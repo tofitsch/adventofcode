@@ -1,6 +1,6 @@
 #!/bin/bash
 
-  awk NF=NF FS='\n' RS='' input.txt \
+awk NF=NF FS='\n' RS='' input.txt \
 | sed 's/ /+/g' \
 | bc \
 | sort -h \
