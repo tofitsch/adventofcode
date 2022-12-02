@@ -7,4 +7,4 @@
 | tail -n3  \
 | awk NF=NF RS='' \
 | sed 's/ /+/g' \
-| bc \
+| bc
