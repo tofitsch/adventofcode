@@ -4,7 +4,7 @@ BEGIN {
 
   FS = ""
 
-  for(i=1; i<=26; i++){
+  for (i=1; i<=26; i++) {
     priority[sprintf("%c", i + 96)] = i
     priority[sprintf("%c", i + 64)] = i + 26
   }
