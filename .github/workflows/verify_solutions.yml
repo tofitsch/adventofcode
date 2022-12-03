@@ -1,17 +1,16 @@
-name: run_solutions
+name: verify_solutions
 
 on:
   push:
   workflow_dispatch:
 
 jobs:
-  run:
+  verify solutions:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: run solutions
+      - name: run
         run: |
-          echo TEST1
-          echo TEST2
+          ls
