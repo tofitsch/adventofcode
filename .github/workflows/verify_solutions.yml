@@ -13,4 +13,4 @@ jobs:
 
       - name: run
         run: |
-          ls
+          source verify_solutions.sh
