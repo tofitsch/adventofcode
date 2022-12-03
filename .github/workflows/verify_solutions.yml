@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  verify solutions:
+  verify_solutions:
     runs-on: ubuntu-latest
 
     steps:
