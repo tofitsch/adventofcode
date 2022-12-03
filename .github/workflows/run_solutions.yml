@@ -1,0 +1,17 @@
+name: run_solutions
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: run solutions
+        run: |
+          echo TEST1
+          echo TEST2
