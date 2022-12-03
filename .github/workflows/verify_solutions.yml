@@ -1,0 +1,16 @@
+name: verify_solutions
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  verify_solutions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: run
+        run: |
+          source verify_solutions.sh
