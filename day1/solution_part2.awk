@@ -9,7 +9,7 @@ BEGIN {RS=""}
 }
 
 END {
-  asort(arr);
+  asort(arr)
   for(i=NR-2; i<=NR; i++) solution += arr[i]
   printf solution "\n"
 }
