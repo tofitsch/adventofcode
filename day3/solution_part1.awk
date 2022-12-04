@@ -12,22 +12,22 @@ BEGIN {
 }
 
 { 
- duplicate = ""
+  duplicate = ""
 
- for (i=1; i<=NF/2; i++) {
-   for (j=NF/2+1; j<=NF; j++) {
+  for (i=1; i<=NF/2; i++) {
+    for (j=NF/2+1; j<=NF; j++) {
 
-     if ($i == $j) {
-       duplicate = $i
-       break
-     }
+      if ($i == $j) {
+        duplicate = $i
+        break
+      }
 
-     if (duplicate != "") break
+      if (duplicate != "") break
 
-   }
- }
+    }
+  }
 
- sum += priority[duplicate]
+  sum += priority[duplicate]
 
 }
 
