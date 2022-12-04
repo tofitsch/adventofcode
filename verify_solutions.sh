@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "solutions: true | computed"; echo
+echo "solutions: true | computed"
 
 for day in day*; do
 
