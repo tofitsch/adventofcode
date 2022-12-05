@@ -10,5 +10,5 @@ BEGIN {RS=""}
 
 END {
   asort(arr)
-  printf arr[NR] "\n"
+  print arr[NR]
 }

@@ -11,5 +11,5 @@ BEGIN {RS=""}
 END {
   asort(arr)
   for(i=NR-2; i<=NR; i++) solution += arr[i]
-  printf solution "\n"
+  print solution
 }
