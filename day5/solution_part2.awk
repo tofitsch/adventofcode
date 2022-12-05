@@ -42,4 +42,4 @@ $1 == "move" {
 
 }
 
-END {for(i=1; i<=9; i++) printf val[i, beg[i]]; print ""}
+END {for(i in beg) printf val[i, beg[i]]; print ""}
