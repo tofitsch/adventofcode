@@ -8,7 +8,7 @@ for day in day*; do
 
     true_solution=$(sed -n "${part}p" < "$day/solution.txt")
 
-    if ["$true_solution" == ""]; then
+    if [ "$true_solution" == "" ]; then
       echo "[WARNING]: No true solution provided for $day part$part"
       continue
     fi
