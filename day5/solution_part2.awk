@@ -24,8 +24,6 @@ length($0) == 0 {FS=" "}
 
 $1 == "move" {
 
-  print "-> " $2 " " $4 " " $6
-
   for(i=0; i<$2; i++){
 
     stack[i] = val[$4, beg[$4]]
@@ -42,16 +40,6 @@ $1 == "move" {
 
   }
 
-  for(x=1; x<=9; x++){
-    printf x " " beg[x] "\t" val[x, beg[x]] "\t"
-    for(y=beg[x]; y<=end[x]; y++){
-      printf val[x, y]
-    }
-    print ""
-  }
-
 }
-
-#$2 == "6" {exit}
 
 END {for(i=1; i<=9; i++) printf val[i, beg[i]]; print ""}
