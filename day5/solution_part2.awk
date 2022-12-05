@@ -8,7 +8,7 @@ $1 == "[" {
     
     if($i == " ") continue
 
-    col = (i-2)/4  +1
+    col = (i-2)/4 + 1
 
     beg[col] = 1
 
