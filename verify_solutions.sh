@@ -6,7 +6,11 @@ for day in day*; do
 
   for part in 1 2; do
 
-    true_solution=$(sed -n "${part}p" < "$day/solution.txt")
+    true_solution=""
+
+    if test -f "$day/solution.txt"; then
+      true_solution=$(sed -n "${part}p" < "$day/solution.txt")
+    fi
 
     if [ "$true_solution" == "" ]; then
       echo "[WARNING]: No true solution provided for $day part$part"
