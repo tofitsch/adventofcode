@@ -20,7 +20,7 @@ BEGIN {window_size = 14}
 
         if(x == window_size && y == window_size){
           print i - 1 + window_size
-          exit
+          next 
         }
 
       }
