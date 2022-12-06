@@ -1,19 +1,29 @@
 #!/bin/awk
 
-BEGIN {FS=""}
+BEGIN {window_size = 4}
 
-{ 
-  
-  for(i=1; i<=NF; i++){
-    
-    if(i>3 && \
-       $i != $(i-1) && $i != $(i-2) && $i != $(i-3) && \
-       $(i-1) != $(i-2) && $(i-1) != $(i-3) && \
-       $(i-2) != $(i-3) \
-      ){
+{
 
-      print i, $i
-      break
+  for(i=1; i<=length($0); i++){
+   
+    split(substr($0, i, window_size), window, "")
+
+    delete counts;
+
+    for(x in window){
+
+      counts[window[x]]++
+
+      for(y in window){
+        
+        if(counts[window[y]] > 1) break
+
+        if(x == window_size && y == window_size){
+          print i - 1 + window_size
+          exit
+        }
+
+      }
 
     }
 
