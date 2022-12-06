@@ -17,7 +17,7 @@ for day in day*; do
       continue
     fi
 
-    computed_solution=$(awk -f "$day/solution_part$part.awk" "$day/input.txt")
+    computed_solution=$(awk -f "$day/part$part.awk" "$day/input.txt")
 
     echo "$day part$part: $true_solution | $computed_solution" 
 
