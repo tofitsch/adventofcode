@@ -2,7 +2,7 @@
 
 [adevent of code](https://adventofcode.com/2022/)
 
-Each day has a folder with 4 files in it:
+Each day has a folder containing 4 files:
 
  1. `input.txt` : the input data
  2. `solution.txt` : the true solutions of part1 (line 1) and part2 (line 2)
@@ -12,5 +12,5 @@ Each day has a folder with 4 files in it:
 The scripts return just the solution, no other printout. They are written in `AWK` and executed like:
 
 ```shell
-awk -f solution_part1.awk input.txt
+awk -f part1.awk input.txt
 ```
