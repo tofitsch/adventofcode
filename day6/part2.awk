@@ -6,7 +6,7 @@ BEGIN {window_size = 14}
   for(i=1; i<=length($0); i++){
    
     split(substr($0, i, window_size), window, "")
-    delete counts;
+    delete counts
 
     for(x in window){
 
