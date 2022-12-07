@@ -14,8 +14,8 @@ $0 ~ "^[0-9]" {
 }
 
 END {
+  unused_space = 7e7 - dir_size["/"]
   for(dir in dir_size){
-    unused_space = 7e7 - dir_size["/"]
     if(dir_size[dir] > 3e7 - unused_space) sufficiently_large_dirs[dir] = dir_size[dir]
   }
   asort(sufficiently_large_dirs)

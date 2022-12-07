@@ -14,10 +14,6 @@ $0 ~ "^[0-9]" {
 }
 
 END {
-  for(dir in dir_size){
-    if(dir_size[dir] < 1e5){
-      sum += dir_size[dir]
-    }
-  }
+  for(dir in dir_size) if(dir_size[dir] < 1e5) sum += dir_size[dir]
   print sum
 }
