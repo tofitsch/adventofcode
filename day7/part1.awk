@@ -6,10 +6,10 @@ $0 ~ "^\\$ cd" {
 }
 
 $0 ~ "^[0-9]" {
-  cur = cursor
-  while(cur != ""){
-    dir_size[cur] += $1
-    cur = substr(cur, 0, match(cur, "\\/[a-z]*$") - 1)
+  sub_cursor = cursor
+  while(sub_cursor != ""){
+    dir_size[sub_cursor] += $1
+    sub_cursor = substr(sub_cursor, 0, match(sub_cursor, "\\/[a-z]*$") - 1)
   }
 }
 
