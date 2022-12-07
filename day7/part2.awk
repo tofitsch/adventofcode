@@ -2,7 +2,7 @@
 
 $0 ~ "^\\$ cd" {
   if($3 == "..") cursor = substr(cursor, 0, match(cursor, "\\/[a-z]*$") - 1)
-  else cursor = ($3 == "/") ? "/" : cursor"/"$3
+  else cursor = cursor"/"$3
 }
 
 $0 ~ "^[0-9]" {
