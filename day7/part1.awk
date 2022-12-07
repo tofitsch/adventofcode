@@ -1,7 +1,9 @@
 #!/bin/awk
 
+function parent_dir(dir){return substr(dir, 0, match(dir, "\\/[a-z]*$") - 1)}
+
 $0 ~ "^\\$ cd" {
-  if($3 == "..") cursor = substr(cursor, 0, match(cursor, "\\/[a-z]*$") - 1)
+  if($3 == "..") cursor = parent_dir(cursor)
   else cursor = cursor"/"$3
 }
 
@@ -9,7 +11,7 @@ $0 ~ "^[0-9]" {
   sub_cursor = cursor
   while(sub_cursor != ""){
     dir_size[sub_cursor] += $1
-    sub_cursor = substr(sub_cursor, 0, match(sub_cursor, "\\/[a-z]*$") - 1)
+    sub_cursor = parent_dir(sub_cursor)
   }
 }
 
