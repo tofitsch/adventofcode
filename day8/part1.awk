@@ -2,13 +2,13 @@
 
 BEGIN {FS=""}
 
-function scan(x_max, y_max, revert_direction, swap_loops){
-  for(x=1; x<=x_max; x++){
+function scan(revert_direction, swap_loops){
+  for(x=1; x<=NF; x++){
     max = -1
-    for(y=1; y<=y_max; y++){
-      y_s = revert_direction == 1 ? y_max + 1 - y : y;
-      Y = swap_loops == 1 ? x : y_s;
-      X = swap_loops == 1 ? y_s : x;
+    for(y=1; y<=NR; y++){
+      y_rev = revert_direction ? NR + 1 - y : y;
+      Y = swap_loops ? x : y_rev;
+      X = swap_loops ? y_rev : x;
       if(val[X, Y] > max){
         vis[X, Y] = 1
         max = val[X, Y]
@@ -21,10 +21,10 @@ function scan(x_max, y_max, revert_direction, swap_loops){
 
 END { 
 
-  scan(NF, NR, 0, 0)
-  scan(NF, NR, 0, 1)
-  scan(NF, NR, 1, 0)
-  scan(NF, NR, 1, 1)
+  scan(0, 0)
+  scan(0, 1)
+  scan(1, 0)
+  scan(1, 1)
 
   for(x=1; x<=NF; x++) for(y=1; y<=NR; y++) if(vis[x, y] == 1) n_visible++
 
