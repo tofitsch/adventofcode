@@ -2,13 +2,13 @@
 
 BEGIN {FS=""}
 
-function scan(revert_direction, swap_loops){
+function scan(mirrored, transposed){
   for(x=1; x<=NF; x++){
     max = -1
     for(y=1; y<=NR; y++){
-      y_rev = revert_direction ? NR + 1 - y : y;
-      Y = swap_loops ? x : y_rev;
-      X = swap_loops ? y_rev : x;
+      y_rev = mirrored ? NR + 1 - y : y;
+      Y = transposed ? x : y_rev;
+      X = transposed ? y_rev : x;
       if(height[X, Y] > max){
         is_visible[X, Y] = 1
         max = height[X, Y]
