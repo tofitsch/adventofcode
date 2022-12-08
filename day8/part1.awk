@@ -58,8 +58,8 @@ END {
   }
   
   # count visible
-  for(y=1; y<=NR; y++){
-    for(x=1; x<=NF; x++){
+  for(x=1; x<=NF; x++){
+    for(y=1; y<=NR; y++){
       #printf vis[x, y]
       if(vis[x, y] == 1) n_visible++
     }
