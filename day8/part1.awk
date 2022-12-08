@@ -3,7 +3,6 @@
 BEGIN {FS=""}
 
 function scan(x_max, y_max, revert_direction, swap_loops){
-
   for(x=1; x<=x_max; x++){
     max = -1
     for(y=1; y<=y_max; y++){
@@ -16,7 +15,6 @@ function scan(x_max, y_max, revert_direction, swap_loops){
       }
     }
   }
-
 }
 
 {for(x=1; x<=NF; x++) val[x, NR] = $x}
@@ -28,11 +26,7 @@ END {
   scan(NF, NR, 1, 0)
   scan(NF, NR, 1, 1)
 
-  for(x=1; x<=NF; x++){
-    for(y=1; y<=NR; y++){
-      if(vis[x, y] == 1) n_visible++
-    }
-  }
+  for(x=1; x<=NF; x++) for(y=1; y<=NR; y++) if(vis[x, y] == 1) n_visible++
 
   print n_visible
 
