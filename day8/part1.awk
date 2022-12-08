@@ -4,9 +4,9 @@ BEGIN {FS=""}
 
 function scan(x_max, y_max, revert_direction, swap_loops){
 
-  for(x=1; x<=NF; x++){
+  for(x=1; x<=x_max; x++){
     max = -1
-    for(y=1; y<=NR; y++){
+    for(y=1; y<=y_max; y++){
       y_s = revert_direction == 1 ? y_max + 1 - y : y;
       Y = swap_loops == 1 ? x : y_s;
       X = swap_loops == 1 ? y_s : x;
