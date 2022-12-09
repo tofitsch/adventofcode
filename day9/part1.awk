@@ -1,4 +1,4 @@
-#!/begin/awk
+#!/bin/awk
 
 func abs(a) {return a < 0 ? -1 * a : a}
 

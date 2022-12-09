@@ -1,4 +1,4 @@
-#!/begin/awk
+#!/bin/awk
 
 BEGIN {n_segments = 10}
 
