@@ -1,6 +1,6 @@
 #!/begin/awk
 
-func abs(x) {return x < 0 ? x* - 1 : x}
+func abs(a) {return a < 0 ? -1 * a : a}
 
 {
   for (i=$2; i>0; i--) {
