@@ -8,11 +8,9 @@ func abs(a) {return a < 0 ? -1 * a : a}
 function cycle() {
   if(abs(X - ctr % width) < 2) printf "#"
   else printf "."
-  if(ctr % width == 1) print ""
   ctr++;
+  if((ctr + 1) % width == 1) print ""
 }
 
 $1 == "noop" {cycle()}
 $1 == "addx" {cycle(); cycle(); X += $2}
-
-END {print sum}
