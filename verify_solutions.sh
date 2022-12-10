@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "solutions: true | computed"
-
 for day in day*; do
 
   for part in 1 2; do
@@ -17,12 +15,26 @@ for day in day*; do
       continue
     fi
 
-    computed_solution=$(awk -f "$day/part$part.awk" "$day/input.txt")
+    if [ "$day part$part" == "day10 part2" ]; then
 
-    echo "$day part$part: $true_solution | $computed_solution" 
+      md5=$(awk -f "$day/part$part.awk" "$day/input.txt" | md5sum)
+
+      if [ "$md5" == "93a99521d352462fbc3a857fed6f4c94  -" ]; then
+        computed_solution="EHZFZHCZ"
+      else
+        computed_solution="wrong md5 sum"
+      fi
+
+    else
+      computed_solution=$(awk -f "$day/part$part.awk" "$day/input.txt")
+    fi
+
+    echo "$day part$part: $computed_solution" 
 
     if [ "$computed_solution" != "$true_solution" ]; then
-      echo "[ERROR]: Mismatch of true and computed solution"
+      echo "[ERROR]: Mismatch of true and computed solution:"
+      echo "true: $true_solution"
+      echo "computed: $computed_solution"
       return 1
     fi
 
