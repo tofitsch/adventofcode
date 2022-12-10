@@ -5,7 +5,7 @@ BEGIN {X = 1; width = 40}
 
 func abs(a) {return a < 0 ? -1 * a : a}
 
-function cycle() {
+func cycle() {
 
   if(abs(X - ctr % width) < 2) printf "#"
   else printf "."

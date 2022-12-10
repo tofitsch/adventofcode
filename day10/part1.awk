@@ -2,7 +2,7 @@
 
 BEGIN {X = 1}
 
-function cycle() {
+func cycle() {
 
   ctr++;
 

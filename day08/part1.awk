@@ -2,7 +2,7 @@
 
 BEGIN {FS=""}
 
-function scan(mirrored, transposed){
+func scan(mirrored, transposed){
   for(x=1; x<=NF; x++){
     max = -1
     for(y=1; y<=NR; y++){
