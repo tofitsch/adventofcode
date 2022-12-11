@@ -10,9 +10,6 @@ $0 ~ "false" {cond_false[ctr] = $6; ctr++}
 
 END {
   
-#  for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
-#  print " "
-
   for(monkey in items){
 
    split(items[monkey], stack, ",")
@@ -25,9 +22,6 @@ END {
    }
 
   }
-
-  for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
-  print " "
 
   for(round=0; round<1e4; round++){
 
@@ -45,8 +39,6 @@ END {
 
         split(stack[i], mods, ";")
 
-#        print stack[i]
-
         stack[i] = ""
 
         for(d in mods){
@@ -61,8 +53,6 @@ END {
 
           mods[d] %= divisor[d - 2]
 
-#          print d, mods[d]
-
           stack[i] = stack[i] ";" mods[d]
 
         }
@@ -73,17 +63,9 @@ END {
 
       }
 
-      for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
-      print ""
-
     }
 
-    print "ROUND"
-
   }
-
-  for(monkey in throws) printf "Monkey "monkey": "throws[monkey]"\n"
-  print " "
 
   asort(throws)
 

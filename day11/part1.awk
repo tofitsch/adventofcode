@@ -12,9 +12,6 @@ END {
   
   for(round=0; round<20; round++){
 
-#    for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
-#    print " "
-
     for(monkey in items){
       
       split(items[monkey], stack, ",")
