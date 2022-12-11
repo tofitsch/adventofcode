@@ -29,7 +29,7 @@ END {
   for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
   print " "
 
-  for(round=0; round<1; round++){
+  for(round=0; round<1e4; round++){
 
     for(monkey in items){
 
@@ -67,16 +67,18 @@ END {
 
         }
         
-        target = (mods[monkey + 1] / divisor[monkey] ~ "\\.") ? cond_false[monkey] : cond_true[monkey]
+        target = (mods[monkey + 2] / divisor[monkey] ~ "\\.") ? cond_false[monkey] : cond_true[monkey]
 
         items[target] = items[target] "," stack[i]
 
       }
 
+      for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
+      print ""
+
     }
 
-    for(monkey in items) printf "Monkey "monkey": "items[monkey]"\n"
-    print " "
+    print "ROUND"
 
   }
 
