@@ -20,8 +20,6 @@ BEGIN {
 {
 
   for(x=1; x<=NF; x++){
-    
-    char[x-1, NR-1] = $x #XXX
 
     height[x-1, NR-1] = char_to_height[$x]
 
@@ -58,6 +56,7 @@ END {
     for(x in neighbors){
       for(y in neighbors){
         if(x == y || x == -y) continue
+        if(min[0] + x < 0 || min[0] + x > NF-1 || min[1] + y < 0 || min[1] + y > NR-1) continue
         if(visited[min[0] + x, min[1] + y] == 1) continue
         if(height[min[0] + x, min[1] + y] - height[min[0], min[1]] > 1) continue
         new_dijkstra = dijkstra[min[0], min[1]] + 1
@@ -68,13 +67,5 @@ END {
   }
 
   print dijkstra[end[0], end[1]]
-
-#  for(x=0; x<NF; x++){
-#    for(y=0; y<NR; y++){
-#      printf dijkstra[x, y] == infinity ? sprintf("%5s", char[x, y]""-1) : sprintf("%5s", char[x, y]""dijkstra[x, y])
-#      if(y<NR-1) printf " "
-#    }
-#    printf "\n"
-#  }
 
 }
