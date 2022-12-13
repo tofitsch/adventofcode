@@ -29,29 +29,17 @@ func nested_split(str, arr,  ctr_opening, ctr_closing, chars, c){
 
 func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val, i){
   
-  ctr++ #XXX
-#  if(ctr > 5) exit #XXX
-  
-  print "compareA", str_a, str_b
-
   if(type(str_a) == "int" && type(str_b) == "int"){
-    if(str_a < str_b) {print "left < right" ; return "ordered"}
-    if(str_a > str_b) {print "left > right" ; return "unordered"}
+    if(str_a < str_b) return "ordered"
+    if(str_a > str_b) return "unordered"
     return "undecided"
   }
 
   if(type(str_a) == "int" && type(str_b) == "list") return recursive_compare(to_list(str_a), str_b)
   if(type(str_b) == "int" && type(str_a) == "list") return recursive_compare(str_a, to_list(str_b)) 
 
-#  print "compareB", str_a, str_b
-
   nested_split(str_a, arr_a)
   nested_split(str_b, arr_b)
-
-#  print "compareC", str_a, str_b
-
-#  if(length(arr_a) < length(arr_b)) {print "left <len right" ; return "ordered"}
-#  if(length(arr_a) > length(arr_b)) {print "left >len right" ; return "unordered"}
 
   return_val = "undecided"
 
@@ -61,20 +49,16 @@ func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val, i){
   }
 
   if(return_val == "undecided"){
-    if(arr_a[i] == "" && arr_b[i] != "") {print "left <len right" ; return "ordered"}
-    if(arr_a[i] != "" && arr_b[i] == "") {print "left >len right" ; return "unordered"}
+    if(arr_a[i] == "" && arr_b[i] != "") return "ordered"
+    if(arr_a[i] != "" && arr_b[i] == "") return "unordered"
   }
 
   return return_val
 
 }
 
-BEGIN{RS="" ; ctr = 0 ; debug = 4} #XXX
+BEGIN{RS=""}
 
-{
-  decision = recursive_compare($1, $2)
-  print NR" > "decision
-  if(decision == "ordered") sum += NR
-}
+{if(recursive_compare($1, $2) == "ordered") sum += NR}
 
 END{print sum}
