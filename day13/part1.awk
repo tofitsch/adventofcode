@@ -32,7 +32,7 @@ func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val, i){
   ctr++ #XXX
 #  if(ctr > 5) exit #XXX
   
-  print str_a, str_b
+#  print str_a, str_b
 
   if(str_a == "" || str_b == "") exit
   
@@ -63,6 +63,8 @@ func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val, i){
 }
 
 BEGIN{RS="" ; ctr = 0} #XXX
+
+{print recursive_compare($1, $2), $1, $2} #XXX
 
 {if(recursive_compare($1, $2) == "ordered") sum += NR}
 
