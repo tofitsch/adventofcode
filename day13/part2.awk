@@ -9,7 +9,7 @@ func to_list(x){return "[" x "]"}
 
 func content(x){
   if(type(x) == "list") return substr(x, 2, length(x) - 2)
-  else return x
+  return x
 }
 
 func nested_split(str, arr,  ctr_opening, ctr_closing, chars, c){
