@@ -78,7 +78,7 @@ END {
     n_swaps = 0
     for(i in packets){
       if(i == 0) continue
-      if(recursive_compare(packets[i], packets[i-1]) == "ordered"){
+      if(recursive_compare(packets[i-1], packets[i]) == "unordered"){
         packet = packets[i-1]
         packets[i-1] = packets[i]
         packets[i] = packet
