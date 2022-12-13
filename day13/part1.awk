@@ -1,7 +1,16 @@
 #!/bin/awk
 
+func type(x){
+  if(substr(x, 1, 1) == "[") return "list"
+  else return "int"
+}
+
+func to_list(x){return "[" x "]"}
+
+func content(x){return substr(x, 2, length(x) - 2)}
+
 func nested_split(str, arr){
-  if(substr(str, 1, 1) == "[") str = substr(str, 2, length(str) - 2)
+  if(type(str) == "list") str = content(str) 
   split(str, chars, "")
   ctr_opening = 0
   ctr_closing = 0
@@ -15,7 +24,7 @@ func nested_split(str, arr){
   for(a in arr) gsub(/;/, ",", arr[a])
 }
 
-func compare(str_a, str_b){
+func recursive_compare(str_a, str_b){
   
   nested_split(str_a, arr_a)
   nested_split(str_b, arr_b)
@@ -29,6 +38,6 @@ func compare(str_a, str_b){
 
 BEGIN{RS=""}
 
-{if(compare($1, $2) == "ordered") sum += NR}
+{if(recursive_compare($1, $2) == "ordered") sum += NR}
 
 END{print sum}
