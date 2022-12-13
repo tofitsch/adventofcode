@@ -27,13 +27,19 @@ func nested_split(str, arr,  ctr_opening, ctr_closing, chars, c){
   for(a in arr) gsub(/;/, ",", arr[a])
 }
 
-func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val){
+func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val, i){
+  
+  ctr++ #XXX
+#  if(ctr > 5) exit #XXX
   
   print str_a, str_b
+
+  if(str_a == "" || str_b == "") exit
   
   if(type(str_a) == "int" && type(str_b) == "int"){
     if(str_a < str_b) return "ordered"
-    if(str_a > str_b) return "unordered"
+    else if(str_a > str_b) return "unordered"
+    else return "undecided"
   }
 
   if(type(str_a) == "int" && type(str_b) == "list") str_a = to_list(str_a)
@@ -47,13 +53,16 @@ func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val){
 
   return_val = "undecided"
 
-  while(return_val == "undecided") return_val = recursive_compare(arr_a[i], arr_b[i])
+  for(i=1; i<=length(arr_a); i++){
+    return_val = recursive_compare(arr_a[i], arr_b[i])
+    if(return_val != "undecided") break
+  }
 
   return return_val
 
 }
 
-BEGIN{RS=""}
+BEGIN{RS="" ; ctr = 0} #XXX
 
 {if(recursive_compare($1, $2) == "ordered") sum += NR}
 
