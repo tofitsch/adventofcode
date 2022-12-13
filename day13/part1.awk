@@ -12,7 +12,7 @@ func content(x){
   else return x
 }
 
-func nested_split(str, arr){
+func nested_split(str, arr,  ctr_opening, ctr_closing, chars, c){
   str = content(str) 
   split(str, chars, "")
   ctr_opening = 0
@@ -27,7 +27,7 @@ func nested_split(str, arr){
   for(a in arr) gsub(/;/, ",", arr[a])
 }
 
-func recursive_compare(str_a, str_b){
+func recursive_compare(str_a, str_b,  arr_a, arr_b, return_val){
   
   if(type(str_a) == "int" && type(str_b) == "int"){
     if(str_a < str_b) return "ordered"
