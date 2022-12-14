@@ -74,16 +74,16 @@ END {
 
       map[grain_y, grain_x] = "o"
 
-      if(at_rest == 1 && grain_y == source_y + 1) {stop = 1 ; break}
+      if(at_rest == 1 && grain_y == source_y) {stop = 1 ; break}
 
     }
 
-    plot()
+    #plot()
     
   }
 
-  plot()
+  #plot()
 
-  print ctr - 1
+  print ctr
 
 }
