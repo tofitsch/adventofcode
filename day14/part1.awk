@@ -4,8 +4,7 @@ func plot(){
 
   for(y=min[2]; y<=max[2]; y++){
     for(x=min[1]; x<=max[1]; x++){
-      if(map[y, x] != "#") map[y, x] = "."
-      printf map[y, x]
+      printf map[y, x] == "" ? "." : map[y,x]
     }
     print ""
   }
@@ -44,6 +43,43 @@ BEGIN {FS=" -> "}
 
 END {
 
-  plot()
+  min[2] = 0
+
+  source_x = 500
+  source_y = min[y]
+
+  map[source_y, source_x] = "+"
+
+  stop = 0
+
+  while(stop != 1){
+    
+    ctr++
+
+    grain_x = source_x
+    grain_y = source_y
+
+    at_rest = 0
+
+    while(at_rest != 1){
+      
+      map[grain_y, grain_x] = ""
+
+      if(map[grain_y + 1, grain_x] == "") grain_y++
+      else if(map[grain_y + 1, grain_x - 1] == "") {grain_y++ ; grain_x--}
+      else if(map[grain_y + 1, grain_x + 1] == "") {grain_y++ ; grain_x++}
+      else at_rest = 1
+
+      map[grain_y, grain_x] = "o"
+
+      if(grain_y > max[2]) {stop = 1 ; break}
+
+    }
+
+#    plot()
+    
+  }
+
+  print ctr - 1
 
 }
