@@ -11,22 +11,17 @@ BEGIN{FS = "=|,|:" ; Y = 2e6}
 
   distance = abs($2 - $6) + abs($4 - $8) 
 
-  x = $2
-  while(abs($2 - x) + abs($4 - Y) <= distance){
-    if(map[x] == ""){
-      map[x] = "#"
+  dx = 0
+  while(abs(dx) + abs($4 - Y) <= distance){
+    if(map[$2 + dx] == ""){
+      map[$2 + dx] = "#"
       ctr++
     }
-    x++
-  }
-
-  x = $2
-  while(abs($2 - x) + abs($4 - Y) <= distance){
-    if(map[x] == ""){
-      map[x] = "#"
+    if(map[$2 - dx] == ""){
+      map[$2 - dx] = "#"
       ctr++
     }
-    x--
+    dx++
   }
 
 }
