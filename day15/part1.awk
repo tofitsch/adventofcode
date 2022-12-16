@@ -2,38 +2,40 @@
 
 func abs(a) {return a < 0 ? -1 * a : a}
 
-BEGIN{FS="=|,|:" ; Y = 2e6}
+BEGIN{FS = "=|,|:" ; Y = 10}
 
 {
 
-  for(j=2; j<=8; j+=2){
-    dim = (j/2+1)%2
-    if(min[dim] == "" || $j < min[dim]) min[dim] = $j
-    if(max[dim] == "" || $j > max[dim]) max[dim] = $j
+  if($4 == Y && map[$2] == ""){print $2" " ; map[$2] = "S" ; ctr++}
+  if($8 == Y && map[$6] == ""){print $6" " ; map[$6] = "B" ; ctr++}
+
+  distance = abs($2 - $6) + abs($4 - $8) 
+
+  x = $2
+  while(abs($2 - x) + abs($4 - Y) <= distance){
+    if(map[x] == ""){
+      printf x" "
+      map[x] = "#"
+      ctr++
+    }
+    x++
   }
-  
-  map[$2, $4] = "S"
-  map[$6, $8] = "B"
 
-  signal_x[NR] = $2
-  signal_y[NR] = $4
+  print ""
 
-  distance[$2, $4] = abs($2 - $6) + abs($4 - $8) + 1
+  x = $2
+  while(abs($2 - x) + abs($4 - Y) <= distance){
+    if(map[x] == ""){
+      printf x" "
+      map[x] = "#"
+      ctr++
+    }
+    x--
+  }
 
 }
 
 END {
-
-  for(i in signal_x){
-    for(X=min[0]; X<=max[0]; X++){
-      if(abs(signal_x[i] - X) + abs(signal_y[i] - Y) < distance[signal_x[i], signal_y[i]] && map[X, Y] == "") map[X, Y] = "#"
-    }
-  }
-
-  for(x=min[0]; x<=max[0]; x++){
-    if(map[x, Y] != "") ctr++
-  }
-
+  for(x=-4; x<=26; x++) printf map[x] == "" ? "." : map[x]
   print ctr
-
 }
