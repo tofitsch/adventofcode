@@ -4,7 +4,7 @@ BEGIN{FS = "=|,|:" ; max = 4e6}
 
 func abs(a) {return a < 0 ? -1 * a : a}
 
-func encircle(X, Y, R, s){
+func encircle(X, Y, R){
 
   x = X + R-1
   y = Y
@@ -15,8 +15,6 @@ func encircle(X, Y, R, s){
 
     for(j in sig_x){
       
-      if(j == s) continue
-
       if(abs(sig_x[j] - x) + abs(sig_y[j] - y) <= sig_reach[j]){
         is_reached = 1
         break
@@ -44,4 +42,4 @@ func encircle(X, Y, R, s){
   sig_reach[NR] = abs($2 - $6) + abs($4 - $8) 
 }
 
-END {for(s in sig_x) encircle(sig_x[s], sig_y[s], sig_reach[s] + 2, s)}
+END {for(s in sig_x) encircle(sig_x[s], sig_y[s], sig_reach[s] + 2)}
