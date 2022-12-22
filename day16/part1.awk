@@ -8,18 +8,28 @@ func recursive_move(move, history, ctr,  position, c){
   
   position = move == "op" ? history[ctr-1] : history[ctr]
 
-  if(ctr == n_moves) evaluate_history(history, ctr)
+  if(n_opened(history, ctr) == n_valves_with_rate || took_shortest_path(history, ctr) != 1 || ctr == n_moves) evaluate_history(history, ctr)
   else{
-    if(move == "xx" || n_opened(history, ctr) == n_valves_with_rate) recursive_move("xx", history, ctr+1)
-    else{
-      for(c=-1; c<n_connections[position]; c++){
-        if(c == -1 && can_open(history, ctr) != 1) continue
-        if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
-        recursive_move(connections[position, c], history, ctr+1)
-      }
+    for(c=-1; c<n_connections[position]; c++){
+      if(c == -1 && can_open(history, ctr) != 1) continue
+      #if(c > -1 && took_shortest_path(history, ctr) != 1) continue
+      #if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
+      recursive_move(connections[position, c], history, ctr+1)
     }
   }
 
+}
+
+func took_shortest_path(history, ctr){
+  for(h=0; h<=ctr; h++){
+    if(history[h] == "op") continue
+    for(H=h+1; H<=ctr; H++){
+      if(history[H] == "op") break 
+#      print history[h], history[H], H - h, distance[history[h], history[H]]
+      if(H - h > distance[history[h], history[H]]) return 0
+    }
+  }
+  return 1
 }
 
 func n_opened(history, ctr,  n, h){
@@ -51,12 +61,14 @@ func can_open(history, ctr,  h){
 
 func evaluate_history(history, ctr,  inst_rate, is_open, output){
   
+  CTR++
+  
   inst_rate = 0
   output = 0
 
   for(h=0; h<=ctr; h++){
    
-    printf history[h]" "
+    if(CTR % 1e4 == 0) printf history[h]" "
 
     if(h==0) continue #XXX
 
@@ -76,12 +88,47 @@ func evaluate_history(history, ctr,  inst_rate, is_open, output){
     for(h=0; h<=ctr; h++) best_history[h] = history[h]
   }
 
-  print output
+  if(CTR % 1e4 == 0) print output
+
+}
+
+func calc_distance(a, b){
+  
+  for(i in rate){
+    dijkstra[i] = inf
+    visited[i] = 0
+  }
+
+  dijkstra[a] = 0
+
+  while(dijkstra[b] == inf){
+    
+    min_dijkstra = inf
+
+    for(i in visited){
+      if(visited[i] == 1) continue
+      if(dijkstra[i] < min_dijkstra){
+        min_dijkstra = dijkstra[i]
+        position = i
+      }
+    }
+    
+    visited[position] = 1
+    
+    for(c=0; c<n_connections[position]; c++){
+      node = connections[position, c]
+      new_dijkstra = dijkstra[position] + 1
+      if(dijkstra[node] > new_dijkstra) dijkstra[node] = new_dijkstra
+    }
+
+  }
+
+  distance[a, b] = dijkstra[b]
 
 }
 
 
-BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30}
+BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30; inf = 1e5}
 
 {
   rate[$2] = $3
@@ -92,6 +139,12 @@ BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30}
 }
 
 END{
+  
+  for(x in rate){
+    for(y in rate){
+      calc_distance(x, y)
+    }
+  }
 
   history[0] = "AA"
   recursive_move("AA", history, 0)
