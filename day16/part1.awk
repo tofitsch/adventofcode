@@ -2,33 +2,33 @@
 
 func recursive_move(node, history, ctr,  c){
   
+  history[ctr] = node
+
 #  print node, ctr
   
-  if(ctr == 5) evaluate_history(history, ctr)
+  if(ctr == 30) evaluate_history(history, ctr)
   else{
-  
-    history[ctr] = node
-
     for(c=-1; c<n_connections[node]; c++){
       if(c == -1 && can_open(history, ctr) != 1) continue
+      if(c > -1 && is_redundant_loop(history, ctr, connections[node, c]) == 1) continue
       connection = node == "open" ? connections[history[ctr-1], c] : connections[node, c]
       recursive_move(connection, history, ctr+1)
     }
 
-    #recursive_move("open", history, ctr+1)
-    #if(can_open(history, ctr) == 1) recursive_move("open", history, ctr+1)
-
-    #recursive_move(connections[node, 0], history, ctr+1)
-
   }
 
-  return
+}
 
+func is_redundant_loop(history, ctr, next_node,  h){
+  for(h=ctr; h>=0; h--){
+    if(history[h] == "open") return 2
+    if(history[h] == next_node) return 1
+  }
 }
 
 func can_open(history, ctr,  h){
 
-  if(history[ctr] == "open") return 2
+  if(history[ctr] == "open" || rate[history[ctr]] == 0) return 2
 
   for(h=1; h<ctr; h++){
     if(history[h-1] == history[ctr] && history[h] == "open") return 3
