@@ -1,37 +1,38 @@
 #!/bin/awk
 
-func recursive_move(node, history, ctr,  c){
+func recursive_move(move, history, ctr,  position, c){
   
-  history[ctr] = node
+  history[ctr] = move 
 
-#  print node, ctr
+#  print move, ctr
   
-  if(ctr == 30) evaluate_history(history, ctr)
+  position = move == "op" ? history[ctr-1] : history[ctr]
+
+  if(ctr == n_moves) evaluate_history(history, ctr)
   else{
-    for(c=-1; c<n_connections[node]; c++){
+    for(c=-1; c<n_connections[position]; c++){
       if(c == -1 && can_open(history, ctr) != 1) continue
-      if(c > -1 && is_redundant_loop(history, ctr, connections[node, c]) == 1) continue
-      connection = node == "open" ? connections[history[ctr-1], c] : connections[node, c]
-      recursive_move(connection, history, ctr+1)
+      if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
+      recursive_move(connections[position, c], history, ctr+1)
     }
 
   }
 
 }
 
-func is_redundant_loop(history, ctr, next_node,  h){
+func is_redundant_loop(history, ctr, next_move,  h){
   for(h=ctr; h>=0; h--){
-    if(history[h] == "open") return 2
-    if(history[h] == next_node) return 1
+    if(history[h] == "op") return 2
+    if(history[h] == next_move) return 1
   }
 }
 
 func can_open(history, ctr,  h){
 
-  if(history[ctr] == "open" || rate[history[ctr]] == 0) return 2
+  if(history[ctr] == "op" || rate[history[ctr]] == 0) return 2
 
   for(h=1; h<ctr; h++){
-    if(history[h-1] == history[ctr] && history[h] == "open") return 3
+    if(history[h-1] == history[ctr] && history[h] == "op") return 3
   }
 
   return 1
@@ -43,15 +44,15 @@ func evaluate_history(history, ctr,  inst_rate, is_open, output){
   inst_rate = 0
   output = 0
 
-  for(h=0; h<ctr; h++){
+  for(h=0; h<=ctr; h++){
    
-    printf history[h]" "
+#    printf history[h]" "
 
     if(h==0) continue #XXX
 
     output += inst_rate
     
-    if(history[h] == "open" && is_open[history[h-1]] != 1){
+    if(history[h] == "op" && is_open[history[h-1]] != 1){
 
       inst_rate += rate[history[h-1]]
       is_open[history[h-1]] = 1
@@ -60,21 +61,23 @@ func evaluate_history(history, ctr,  inst_rate, is_open, output){
     
   }
 
-  if(output > max_output) max_output = output
+  if(output > max_output){
+    max_output = output
+    for(h=0; h<=ctr; h++) best_history[h] = history[h]
+  }
 
-  print output
+#  print output
 
 }
 
 
-BEGIN{FS="Valve | has.*=|; tunnel.*valves? |, "}
+BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30}
 
 {
   rate[$2] = $3
   n_connections[$2] = NF-3
-  n_connections["open"] = 1
   for(i=4; i<=NF; i++) connections[$2, i-4] = $i
-  connections[$2, -1] = "open"
+  connections[$2, -1] = "op"
 }
 
 END{
@@ -82,6 +85,9 @@ END{
   history[0] = "AA"
   recursive_move("AA", history, 0)
 
+  print "best:"
+  for(h=0; h<=n_moves; h++) printf best_history[h]" "
+  print ""
   print max_output
 
 }
