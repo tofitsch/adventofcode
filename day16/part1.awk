@@ -10,14 +10,24 @@ func recursive_move(move, history, ctr,  position, c){
 
   if(ctr == n_moves) evaluate_history(history, ctr)
   else{
-    for(c=-1; c<n_connections[position]; c++){
-      if(c == -1 && can_open(history, ctr) != 1) continue
-      if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
-      recursive_move(connections[position, c], history, ctr+1)
+    if(move == "xx" || n_opened(history, ctr) == n_valves_with_rate) recursive_move("xx", history, ctr+1)
+    else{
+      for(c=-1; c<n_connections[position]; c++){
+        if(c == -1 && can_open(history, ctr) != 1) continue
+        if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
+        recursive_move(connections[position, c], history, ctr+1)
+      }
     }
-
   }
 
+}
+
+func n_opened(history, ctr,  n, h){
+  n=0
+  for(h=1; h<=ctr; h++){
+    if(history[h] == "op") n++
+  }
+  return n
 }
 
 func is_redundant_loop(history, ctr, next_move,  h){
@@ -46,7 +56,7 @@ func evaluate_history(history, ctr,  inst_rate, is_open, output){
 
   for(h=0; h<=ctr; h++){
    
-#    printf history[h]" "
+    printf history[h]" "
 
     if(h==0) continue #XXX
 
@@ -66,7 +76,7 @@ func evaluate_history(history, ctr,  inst_rate, is_open, output){
     for(h=0; h<=ctr; h++) best_history[h] = history[h]
   }
 
-#  print output
+  print output
 
 }
 
@@ -75,6 +85,7 @@ BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30}
 
 {
   rate[$2] = $3
+  if($3 > 0) n_valves_with_rate++
   n_connections[$2] = NF-3
   for(i=4; i<=NF; i++) connections[$2, i-4] = $i
   connections[$2, -1] = "op"
