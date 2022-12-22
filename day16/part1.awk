@@ -1,100 +1,8 @@
 #!/bin/awk
 
-func recursive_move(move, history, ctr,  position, c){
-  
-  history[ctr] = move 
-
-#  print move, ctr
-  
-  position = move == "op" ? history[ctr-1] : history[ctr]
-
-  if(n_opened(history, ctr) == n_valves_with_rate || took_shortest_path(history, ctr) != 1 || ctr == n_moves) evaluate_history(history, ctr)
-  else{
-    for(c=-1; c<n_connections[position]; c++){
-      if(c == -1 && can_open(history, ctr) != 1) continue
-      #if(c > -1 && took_shortest_path(history, ctr) != 1) continue
-      #if(c > -1 && is_redundant_loop(history, ctr, connections[position, c]) == 1) continue
-      recursive_move(connections[position, c], history, ctr+1)
-    }
-  }
-
-}
-
-func took_shortest_path(history, ctr){
-  for(h=0; h<=ctr; h++){
-    if(history[h] == "op") continue
-    for(H=h+1; H<=ctr; H++){
-      if(history[H] == "op") break 
-#      print history[h], history[H], H - h, distance[history[h], history[H]]
-      if(H - h > distance[history[h], history[H]]) return 0
-    }
-  }
-  return 1
-}
-
-func n_opened(history, ctr,  n, h){
-  n=0
-  for(h=1; h<=ctr; h++){
-    if(history[h] == "op") n++
-  }
-  return n
-}
-
-func is_redundant_loop(history, ctr, next_move,  h){
-  for(h=ctr; h>=0; h--){
-    if(history[h] == "op") return 2
-    if(history[h] == next_move) return 1
-  }
-}
-
-func can_open(history, ctr,  h){
-
-  if(history[ctr] == "op" || rate[history[ctr]] == 0) return 2
-
-  for(h=1; h<ctr; h++){
-    if(history[h-1] == history[ctr] && history[h] == "op") return 3
-  }
-
-  return 1
-
-}
-
-func evaluate_history(history, ctr,  inst_rate, is_open, output){
-  
-  CTR++
-  
-  inst_rate = 0
-  output = 0
-
-  for(h=0; h<=ctr; h++){
-   
-    if(CTR % 1e4 == 0) printf history[h]" "
-
-    if(h==0) continue #XXX
-
-    output += inst_rate
-    
-    if(history[h] == "op" && is_open[history[h-1]] != 1){
-
-      inst_rate += rate[history[h-1]]
-      is_open[history[h-1]] = 1
-
-    }
-    
-  }
-
-  if(output > max_output){
-    max_output = output
-    for(h=0; h<=ctr; h++) best_history[h] = history[h]
-  }
-
-  if(CTR % 1e4 == 0) print output
-
-}
-
 func calc_distance(a, b){
   
-  for(i in rate){
+  for(i in rates){
     dijkstra[i] = inf
     visited[i] = 0
   }
@@ -125,14 +33,36 @@ func calc_distance(a, b){
 
   distance[a, b] = dijkstra[b]
 
+#  print a, b, distance[a, b]
+
 }
 
+func next_permutation(arr, n){
+  # Narayana Pandita algo
+
+  for(k=n-1; k>1; k--) if(arr[k] < arr[k+1]) break
+  if(!(arr[k] < arr[k+1])) return 0
+
+  for(l=n; l>k; l--) if(arr[k] < arr[l]) break
+
+  swap = arr[k]
+  arr[k] = arr[l]
+  arr[l] = swap
+
+  for(l=n; l>k; l--) buffer[l] = arr[l]
+  for(m=n; m>k; m--) arr[m] = buffer[k+1+n-m]
+
+  return 1
+}
 
 BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30; inf = 1e5}
 
 {
-  rate[$2] = $3
-  if($3 > 0) n_valves_with_rate++
+  rates[$2] = $3
+  if($3 > 0){
+    n_non_zero_valves++
+    non_zero_valves[n_non_zero_valves] = $2
+  }
   n_connections[$2] = NF-3
   for(i=4; i<=NF; i++) connections[$2, i-4] = $i
   connections[$2, -1] = "op"
@@ -140,18 +70,24 @@ BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30; inf = 1e5}
 
 END{
   
-  for(x in rate){
-    for(y in rate){
+  for(x in rates){
+    for(y in rates){
       calc_distance(x, y)
     }
   }
 
-  history[0] = "AA"
-  recursive_move("AA", history, 0)
+  asort(non_zero_valves)
 
-  print "best:"
-  for(h=0; h<=n_moves; h++) printf best_history[h]" "
-  print ""
-  print max_output
+  print n_non_zero_valves
+
+  do{
+    ctr++
+    if(ctr % 1e6 == 0) print ctr
+    for(i=1; i<=n_non_zero_valves; i++) printf non_zero_valves[i]" "
+    print ""
+  }
+  while(next_permutation(non_zero_valves, n_non_zero_valves) != 0)
+
+  print ctr
 
 }
