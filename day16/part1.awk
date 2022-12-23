@@ -9,7 +9,7 @@ func recursive_move(move, ctr, path,  c, path_length, i, duplicate){
 
   path_length = evaluate(path, ctr)
 
-  if(path_length < 30){
+  if(path_length < n_moves){
     for(c in non_zero_valves){
       duplicate = 0
       for(i=0; i<=ctr; i++) if(path[i] == non_zero_valves[c]) duplicate = 1
@@ -27,12 +27,12 @@ func evaluate(path, ctr,  path_length, inst_rate, sum, dt, i){
   for(i=1 ; i<=ctr; i++){
     dt = distance[path[i], path[i-1]] + 1
     path_length += dt
-    inst_rate += rates[path[i]]
     sum += inst_rate * dt
-#    printf path[i] dist " "
+    inst_rate += rates[path[i]]
+    #printf path[i] ":" path_length ":" inst_rate " "
   }
-#  sum += inst_rate * (30 - path_length)
-#  print sum
+  sum += inst_rate * (n_moves - path_length)
+  #print sum
   if(sum > max_sum){
     delete best_path
     for(i=0 ; i<=ctr; i++) best_path[i] = path[i]
@@ -110,6 +110,16 @@ END{
       calc_distance(x, y)
     }
   }
+
+ # path[0] = "AA"
+ # path[1] = "DD"
+ # path[2] = "BB"
+ # path[3] = "JJ"
+ # path[4] = "HH"
+ # path[5] = "EE"
+ # path[6] = "CC"
+ # evaluate(path, 6)
+ # exit
 
   path[0] = "AA"
   recursive_move("AA", 0, path)
