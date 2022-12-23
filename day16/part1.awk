@@ -1,5 +1,48 @@
 #!/bin/awk
 
+func recursive_move(move, ctr, path,  c, path_length, i, duplicate){
+
+  path[ctr] = move
+
+  path_length = 0
+  for(i=0; i<=ctr; i++) 
+
+  path_length = evaluate(path, ctr)
+
+  if(path_length < 30){
+    for(c in non_zero_valves){
+      duplicate = 0
+      for(i=0; i<=ctr; i++) if(path[i] == non_zero_valves[c]) duplicate = 1
+      if(duplicate == 0) recursive_move(non_zero_valves[c], ctr+1, path)
+      
+    }
+  }
+
+}
+
+func evaluate(path, ctr,  path_length, inst_rate, sum, dt, i){
+  path_length = 0
+  inst_rate = 0
+  sum = 0
+  for(i=1 ; i<=ctr; i++){
+    dt = distance[path[i], path[i-1]] + 1
+    path_length += dt
+    inst_rate += rates[path[i]]
+    sum += inst_rate * dt
+#    printf path[i] dist " "
+  }
+#  sum += inst_rate * (30 - path_length)
+#  print sum
+  if(sum > max_sum){
+    delete best_path
+    for(i=0 ; i<=ctr; i++) best_path[i] = path[i]
+    max_sum = sum
+    best_path_inst_rate = inst_rate
+    best_path_path_length = path_length
+  }
+  return path_length
+}
+
 func calc_distance(a, b){
   
   for(i in rates){
@@ -37,29 +80,19 @@ func calc_distance(a, b){
 
 }
 
-func next_permutation(arr, n){
-  # Narayana Pandita algo
-
-  for(k=n-1; k>1; k--) if(arr[k] < arr[k+1]) break
-  if(!(arr[k] < arr[k+1])) return 0
-
-  for(l=n; l>k; l--) if(arr[k] < arr[l]) break
-
-  swap = arr[k]
-  arr[k] = arr[l]
-  arr[l] = swap
-
-  for(l=n; l>k; l--) buffer[l] = arr[l]
-  for(m=n; m>k; m--) arr[m] = buffer[k+1+n-m]
-
-  return 1
+func get_path_length(path){
+  sum = 0
+  for(i=1; i<n_non_zero_valves; i++) sum += distance[path[i], path[i+1]]
+  return sum
 }
+
 
 BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30; inf = 1e5}
 
 {
   rates[$2] = $3
   if($3 > 0){
+    nodes[$2] = ""
     n_non_zero_valves++
     non_zero_valves[n_non_zero_valves] = $2
   }
@@ -70,24 +103,20 @@ BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 30; inf = 1e5}
 
 END{
   
-  for(x in rates){
-    for(y in rates){
+  nodes["AA"] = ""
+  
+  for(x in nodes){
+    for(y in nodes){
       calc_distance(x, y)
     }
   }
 
-  asort(non_zero_valves)
+  path[0] = "AA"
+  recursive_move("AA", 0, path)
 
-  print n_non_zero_valves
+  for(i in best_path) printf best_path[i] " "
+  print best_path_inst_rate" : " best_path_path_length
 
-  do{
-    ctr++
-    if(ctr % 1e6 == 0) print ctr
-    for(i=1; i<=n_non_zero_valves; i++) printf non_zero_valves[i]" "
-    print ""
-  }
-  while(next_permutation(non_zero_valves, n_non_zero_valves) != 0)
-
-  print ctr
+  print max_sum
 
 }
