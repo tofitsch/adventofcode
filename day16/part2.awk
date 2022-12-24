@@ -24,16 +24,16 @@ func recursive_move(move, ctr_A, ctr_B, path_A, path_B, path_length_A, path_leng
 
   }
 
-  CTR++
-  if(CTR % 1e4 == 0){
-    for(i=0 ; i<=15; i++) printf (i<=ctr_A ? path_A[i] : "  ")":"(i<=ctr_B ? path_B[i] : "  ") "|"
-    print sum_A + sum_B
-  }
+#  CTR++
+#  if(CTR % 1e4 == 0){
+#    for(i=0 ; i<=15; i++) printf (i<=ctr_A ? path_A[i] : "  ")":"(i<=ctr_B ? path_B[i] : "  ") "|"
+#    print sum_A + sum_B
+#  }
 
   unused_rate = max_rate - (inst_rate_A + inst_rate_B)
-
+  k
   attainable_sum = sum_A + sum_B + inst_rate_A * (n_moves - path_length_A) + inst_rate_B * (n_moves - path_length_B)
-  attainable_sum += unused_rate * (n_moves - (path_length_A > path_length_B ? path_length_B : path_length_A))
+  attainable_sum += unused_rate * (n_moves - (path_length_A > path_length_B ? path_length_B : path_length_A) - (n_non_zero_valves - (ctr_A + ctr_B)))
 
   if(attainable_sum > max_sum){
 
