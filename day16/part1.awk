@@ -124,8 +124,8 @@ END{
   path[0] = "AA"
   recursive_move("AA", 0, path)
 
-  for(i in best_path) printf best_path[i] " "
-  print best_path_inst_rate" : " best_path_path_length
+#  for(i in best_path) printf best_path[i] " "
+#  print best_path_inst_rate" : " best_path_path_length
 
   print max_sum
 
