@@ -30,22 +30,26 @@ func recursive_move(move, ctr_A, ctr_B, path_A, path_B, path_length_A, path_leng
     print sum_A + sum_B
   }
 
-  if(path_length_A < n_moves){
-    for(c in non_zero_valves){
-      skip = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
-      if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
-      if(skip == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
-    }
-  }
+  if(sum_A + sum_B + max_rate * (n_moves - (path_length_A < path_length_B ? path_length_A : path_length_B)) > max_sum){
 
-  if(path_length_B < n_moves){
-    for(c in non_zero_valves){
-      skip = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
-      if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
-      if(skip == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
+    if(path_length_A < n_moves){
+      for(c in non_zero_valves){
+        skip = 0
+        for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
+        if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
+        if(skip == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
+      }
     }
+
+    if(path_length_B < n_moves){
+      for(c in non_zero_valves){
+        skip = 0
+        for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
+        if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
+        if(skip == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
+      }
+    }
+
   }
 
   sum_A += inst_rate_A * (n_moves - path_length_A)
@@ -96,6 +100,7 @@ BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 26; inf = 1e5}
 
 {
   rates[$2] = $3
+  max_rate += $3
   if($3 > 0){
     nodes[$2] = ""
     n_non_zero_valves++
