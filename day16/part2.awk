@@ -1,7 +1,7 @@
 #!/bin/awk
 
-func recursive_move(move, ctr_A, ctr_B, path_A, path_B,  c, path_length, i, duplicate, move_arr){
-
+func recursive_move(move, ctr_A, ctr_B, path_A, path_B,  c, path_length, i, skip, move_arr){
+  
   if(move != ""){
     split(move, move_arr, ":")
 
@@ -20,21 +20,27 @@ func recursive_move(move, ctr_A, ctr_B, path_A, path_B,  c, path_length, i, dupl
 
   if(sum_A + sum_B > max_sum) max_sum = sum_A + sum_B
 
+  CTR++
+  if(CTR % 1e4 == 0){
+    for(i=0 ; i<=15; i++) printf (i<=ctr_A ? path_A[i] : "  ")":"(i<=ctr_B ? path_B[i] : "  ") "|"
+    print sum_A + sum_B
+  }
+
   if(path_length_A < n_moves){
     for(c in non_zero_valves){
-      duplicate = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) duplicate = 1
-      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) duplicate = 1
-      if(duplicate == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B)
+      skip = 0
+      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) skip = 1
+      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) skip = 1
+      if(skip == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B)
     }
   }
 
   if(path_length_B < n_moves){
     for(c in non_zero_valves){
-      duplicate = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) duplicate = 1
-      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) duplicate = 1
-      if(duplicate == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B)
+      skip = 0
+      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) skip = 1
+      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) skip = 1
+      if(skip == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B)
     }
   }
 
@@ -92,13 +98,6 @@ func calc_distance(a, b){
 #  print a, b, distance[a, b]
 
 }
-
-func get_path_length(path){
-  sum = 0
-  for(i=1; i<n_non_zero_valves; i++) sum += distance[path[i], path[i+1]]
-  return sum
-}
-
 
 BEGIN{FS = "Valve | has.*=|; tunnel.*valves? |, "; n_moves = 26; inf = 1e5}
 
