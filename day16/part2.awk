@@ -1,24 +1,28 @@
 #!/bin/awk
 
-func recursive_move(move, ctr_A, ctr_B, path_A, path_B,  c, path_length, i, skip, move_arr){
+func recursive_move(move, ctr_A, ctr_B, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B,  c, i, skip, move_arr){
   
   if(move != ""){
+
     split(move, move_arr, ":")
 
-    if(move_arr[1] == "A") path_A[ctr_A] = move_arr[2]
-    if(move_arr[1] == "B") path_B[ctr_B] = move_arr[2]
+    if(move_arr[1] == "A"){
+      path_A[ctr_A] = move_arr[2]
+      dt = distance[path_A[ctr_A - 1], path_A[ctr_A]] + 1
+      path_length_A += dt
+      sum_A += inst_rate_A * dt
+      inst_rate_A += rates[path_A[ctr_A]]
+    }
+
+    if(move_arr[1] == "B"){
+      path_B[ctr_B] = move_arr[2]
+      dt = distance[path_B[ctr_B - 1], path_B[ctr_B]] + 1
+      path_length_B += dt
+      sum_B += inst_rate_B * dt
+      inst_rate_B += rates[path_B[ctr_B]]
+    }
+
   }
-
-  path_length_A = evaluate(path_A, ctr_A, length_and_sum_A)
-  path_length_B = evaluate(path_B, ctr_B, length_and_sum_B)
-
-  path_length_A = length_and_sum_A[0]
-  path_length_B = length_and_sum_B[0]
-
-  sum_A = length_and_sum_A[1]
-  sum_B = length_and_sum_B[1]
-
-  if(sum_A + sum_B > max_sum) max_sum = sum_A + sum_B
 
   CTR++
   if(CTR % 1e4 == 0){
@@ -29,37 +33,26 @@ func recursive_move(move, ctr_A, ctr_B, path_A, path_B,  c, path_length, i, skip
   if(path_length_A < n_moves){
     for(c in non_zero_valves){
       skip = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) skip = 1
-      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) skip = 1
-      if(skip == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B)
+      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
+      if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
+      if(skip == 0) recursive_move("A:"non_zero_valves[c], ctr_A+1, ctr_B, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
     }
   }
 
   if(path_length_B < n_moves){
     for(c in non_zero_valves){
       skip = 0
-      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) skip = 1
-      for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) skip = 1
-      if(skip == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B)
+      for(i=0; i<=ctr_A; i++) if(path_A[i] == non_zero_valves[c]) {skip = 1; break}
+      if(skip == 0) for(i=0; i<=ctr_B; i++) if(path_B[i] == non_zero_valves[c]) {skip = 1; break}
+      if(skip == 0) recursive_move("B:"non_zero_valves[c], ctr_A, ctr_B+1, path_A, path_B, path_length_A, path_length_B, inst_rate_A, inst_rate_B, sum_A, sum_B)
     }
   }
 
-}
+  sum_A += inst_rate_A * (n_moves - path_length_A)
+  sum_B += inst_rate_B * (n_moves - path_length_B)
 
-func evaluate(path, ctr, length_and_sum,  inst_rate, dt, i){
-  length_and_sum[0] = 0
-  length_and_sum[1] = 0
-  inst_rate = 0
-  for(i=1 ; i<=ctr; i++){
-    dt = distance[path[i], path[i-1]] + 1
-    length_and_sum[0] += dt
-    length_and_sum[1] += inst_rate * dt
-    inst_rate += rates[path[i]]
-    #printf path[i] ":" length_and_sum[0] ":" inst_rate " "
-  }
-  length_and_sum[1] += inst_rate * (n_moves - length_and_sum[0])
-  #print length_and_sum[1]
-  return length_and_sum[0]
+  if(sum_A + sum_B > max_sum) max_sum = sum_A + sum_B
+
 }
 
 func calc_distance(a, b){
@@ -123,19 +116,9 @@ END{
     }
   }
 
- # path[0] = "AA"
- # path[1] = "DD"
- # path[2] = "BB"
- # path[3] = "JJ"
- # path[4] = "HH"
- # path[5] = "EE"
- # path[6] = "CC"
- # evaluate(path, 6)
- # exit
-
   path_A[0] = "AA"
   path_B[0] = "AA"
-  recursive_move("", 0, 0, path_A, path_B)
+  recursive_move("", 0, 0, path_A, path_B, 0, 0, 0, 0, 0, 0)
 
   print max_sum
 
