@@ -11,7 +11,7 @@ func add_row(){
 
 func plot(){
   print time
-  for(y=n_rows; y>0; y--){
+  for(y=n_rows; y>=min_y; y--){
     for(x=1; x<=9; x++) printf map[x, y]
     print ""
   }
@@ -19,11 +19,14 @@ func plot(){
 
 func spawn(){
   
-  for(y=1; y<=n_rows; y++){
+  for(y=min_y; y<=n_rows; y++){
+    full_row = 1
     for(x=2; x<9; x++){
       if(map[x, y] == "@") map[x, y] = "#"
       if(map[x, y] == "#") max_y = y
+      else full_row = 0
     }
+    if(full_row == 1) min_y = y
   }
 
   if(ctr % 5 == 0){
@@ -74,14 +77,14 @@ func tick(){
   direction = $(int(time / 2) % NF + 1) == "<" ? -1 : 1
 
   if(time % 2 == 0){
-    for(y=2; y<=n_rows; y++){
+    for(y=min_y; y<=n_rows; y++){
       for(x=0; x<=6; x++){
         if(map[x, y] == "@" && map[x, y-1] == "#") return spawn()
       }
     }
   }
   else{
-    for(y=2; y<=n_rows; y++){
+    for(y=min_y; y<=n_rows; y++){
       for(x=0; x<=6; x++){
         X = direction == -1 ? 2 + x : 8 - x
         if(map[X, y] == "@" && map[X+direction, y] == "#") return ""
@@ -89,7 +92,7 @@ func tick(){
     }
   }
 
-  for(y=2; y<=n_rows; y++){
+  for(y=min_y; y<=n_rows; y++){
     for(x=0; x<=6; x++){
       X = direction == -1 ? 2 + x : 8 - x
       if(map[X, y] == "@"){
@@ -117,7 +120,7 @@ func tick(){
 
 #  plot()
 
-  while(n_blocks <= 1000) tick()
+  while(n_blocks <= 2022) tick()
 
   plot()
 
