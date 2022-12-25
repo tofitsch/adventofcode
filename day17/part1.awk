@@ -10,23 +10,23 @@ func add_row(){
 }
 
 func plot(){
-  print time
+  print ""
   for(y=n_rows; y>=min_y; y--){
     for(x=1; x<=9; x++) printf map[x, y]
-    print ""
+    print " "y
   }
 }
 
 func spawn(){
   
   for(y=min_y; y<=n_rows; y++){
-    full_row = 1
+    blocked_row = 1
     for(x=2; x<9; x++){
       if(map[x, y] == "@") map[x, y] = "#"
       if(map[x, y] == "#") max_y = y
-      else full_row = 0
+      if(map[x, y] != "#" && map[x, y+1] != "#") blocked_row = 0
     }
-    if(full_row == 1) min_y = y
+    if(blocked_row == 1) min_y = y
   }
 
   if(ctr % 5 == 0){
@@ -64,9 +64,9 @@ func spawn(){
   ctr++
   n_blocks++
 
-  #print n_blocks
+  #print n_blocks, min_y, max_y
 
-#  plot()
+  #plot()
 
 }
 
@@ -78,7 +78,7 @@ func tick(){
 
   if(time % 2 == 0){
     for(y=min_y; y<=n_rows; y++){
-      for(x=0; x<=6; x++){
+      for(x=2; x<=8; x++){
         if(map[x, y] == "@" && map[x, y-1] == "#") return spawn()
       }
     }
@@ -108,6 +108,8 @@ func tick(){
     }
   }
 
+  #plot()
+
 }
 
 {
@@ -122,10 +124,10 @@ func tick(){
 
 #  plot()
 
-  while(n_blocks <= 10) tick()
+  while(n_blocks <= 2022) tick()
 
-  plot()
+  #plot()
 
-  print max_y
+  print max_y - 1
   
 }
