@@ -10,7 +10,7 @@ func add_row(){
 }
 
 func plot(){
-  print ""
+  print time
   for(y=n_rows; y>0; y--){
     for(x=1; x<=9; x++) printf map[x, y]
     print ""
@@ -18,7 +18,7 @@ func plot(){
 }
 
 func spawn(){
-
+  
   for(y=1; y<=n_rows; y++){
     for(x=2; x<9; x++){
       if(map[x, y] == "@") map[x, y] = "#"
@@ -59,6 +59,11 @@ func spawn(){
   }
 
   ctr++
+  n_blocks++
+
+  print n_blocks
+
+#  plot()
 
 }
 
@@ -66,7 +71,7 @@ func tick(){
 
   time++
 
-  direction = $(int(time / 2) % NF) == ">" ? -1 : 1
+  direction = $(int(time / 2) % NF + 1) == "<" ? -1 : 1
 
   if(time % 2 == 0){
     for(y=2; y<=n_rows; y++){
@@ -110,8 +115,12 @@ func tick(){
   add_row()
   spawn()
 
+#  plot()
+
+  while(n_blocks <= 1000) tick()
+
   plot()
 
-  for(i=0; i<10; i++) {tick(); plot()}
+  print max_y
   
 }
