@@ -37,17 +37,16 @@ func spawn(){
   if(periodicity == "" && ctr % 5 == 0 && n_occupied_at_max_y > 1){ 
     if(same_state[time % NF] != ""){
 
-      offset = same_state[time % NF]
       periodicity = n_blocks - same_state[time % NF]
       delta_y = max_y - max_y_at[time % NF]
 
-      n_periods_to_skip = int((goal - n_blocks) / periodicity)
-
-      n_blocks += n_periods_to_skip
+      break_cond = (goal - n_blocks) % periodicity
 
     }
-    same_state[time % NF] = n_blocks
-    max_y_at[time % NF] = max_y
+    else{
+      same_state[time % NF] = n_blocks
+      max_y_at[time % NF] = max_y
+    }
   }
 
   if(ctr % 5 == 0){
@@ -145,11 +144,13 @@ func tick(){
 
 #  plot()
 
-  while(n_blocks < goal) tick()
+  break_cond = goal
+
+  while(n_blocks < break_cond) tick()
 
   #plot()
 
   max_y += delta_y * n_periods_to_skip
-  print max_y - 1
+  print max_y - 1 + delta_y * (int(goal / periodicity) - 1)
   
 }
