@@ -1,6 +1,6 @@
 #!/bin/awk
 
-BEGIN {FS = ""; n_rows=1}
+BEGIN {FS=""}
 
 func add_row(){
   n_rows++
@@ -64,7 +64,7 @@ func spawn(){
   ctr++
   n_blocks++
 
-  print n_blocks
+  #print n_blocks
 
 #  plot()
 
@@ -115,12 +115,14 @@ func tick(){
   for(i=1; i<=9; i++) map[i, 1] = "#"
 
   ctr = 0
+  n_rows = 1
+
   add_row()
   spawn()
 
 #  plot()
 
-  while(n_blocks <= 2022) tick()
+  while(n_blocks <= 10) tick()
 
   plot()
 
