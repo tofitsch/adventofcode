@@ -1,6 +1,6 @@
 #!/bin/awk
 
-func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  i, j, k, l, rest_ore, rest_cla, rest_obs){
+func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  rest_ore, rest_cla, rest_obs){
   
   if(t == 0){
     if(geo > most_geo) most_geo = geo
