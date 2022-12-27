@@ -29,18 +29,18 @@ func spawn(){
     if(blocked_row == 1) min_y = y
   }
 
-  n_occupied_at_max_y = 0
-  for(x=2; x<9; x++)
-    if(map[x, max_y] == "#")
-      n_occupied_at_max_y++
-
-  if(periodicity == "" && ctr % 5 == 0 && n_occupied_at_max_y > 1){ 
+  if(periodicity == "" && ctr % 5 == 0 && map[5, max_y] == "#"){
     if(same_state[time % NF] != ""){
+      
+      #print n_blocks
 
+      offset = same_state[time % NF]
       periodicity = n_blocks - same_state[time % NF]
       delta_y = max_y - max_y_at[time % NF]
 
-      break_cond = (goal - n_blocks) % periodicity
+      break_cond = (goal - offset) % periodicity + periodicity + offset
+
+      print goal, periodicity, n_blocks, break_cond
 
     }
     else{
@@ -84,7 +84,7 @@ func spawn(){
   ctr++
   n_blocks++
 
-  print n_blocks, min_y, max_y
+  #print n_blocks, min_y, max_y
 
   #plot()
 
@@ -146,11 +146,12 @@ func tick(){
 
   break_cond = goal
 
-  while(n_blocks < break_cond) tick()
+  while(n_blocks <= break_cond) tick()
 
-  #plot()
+#  plot()
 
-  max_y += delta_y * n_periods_to_skip
-  print max_y - 1 + delta_y * (int(goal / periodicity) - 1)
+#  print max_y, delta_y, int((goal - offset) / periodicity)
+
+  print max_y - 1 + delta_y * (int((goal - offset) / periodicity) - 1)
   
 }
