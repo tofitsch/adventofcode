@@ -4,7 +4,6 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
 
   if(t == 0){
     if(geo > most_geo) most_geo = geo
-    print t, "\t|", ore, cla, obs, geo, "\t|", ore_bots, cla_bots, obs_bots, geo_bots
     return ""
   }
 
@@ -17,11 +16,14 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
     for(j=0; j<=cla_bot_costs_ore/ore; j++){
       for(k=0; k<=obs_bot_costs_ore/ore; k++){
         for(l=0; l<=geo_bot_costs_ore/ore; l++){
-          rest_ore = ore-i*geo_bot_costs_ore-j*obs_bot_costs_ore-k*cla_bot_costs_ore-l*ore_bot_costs_ore
-          rest_cla = cla-j*obs_bot_costs_cla
-          rest_obs = obs-i*geo_bot_costs_obs
+
+          rest_ore = ore-i*ore_bot_costs_ore-j*cla_bot_costs_ore-k*obs_bot_costs_ore-l*geo_bot_costs_ore
+          rest_cla = cla-k*obs_bot_costs_cla
+          rest_obs = obs-l*geo_bot_costs_obs
+
           if(rest_ore >= 0 && rest_cla >=0 && rest_obs >=0)
-            recursive_move(t-1, rest_ore, rest_cla, rest_obs, geo, ore_bots+l, cla_bots+k, obs_bots+j, geo_bots+i)
+            recursive_move(t-1, rest_ore, rest_cla, rest_obs, geo, ore_bots+i, cla_bots+j, obs_bots+k, geo_bots+l)
+
         }
       }
     }
@@ -29,7 +31,7 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
 
 }
 
-END {
+{
 
   ore_bot_costs_ore = $7
   cla_bot_costs_ore = $13
@@ -38,7 +40,7 @@ END {
   geo_bot_costs_ore = $28
   geo_bot_costs_obs = $31
 
-  recursive_move(28, 0, 0, 0, 0, 1, 0, 0, 0)
+  recursive_move(25, 0, 0, 0, 0, 1, 0, 0, 0)
 
   print most_geo 
 
