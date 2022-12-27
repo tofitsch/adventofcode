@@ -12,10 +12,10 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
   obs += obs_bots
   geo += geo_bots
 
-  for(i=0; i<28; i++){
-    for(j=0; j<28; j++){
-      for(k=0; k<28; k++){
-        for(l=0; l<28; l++){
+  for(i=0; i<=ore_bot_costs_ore/ore; i++){
+    for(j=0; j<=cla_bot_costs_ore/ore; j++){
+      for(k=0; k<=obs_bot_costs_ore/ore; k++){
+        for(l=0; l<=geo_bot_costs_ore/ore; l++){
           rest_ore = ore-i*geo_bot_costs_ore-j*obs_bot_costs_ore-k*cla_bot_costs_ore-l*ore_bot_costs_ore
           rest_cla = cla-j*obs_bot_costs_cla
           rest_obs = obs-i*geo_bot_costs_obs
@@ -38,6 +38,6 @@ END {
   geo_bot_costs_obs = $31
 
 
-  recursive_move(10, 0, 0, 0, 0, 1, 0, 0, 0)
+  recursive_move(5, 0, 0, 0, 0, 1, 0, 0, 0)
 
 }
