@@ -1,6 +1,6 @@
 #!/bin/awk
 
-func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  i, j, k, l){
+func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  i, j, k, l, rest_ore, rest_cla, rest_obs){
 
   if(t == 0){
     print t, "\t|", ore, cla, obs, geo, "\t|", ore_bots, cla_bots, obs_bots, geo_bots
@@ -12,31 +12,19 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
   obs += obs_bots
   geo += geo_bots
 
-  i=1
-  while(ore >= i*geo_bot_costs_ore && obs >= i*geo_bot_costs_obs){
-    recursive_move(t-1, ore-i*geo_bot_costs_ore, cla, obs-i*geo_bot_costs_obs, geo, ore_bots, cla_bots, obs_bots, geo_bots+i)
-    i++
+  for(i=0; i<28; i++){
+    for(j=0; j<28; j++){
+      for(k=0; k<28; k++){
+        for(l=0; l<28; l++){
+          rest_ore = ore-i*geo_bot_costs_ore-j*obs_bot_costs_ore-k*cla_bot_costs_ore-l*ore_bot_costs_ore
+          rest_cla = cla-j*obs_bot_costs_cla
+          rest_obs = obs-i*geo_bot_costs_obs
+          if(rest_ore >= 0 && rest_cla >=0 && rest_obs >=0 && rest_ore < 3 && rest_cla < 8 && rest_obs < 12)
+            recursive_move(t-1, rest_ore, rest_cla, rest_obs, geo, ore_bots+l, cla_bots+k, obs_bots+j, geo_bots+i)
+        }
+      }
+    }
   }
-
-  j=1
-  while(ore >= j*obs_bot_costs_ore && cla >= j*obs_bot_costs_cla){
-    recursive_move(t-1, ore-j*obs_bot_costs_ore, cla-j*obs_bot_costs_cla, obs, geo, ore_bots, cla_bots, obs_bots+j, geo_bots)
-    j++
-  }
-
-  k=1
-  while(ore >= k*cla_bot_costs_ore){
-    recursive_move(t-1, ore-k*cla_bot_costs_ore, cla, obs, geo, ore_bots, cla_bots+k, obs_bots, geo_bots)
-    k++
-  }
-
-  l=1
-  while(ore >= l*ore_bot_costs_ore){
-    recursive_move(t-1, ore-l*ore_bot_costs_ore, cla, obs, geo, ore_bots+l, cla_bots, obs_bots, geo_bots)
-    l++
-  }
-
-  recursive_move(t-1, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots)
 
 }
 
@@ -50,6 +38,6 @@ END {
   geo_bot_costs_obs = $31
 
 
-  recursive_move(15, 0, 0, 0, 0, 1, 0, 0, 0)
+  recursive_move(10, 0, 0, 0, 0, 1, 0, 0, 0)
 
 }
