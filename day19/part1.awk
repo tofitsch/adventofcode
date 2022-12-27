@@ -1,7 +1,7 @@
 #!/bin/awk
 
 func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  i, j, k, l, rest_ore, rest_cla, rest_obs){
-
+  
   if(t == 0){
     if(geo > most_geo) most_geo = geo
     return ""
@@ -12,22 +12,21 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
   obs += obs_bots
   geo += geo_bots
 
-  for(i=0; i<=ore_bot_costs_ore/ore; i++){
-    for(j=0; j<=cla_bot_costs_ore/ore; j++){
-      for(k=0; k<=obs_bot_costs_ore/ore; k++){
-        for(l=0; l<=geo_bot_costs_ore/ore; l++){
+  recursive_move(t-1, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots)
 
-          rest_ore = ore-i*ore_bot_costs_ore-j*cla_bot_costs_ore-k*obs_bot_costs_ore-l*geo_bot_costs_ore
-          rest_cla = cla-k*obs_bot_costs_cla
-          rest_obs = obs-l*geo_bot_costs_obs
+  rest_ore = ore - ore_bot_costs_ore
+  if(rest_ore >= 0) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots+1, cla_bots, obs_bots, geo_bots)
 
-          if(rest_ore >= 0 && rest_cla >=0 && rest_obs >=0)
-            recursive_move(t-1, rest_ore, rest_cla, rest_obs, geo, ore_bots+i, cla_bots+j, obs_bots+k, geo_bots+l)
+  rest_ore = ore - cla_bot_costs_ore
+  if(rest_ore >= 0) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots, cla_bots+1, obs_bots, geo_bots)
 
-        }
-      }
-    }
-  }
+  rest_ore = ore - obs_bot_costs_ore
+  rest_cla = cla - obs_bot_costs_cla
+  if(rest_ore >= 0 && rest_cla >= 0) recursive_move(t-1, rest_ore, rest_cla, obs, geo, ore_bots, cla_bots, obs_bots+1, geo_bots)
+ 
+  rest_ore = ore - geo_bot_costs_ore
+  rest_obs = obs - geo_bot_costs_obs
+  if(rest_ore >= 0 && rest_obs >= 0) recursive_move(t-1, rest_ore, cla, rest_obs, geo, ore_bots, cla_bots, obs_bots, geo_bots+1)
 
 }
 
