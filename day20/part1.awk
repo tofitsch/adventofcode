@@ -6,12 +6,12 @@
 }
 
 func swap(pos_a, pos_b){
- buff = val[pos_b]
- val[pos_b] = val[pos_a]
- val[pos_a] = buff
- buff = id[pos_b]
- id[pos_b] = id[pos_a]
- id[pos_a] = buff
+  buff = val[pos_b]
+  val[pos_b] = val[pos_a]
+  val[pos_a] = buff
+  buff = id[pos_b]
+  id[pos_b] = id[pos_a]
+  id[pos_a] = buff
 }
 
 END {
