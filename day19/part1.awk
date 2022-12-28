@@ -1,8 +1,9 @@
 #!/bin/awk
 
-func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots,  rest_ore, rest_cla, rest_obs){
+func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots){
   
   if(t == 0){
+    print t, "\t", ore, cla, geo, "\t", ore_bots, cla_bots, obs_bots, geo_bots
     if(geo > most_geo) most_geo = geo
     return ""
   }
@@ -15,14 +16,14 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
   recursive_move(t-1, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots)
 
   rest_ore = ore - ore_bot_costs_ore
-  if(rest_ore >= 0) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots+1, cla_bots, obs_bots, geo_bots)
+  if(rest_ore >= 0 && ore_bots < max_ore_cost) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots+1, cla_bots, obs_bots, geo_bots)
 
   rest_ore = ore - cla_bot_costs_ore
-  if(rest_ore >= 0) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots, cla_bots+1, obs_bots, geo_bots)
+  if(rest_ore >= 0 && cla_bots < obs_bot_costs_cla) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots, cla_bots+1, obs_bots, geo_bots)
 
   rest_ore = ore - obs_bot_costs_ore
   rest_cla = cla - obs_bot_costs_cla
-  if(rest_ore >= 0 && rest_cla >= 0) recursive_move(t-1, rest_ore, rest_cla, obs, geo, ore_bots, cla_bots, obs_bots+1, geo_bots)
+  if(rest_ore >= 0 && rest_cla >= 0 && obs_bots < geo_bot_costs_obs) recursive_move(t-1, rest_ore, rest_cla, obs, geo, ore_bots, cla_bots, obs_bots+1, geo_bots)
  
   rest_ore = ore - geo_bot_costs_ore
   rest_obs = obs - geo_bot_costs_obs
@@ -39,7 +40,12 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
   geo_bot_costs_ore = $28
   geo_bot_costs_obs = $31
 
-  recursive_move(25, 0, 0, 0, 0, 1, 0, 0, 0)
+  max_ore_cost = ore_bot_costs_ore
+  if(cla_bot_costs_ore > max_ore_cost) max_ore_cost = cla_bot_costs_ore
+  if(obs_bot_costs_ore > max_ore_cost) max_ore_cost = cla_bot_costs_ore
+  if(geo_bot_costs_ore > max_ore_cost) max_ore_cost = cla_bot_costs_ore
+
+  recursive_move(20, 0, 0, 0, 0, 1, 0, 0, 0)
 
   print most_geo 
 
