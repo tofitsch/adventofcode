@@ -2,10 +2,9 @@
 
 func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots, new_ore_bots, new_cla_bots, new_obs_bots, new_geo_bots){
   
-  if(t == 0){
-#    print t, "\t", ore, cla, geo, "\t", ore_bots, cla_bots, obs_bots, geo_bots
+  if(t < 0){
     if(geo > most_geo) most_geo = geo
-    return ""
+    return
   }
 
   ore += ore_bots
@@ -52,6 +51,10 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
 
   recursive_move(24, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)
 
-  print most_geo 
+  print most_geo
+
+  sum += NR * most_geo
 
 }
+
+END {print sum}
