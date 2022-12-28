@@ -23,7 +23,7 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
     recursive_move(t-1, rest_ore, cla, rest_obs, geo, ore_bots, cla_bots, obs_bots, geo_bots, 0, 0, 0, 1)
   }
   else{
-    if(ore < max_ore_cost && cla < obs_bot_costs_cla && obs < geo_bot_costs_obs)recursive_move(t-1, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots, 0, 0, 0, 0)
+    if(ore < max_ore_cost) recursive_move(t-1, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots, 0, 0, 0, 0)
 
     rest_ore = ore - ore_bot_costs_ore
     if(rest_ore >= 0 && ore_bots < max_ore_cost) recursive_move(t-1, rest_ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bots, 1, 0, 0, 0)
@@ -43,6 +43,8 @@ func recursive_move(t, ore, cla, obs, geo, ore_bots, cla_bots, obs_bots, geo_bot
 }
 
 {
+  
+  most_geo = 0
 
   ore_bot_costs_ore = $7
   cla_bot_costs_ore = $13
