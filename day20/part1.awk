@@ -15,41 +15,40 @@ func swap(pos_a, pos_b){
 }
 
 END {
+#  for(v=0; v<NR; v++) printf val[v]" "
+#  print ""
   for(i=0; i<NR; i++){
     pos = 0
     while(id[pos] != i) pos++
+#    print val[pos]
     if(val[pos] > 0){
       for(j=val[pos]; j>0; j--){
-        if(pos+1 >= NR-1){
-          swap(pos, pos+1)
+        if(pos+1 > NR-1){
           for(p=NR-1; p>0; p--) swap(p, p-1)
-          pos = -1
+          pos = 0
+          j++
         }
-        else
+        else{
           swap(pos, pos+1)
-        pos++
-        pos = pos % NR
-        if(pos < 0) pos += NR
+          pos++
+        }
       }
     }
     else{
       for(j=val[pos]; j<0; j++){
-        if(pos-1 <= 0){
-          swap(pos, pos-1)
-          for(p=0; p<NR-1; p++) swap(p, p+1)
-          pos = NR
+        if(pos <= 1){
+          for(p=pos; p<NR-1; p++) swap(p, p+1)
+          pos = NR-1
         }
-        else
+        else{
           swap(pos, pos-1)
-        pos--
-        pos = pos % NR
-        if(pos < 0) pos += NR
+          pos--
+        }
       }
     }
+#    for(v=0; v<NR; v++) printf val[v]" "
+#    print ""
   }
-
-#  for(v=0; v<NR; v++) printf val[v]" "
-#  print ""
 
   pos = 0
   while(val[pos] != 0) pos++
