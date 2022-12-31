@@ -5,6 +5,15 @@
   id[NR - 1] = NR - 1
 }
 
+
+func abs(a) {return a < 0 ? -1 * a : a}
+
+func wrap(x){
+  if(abs(x) < NR) return x
+  if(x < 0) return -1 * (abs(x) % NR) - NR
+  return x % NR + NR
+}
+
 func swap(pos_a, pos_b){
   buff = val[pos_b]
   val[pos_b] = val[pos_a]
@@ -22,7 +31,7 @@ END {
     while(id[pos] != i) pos++
 #    print val[pos]
     if(val[pos] > 0){
-      for(j=val[pos]; j>0; j--){
+      for(j=wrap(val[pos]); j>0; j--){
         if(pos+1 > NR-1){
           for(p=NR-1; p>0; p--) swap(p, p-1)
           pos = 0
@@ -35,7 +44,7 @@ END {
       }
     }
     else{
-      for(j=val[pos]; j<0; j++){
+      for(j=wrap(val[pos]); j<0; j++){
         if(pos <= 1){
           for(p=pos; p<NR-1; p++) swap(p, p+1)
           pos = NR-1
