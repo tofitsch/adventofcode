@@ -7,16 +7,6 @@
   if($1 == 0) zero_id = NR
 }
 
-func debug() {
-  pos = 1
-  for(i=1; i<=NR; i++){
-    printf val[pos]" "
-#    printf pos" "
-    pos = nxt[pos]
-  }
-  print ""
-}
-
 func abs(a) {return a < 0 ? -1 * a : a}
 
 func move(id, by){
@@ -28,12 +18,9 @@ func move(id, by){
 
   pos = id
 
-  for(i=0; i<abs(by); i++)
-    pos = by > 0 ? nxt[pos] : prv[pos]
+  end = by > 0 ? by: abs(by) + 1
 
-  if(by < 0) pos = prv[pos]
-
-  #print val[id], id, pos
+  for(i=0; i<end % (NR - 1); i++) pos = by > 0 ? nxt[pos] : prv[pos]
 
   prv[id] = pos
   nxt[id] = nxt[pos]
@@ -48,10 +35,7 @@ END {
   nxt[NR] = 1 
   prv[1] = NR 
 
-  for(n=1; n<=NR; n++){
-    move(n, val[n])
-#    debug()
-  }
+  for(n=1; n<=NR; n++) move(n, val[n])
 
   pos = zero_id
 
@@ -60,7 +44,6 @@ END {
     if(i == 1000 || i == 2000 || i == 3000) sum += val[pos]
   }
 
-  debug()
   print sum
 
 }
