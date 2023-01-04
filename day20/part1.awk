@@ -1,71 +1,66 @@
 #!/bin/awk
 
 {
-  val[NR - 1] = $1
-  id[NR - 1] = NR - 1
+  val[NR] = $1
+  prv[NR] = NR - 1
+  nxt[NR] = NR + 1
+  if($1 == 0) zero_id = NR
 }
 
+func debug() {
+  pos = 1
+  for(i=1; i<=NR; i++){
+    printf val[pos]" "
+#    printf pos" "
+    pos = nxt[pos]
+  }
+  print ""
+}
 
 func abs(a) {return a < 0 ? -1 * a : a}
 
-func wrap(x){
-  if(abs(x) < NR) return x
-  if(x < 0) return -1 * (abs(x) % NR) - NR
-  return x % NR + NR
-}
+func move(id, by){
+  
+  if(val[id] == 0) return 0
+ 
+  nxt[prv[id]] = nxt[id]
+  prv[nxt[id]] = prv[id]
 
-func swap(pos_a, pos_b){
-  buff = val[pos_b]
-  val[pos_b] = val[pos_a]
-  val[pos_a] = buff
-  buff = id[pos_b]
-  id[pos_b] = id[pos_a]
-  id[pos_a] = buff
+  pos = id
+
+  for(i=0; i<abs(by); i++)
+    pos = by > 0 ? nxt[pos] : prv[pos]
+
+  if(by < 0) pos = prv[pos]
+
+  #print val[id], id, pos
+
+  prv[id] = pos
+  nxt[id] = nxt[pos]
+
+  prv[nxt[pos]] = id
+  nxt[pos] = id
+
 }
 
 END {
-#  for(v=0; v<NR; v++) printf val[v]" "
-#  print ""
-  for(i=0; i<NR; i++){
-    pos = 0
-    while(id[pos] != i) pos++
-#    print val[pos]
-    if(val[pos] > 0){
-      for(j=wrap(val[pos]); j>0; j--){
-        if(pos+1 > NR-1){
-          for(p=NR-1; p>0; p--) swap(p, p-1)
-          pos = 0
-          j++
-        }
-        else{
-          swap(pos, pos+1)
-          pos++
-        }
-      }
-    }
-    else{
-      for(j=wrap(val[pos]); j<0; j++){
-        if(pos <= 1){
-          for(p=pos; p<NR-1; p++) swap(p, p+1)
-          pos = NR-1
-        }
-        else{
-          swap(pos, pos-1)
-          pos--
-        }
-      }
-    }
-#    for(v=0; v<NR; v++) printf val[v]" "
-#    print ""
+
+  nxt[NR] = 1 
+  prv[1] = NR 
+
+  for(n=1; n<=NR; n++){
+    move(n, val[n])
+#    debug()
   }
 
-  pos = 0
-  while(val[pos] != 0) pos++
+  pos = zero_id
 
-  sum += val[(pos + 1000) % NR]
-  sum += val[(pos + 2000) % NR]
-  sum += val[(pos + 3000) % NR]
+  for(i=1; i<=3000; i++){
+    pos = nxt[pos]
+    if(i == 1000 || i == 2000 || i == 3000) sum += val[pos]
+  }
 
+  debug()
   print sum
 
 }
