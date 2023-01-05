@@ -23,7 +23,7 @@ END {
 
   for(i in dists){
 
-    print dists[i], turns[i+1]
+    #print dists[i], turns[i+1]
 
     if(facing == 0){
       for(j=0; j<dists[i]; j++){
@@ -32,9 +32,9 @@ END {
           x--
           break
         }
-        if(map[x, y] == ""){
+        if(map[x, y] == "" || map[x, y] == " "){
           X = x-1
-          while(map[X, y] != "") X--
+          while(map[X, y] ~ "\\.|#") X--
           if(map[X+1, y] == ".") x = X + 1
           if(map[X+1, y] == "#"){
             x--
@@ -51,9 +51,9 @@ END {
           y--
           break
         }
-        if(map[x, y] == ""){
+        if(map[x, y] == "" || map[x, y] == " "){
           Y = y-1
-          while(map[x, Y] != "") Y--
+          while(map[x, Y] ~ "\\.|#") Y--
           if(map[x, Y+1] == ".") y = Y + 1
           if(map[x, Y+1] == "#"){
             y--
@@ -70,9 +70,9 @@ END {
           x++
           break
         }
-        if(map[x, y] == ""){
+        if(map[x, y] == "" || map[x, y] == " "){
           X = x+1
-          while(map[X, y] != "") X++
+          while(map[X, y] ~ "\\.|#") X++
           if(map[X-1, y] == ".") x = X - 1
           if(map[X-1, y] == "#"){
             x++
@@ -89,9 +89,9 @@ END {
           y++
           break
         }
-        if(map[x, y] == ""){
+        if(map[x, y] == "" || map[x, y] == " "){
           Y = y+1
-          while(map[x, Y] != "") Y++
+          while(map[x, Y] ~ "\\.|#") Y++
           if(map[x, Y-1] == ".") y = Y - 1
           if(map[x, Y-1] == "#"){
             y++
@@ -112,18 +112,19 @@ END {
     if(facing == 2) Map[x, y] = "<"
     if(facing == 3) Map[x, y] = "^"
 
-    print "", x, y, facing
+    #print "", x, y, facing
 
   }
 
-  for(y=1; y<=y_max; y++){
-    for(x=1; x<=x_max; x++){
-      printf Map[x, y]
-    }
-    print ""
-  }
+#  print x, y, facing
 
+  print 1e3 * y + 4 * x + facing
 
-  print x, y, facing
+#  for(y=1; y<=y_max; y++){
+#    for(x=1; x<=x_max; x++){
+#      printf Map[x, y]
+#    }
+#    print ""
+#  }
 
 }
