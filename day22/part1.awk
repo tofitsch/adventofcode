@@ -23,7 +23,7 @@ END {
 
   for(i in dists){
 
-    print dists[i], turns[i]
+    print dists[i], turns[i+1]
 
     if(facing == 0){
       for(j=0; j<dists[i]; j++){
@@ -54,7 +54,7 @@ END {
         if(map[x, y] == ""){
           Y = y-1
           while(map[x, Y] != "") Y--
-          if(map[x, Y+1] == ".") x = Y + 1
+          if(map[x, Y+1] == ".") y = Y + 1
           if(map[x, Y+1] == "#"){
             y--
             break
@@ -92,7 +92,7 @@ END {
         if(map[x, y] == ""){
           Y = y+1
           while(map[x, Y] != "") Y++
-          if(map[x, Y-1] == ".") x = Y - 1
+          if(map[x, Y-1] == ".") y = Y - 1
           if(map[x, Y-1] == "#"){
             y++
             break
@@ -101,8 +101,8 @@ END {
       }
     }
 
-    if(turns[i] == "R") facing++
-    if(turns[i] == "L") facing--
+    if(turns[i+1] == "R") facing++
+    if(turns[i+1] == "L") facing--
 
     if(facing > 3) facing = 0
     if(facing < 0) facing = 3
@@ -111,6 +111,8 @@ END {
     if(facing == 1) Map[x, y] = "v"
     if(facing == 2) Map[x, y] = "<"
     if(facing == 3) Map[x, y] = "^"
+
+    print "", x, y, facing
 
   }
 
