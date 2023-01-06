@@ -58,12 +58,7 @@ END {
 
   for(i in dists){
     
-    for(j=0; j<dists[i]; j++){
-      split(coord, xy, SUBSEP)
-      print xy[1], xy[2], facing, connection[0, xy[1], xy[2]]
-      coord = connection[facing, coord]
-    }
-    print ""
+    for(j=0; j<dists[i]; j++) coord = connection[facing, coord]
 
     if(turns[i+1] == "R") facing++
     if(turns[i+1] == "L") facing--
@@ -78,15 +73,15 @@ END {
 
   }
 
-  print x, y, facing
+  split(coord, xy, SUBSEP)
+#  print xy[1], xy[2], facing
+  print 1e3 * xy[2] + 4 * xy[1] + facing
 
-  print 1e3 * y + 4 * x + facing
-
-  for(y=1; y<=y_max; y++){
-    for(x=1; x<=x_max; x++){
-      printf Map[x, y]
-    }
-    print ""
-  }
+#  for(y=1; y<=y_max; y++){
+#    for(x=1; x<=x_max; x++){
+#      printf Map[x, y]
+#    }
+#    print ""
+#  }
 
 }
