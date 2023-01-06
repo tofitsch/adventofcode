@@ -12,6 +12,7 @@
 #
 # all 8 possible folds (modulo rotations and reflections):
 #
+#  A   B    C    D    E     F     G     H
 #    |    |    |    |     |     |     |   <
 #  v |    |    |  > |   < |     |   v |
 #    |    |  > |    |     |   v |     |
@@ -27,14 +28,14 @@ $0 ~ "\\." {
   y_max = NR
 }
 
-func neighbor(dir, coord){
+func neighbor(dir, dist, coord){
 
   split(coord, xy, SUBSEP)
 
-  if(dir == 0) xy[1]++
-  if(dir == 1) xy[2]++
-  if(dir == 2) xy[1]--
-  if(dir == 3) xy[2]--
+  if(dir == 0) xy[1] += dist
+  if(dir == 1) xy[2] += dist
+  if(dir == 2) xy[1] -= dist
+  if(dir == 3) xy[2] -= dist
 
   return xy[1] SUBSEP xy[2]
 
@@ -51,17 +52,33 @@ END {
     for(x=1; x<=x_max; x++){
       for(i=0; i<=3; i++){
 
-        connection[i, x, y] = neighbor(i, x SUBSEP y)
+        if(map[x, y] !~ "\\.|#") continue
 
-        if(map[connection[i, x, y]] !~ "\\.|#"){
+        connection[i, x, y] = neighbor(i, 1, x SUBSEP y)
 
-          coord = x SUBSEP y
-          while(map[coord] ~ "\\.|#") coord = neighbor((i + 2) % 4, coord)
-          coord = neighbor(i, coord)
+        target = neighbor(i, -4 * side_length + 1, x SUBSEP y)
+        if(map[connection[i, x, y]] !~ "\\.|#" && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
+          connection[i, x, y] = target
+          print "fold A", x, y, target
+          }
 
-          connection[i, x, y] = coord
-  
+        for(mirror=0; mirror<=1; mirror++){
+
+          if(map[connection[i, x, y]] !~ "\\.|#"){
+            target = x SUBSEP y
+            for(j=0; j<side_length; j++){
+              target = neighbor(i, 1, target)
+              target = neighbor((i+(mirror ? 3 : 1))%4, 1, target)
+              if(map[target] ~ "\\.|#"){
+                connection[i, x, y] = target
+                print "fold B"mirror, x, y, target
+                break
+              }
+            }
+          }
+
         }
+
 
         if(map[connection[i, x, y]] == "#") connection[i, x, y] = x SUBSEP y
 
