@@ -13,7 +13,6 @@ func move(dir, coord){
 
   split(coord, xy, SUBSEP)
 
-
   if(dir == 0) xy[1]++
   if(dir == 1) xy[2]++
   if(dir == 2) xy[1]--
@@ -51,6 +50,8 @@ END {
   
   split($0, turns, "[0-9]*")
   split($0, dists, "L|R")
+
+  x = 1
   
   while(map[x, 1] != ".") x++
 
