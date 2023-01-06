@@ -4,12 +4,47 @@ BEGIN {FS=""}
 
 $0 ~ "\\." {
   for(x=1; x<=NF; x++) map[x, NR] = $x
-  for(x=1; x<=NF; x++) Map[x, NR] = $x #XXX
+  for(x=1; x<=NF; x++) Map[x, NR] = $x #TODO
   if(NF > x_max) x_max = NF
   y_max = NR
 }
 
+func move(dir, coord){
+
+  split(coord, xy, SUBSEP)
+
+  if(dir == 0) xy[0]++
+  if(dir == 1) xy[1]++
+  if(dir == 2) xy[0]--
+  if(dir == 3) xy[1]--
+
+  return x SUBSEP y
+
+}
+
 END {
+  
+  for(y=1; y<=y_max; y++){
+    for(x=1; x<=x_max; x++){
+      for(i=0; i<=3; i++){
+
+        connection[i, x, y] = move(i, x SUBSEP y)
+
+        if(connection[i, x, y] !~ "\\.|#"){
+
+          coord = x SUBSEP y
+          while(map[coord] ~ "\\.|#") coord = move((i + 2) % 4, coord)
+          coord = move(i, coord)
+
+          connection[i, x, y] = coord
+  
+        }
+
+        if(connection[i, x, y] == "#") connection[i, x, y] = x SUBSEP y
+
+      }
+    }
+  }
 
   facing = 0
   
@@ -21,85 +56,11 @@ END {
 
   while(map[x, y] != ".") x++
 
+  coord = x SUBSEP y
+
   for(i in dists){
-
-    #print dists[i], turns[i+1]
-
-    if(facing == 0){
-      for(j=0; j<dists[i]; j++){
-        x++
-        if(map[x, y] == "#"){
-          x--
-          break
-        }
-        if(map[x, y] == "" || map[x, y] == " "){
-          X = x-1
-          while(map[X, y] ~ "\\.|#") X--
-          if(map[X+1, y] == ".") x = X + 1
-          if(map[X+1, y] == "#"){
-            x--
-            break
-          }
-        }
-      }
-    }
-
-    else if(facing == 1){
-      for(j=0; j<dists[i]; j++){
-        y++
-        if(map[x, y] == "#"){
-          y--
-          break
-        }
-        if(map[x, y] == "" || map[x, y] == " "){
-          Y = y-1
-          while(map[x, Y] ~ "\\.|#") Y--
-          if(map[x, Y+1] == ".") y = Y + 1
-          if(map[x, Y+1] == "#"){
-            y--
-            break
-          }
-        }
-      }
-    }
-
-    else if(facing == 2){
-      for(j=0; j<dists[i]; j++){
-        x--
-        if(map[x, y] == "#"){
-          x++
-          break
-        }
-        if(map[x, y] == "" || map[x, y] == " "){
-          X = x+1
-          while(map[X, y] ~ "\\.|#") X++
-          if(map[X-1, y] == ".") x = X - 1
-          if(map[X-1, y] == "#"){
-            x++
-            break
-          }
-        }
-      }
-    }
-
-    else if(facing == 3){
-      for(j=0; j<dists[i]; j++){
-        y--
-        if(map[x, y] == "#"){
-          y++
-          break
-        }
-        if(map[x, y] == "" || map[x, y] == " "){
-          Y = y+1
-          while(map[x, Y] ~ "\\.|#") Y++
-          if(map[x, Y-1] == ".") y = Y - 1
-          if(map[x, Y-1] == "#"){
-            y++
-            break
-          }
-        }
-      }
-    }
+    
+    for(j=0; j<dists[i]; j++) coord = connection[facing, coord]
 
     if(turns[i+1] == "R") facing++
     if(turns[i+1] == "L") facing--
@@ -107,24 +68,22 @@ END {
     if(facing > 3) facing = 0
     if(facing < 0) facing = 3
 
-    if(facing == 0) Map[x, y] = ">"
-    if(facing == 1) Map[x, y] = "v"
-    if(facing == 2) Map[x, y] = "<"
-    if(facing == 3) Map[x, y] = "^"
-
-    #print "", x, y, facing
+    if(facing == 0) Map[coord] = ">"
+    if(facing == 1) Map[coord] = "v"
+    if(facing == 2) Map[coord] = "<"
+    if(facing == 3) Map[coord] = "^"
 
   }
 
-#  print x, y, facing
+  print x, y, facing
 
   print 1e3 * y + 4 * x + facing
 
-#  for(y=1; y<=y_max; y++){
-#    for(x=1; x<=x_max; x++){
-#      printf Map[x, y]
-#    }
-#    print ""
-#  }
+  for(y=1; y<=y_max; y++){
+    for(x=1; x<=x_max; x++){
+      printf Map[x, y]
+    }
+    print ""
+  }
 
 }
