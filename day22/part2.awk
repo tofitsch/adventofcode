@@ -27,7 +27,7 @@ $0 ~ "\\." {
   y_max = NR
 }
 
-func move(dir, coord){
+func neighbor(dir, coord){
 
   split(coord, xy, SUBSEP)
 
@@ -51,13 +51,13 @@ END {
     for(x=1; x<=x_max; x++){
       for(i=0; i<=3; i++){
 
-        connection[i, x, y] = move(i, x SUBSEP y)
+        connection[i, x, y] = neighbor(i, x SUBSEP y)
 
         if(map[connection[i, x, y]] !~ "\\.|#"){
 
           coord = x SUBSEP y
-          while(map[coord] ~ "\\.|#") coord = move((i + 2) % 4, coord)
-          coord = move(i, coord)
+          while(map[coord] ~ "\\.|#") coord = neighbor((i + 2) % 4, coord)
+          coord = neighbor(i, coord)
 
           connection[i, x, y] = coord
   

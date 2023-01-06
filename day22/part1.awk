@@ -4,12 +4,11 @@ BEGIN {FS=""}
 
 $0 ~ "\\." {
   for(x=1; x<=NF; x++) map[x, NR] = $x
-  for(x=1; x<=NF; x++) Map[x, NR] = $x #TODO
   if(NF > x_max) x_max = NF
   y_max = NR
 }
 
-func move(dir, coord){
+func neighbor(dir, coord){
 
   split(coord, xy, SUBSEP)
 
@@ -28,13 +27,13 @@ END {
     for(x=1; x<=x_max; x++){
       for(i=0; i<=3; i++){
 
-        connection[i, x, y] = move(i, x SUBSEP y)
+        connection[i, x, y] = neighbor(i, x SUBSEP y)
 
         if(map[connection[i, x, y]] !~ "\\.|#"){
 
           coord = x SUBSEP y
-          while(map[coord] ~ "\\.|#") coord = move((i + 2) % 4, coord)
-          coord = move(i, coord)
+          while(map[coord] ~ "\\.|#") coord = neighbor((i + 2) % 4, coord)
+          coord = neighbor(i, coord)
 
           connection[i, x, y] = coord
   
@@ -66,22 +65,10 @@ END {
     if(facing > 3) facing = 0
     if(facing < 0) facing = 3
 
-    if(facing == 0) Map[coord] = ">"
-    if(facing == 1) Map[coord] = "v"
-    if(facing == 2) Map[coord] = "<"
-    if(facing == 3) Map[coord] = "^"
-
   }
 
   split(coord, xy, SUBSEP)
-#  print xy[1], xy[2], facing
-  print 1e3 * xy[2] + 4 * xy[1] + facing
 
-#  for(y=1; y<=y_max; y++){
-#    for(x=1; x<=x_max; x++){
-#      printf Map[x, y]
-#    }
-#    print ""
-#  }
+  print 1e3 * xy[2] + 4 * xy[1] + facing
 
 }
