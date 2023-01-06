@@ -30,7 +30,7 @@ END {
 
         connection[i, x, y] = move(i, x SUBSEP y)
 
-        if(connection[i, x, y] !~ "\\.|#"){
+        if(map[connection[i, x, y]] !~ "\\.|#"){
 
           coord = x SUBSEP y
           while(map[coord] ~ "\\.|#") coord = move((i + 2) % 4, coord)
@@ -40,14 +40,12 @@ END {
   
         }
 
-        if(connection[i, x, y] == "#") connection[i, x, y] = x SUBSEP y
+        if(map[connection[i, x, y]] == "#") connection[i, x, y] = x SUBSEP y
 
       }
     }
   }
 
-  facing = 0
-  
   split($0, turns, "[0-9]*")
   split($0, dists, "L|R")
 
@@ -56,10 +54,16 @@ END {
   while(map[x, 1] != ".") x++
 
   coord = x SUBSEP 1
+  facing = 0
 
   for(i in dists){
     
-    for(j=0; j<dists[i]; j++) coord = connection[facing, coord]
+    for(j=0; j<dists[i]; j++){
+      split(coord, xy, SUBSEP)
+      print xy[1], xy[2], facing, connection[0, xy[1], xy[2]]
+      coord = connection[facing, coord]
+    }
+    print ""
 
     if(turns[i+1] == "R") facing++
     if(turns[i+1] == "L") facing--
