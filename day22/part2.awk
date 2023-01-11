@@ -41,6 +41,55 @@ func neighbor(dir, dist, coord){
 
 }
 
+func fold(fold_type){
+
+  for(coord in edge){
+
+    split(coord, ixy, SUBSEP)
+
+    i = ixy[1]
+    x = ixy[2]
+    y = ixy[3]
+
+    for(mirror=0; mirror<=1; mirror++){
+    
+      if(edge[coord] != 0) continue
+
+      if(fold_type == 0){
+        target = neighbor(i, -4 * side_length + 1, x SUBSEP y)
+        if(map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
+          edge[coord] = target
+          turn[coord] = 2
+          print "fold A", x, y, target, turn[coord] #XXX
+          Map[x, y] = "A" #XXX
+        }
+      }
+
+      else if(fold_type == 1){
+        target = x SUBSEP y
+        for(j=0; j<side_length; j++){
+          target = neighbor(i, 1, target)
+          target = neighbor((i+(mirror ? 3 : 1))%4, 1, target)
+          if(map[target] ~ "\\.|#"){
+            edge[coord] = target
+            turn[coord] = mirror #TODO
+            print "fold B"mirror, x, y, target, turn[coord] #XXX
+            Map[x, y] = "B" #XXX
+            break
+          }
+        }
+      }
+
+      else if(fold_type == 2){
+        #TODO
+      }
+
+    }
+
+  }
+
+}
+
 END {
 
   if(3 / x_max == 4 / y_max) side_length = x_max / 3
@@ -56,29 +105,19 @@ END {
 
         connection[i, x, y] = neighbor(i, 1, x SUBSEP y)
 
-        target = neighbor(i, -4 * side_length + 1, x SUBSEP y)
-        if(map[connection[i, x, y]] !~ "\\.|#" && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
-          connection[i, x, y] = target
-          print "fold A", x, y, target
-          }
+        if(map[connection[i, x, y]] !~ "\\.|#") edge[i, x, y] = 0
 
-        for(mirror=0; mirror<=1; mirror++){
+      }
+    }
+  }
 
-          if(map[connection[i, x, y]] !~ "\\.|#"){
-            target = x SUBSEP y
-            for(j=0; j<side_length; j++){
-              target = neighbor(i, 1, target)
-              target = neighbor((i+(mirror ? 3 : 1))%4, 1, target)
-              if(map[target] ~ "\\.|#"){
-                connection[i, x, y] = target
-                print "fold B"mirror, x, y, target
-                break
-              }
-            }
-          }
+  for(f=0; f<=9; f++) fold(f)
 
-        }
+  for(coord in edge) connection[coord] = edge[coord]
 
+  for(y=1; y<=y_max; y++){
+    for(x=1; x<=x_max; x++){
+      for(i=0; i<=3; i++){
 
         if(map[connection[i, x, y]] == "#") connection[i, x, y] = x SUBSEP y
 
@@ -106,10 +145,10 @@ END {
     if(facing > 3) facing = 0
     if(facing < 0) facing = 3
 
-    if(facing == 0) Map[coord] = ">"
-    if(facing == 1) Map[coord] = "v"
-    if(facing == 2) Map[coord] = "<"
-    if(facing == 3) Map[coord] = "^"
+#    if(facing == 0) Map[coord] = ">"
+#    if(facing == 1) Map[coord] = "v"
+#    if(facing == 2) Map[coord] = "<"
+#    if(facing == 3) Map[coord] = "^"
 
   }
 
@@ -117,11 +156,11 @@ END {
 #  print xy[1], xy[2], facing
   print 1e3 * xy[2] + 4 * xy[1] + facing
 
-#  for(y=1; y<=y_max; y++){
-#    for(x=1; x<=x_max; x++){
-#      printf Map[x, y]
-#    }
-#    print ""
-#  }
+  for(y=1; y<=y_max; y++){
+    for(x=1; x<=x_max; x++){
+      printf Map[x, y]
+    }
+    print ""
+  }
 
 }
