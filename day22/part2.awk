@@ -12,7 +12,7 @@
 #
 # all 8 possible folds (modulo rotations and reflections):
 #
-#  A   B    C    D    E     F     G     H
+#  1   2    3    4    5     6     7     8
 #    |    |    |    |     |     |     |   <
 #  v |    |    |  > |   < |     |   v |
 #    |    |  > |    |     |   v |     |
@@ -55,7 +55,7 @@ func fold(fold_type){
     
       if(edge[coord] != 0) continue
 
-      if(fold_type == 0){
+      if(fold_type == 1){
         target = neighbor(i, -4 * side_length + 1, x SUBSEP y)
         if(map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
           edge[coord] = target
@@ -65,14 +65,16 @@ func fold(fold_type){
         }
       }
 
-      else if(fold_type == 1){
+      else if(fold_type == 2){
         target = x SUBSEP y
         for(j=0; j<side_length; j++){
           target = neighbor(i, 1, target)
-          target = neighbor((i+(mirror ? 3 : 1))%4, 1, target)
-          if(map[target] ~ "\\.|#"){
+          target = neighbor((i + (mirror ? 3 : 1)) % 4, 1, target)
+          if(edge[target] == 0 && map[target] ~ "\\.|#"){
             edge[coord] = target
-            turn[coord] = mirror #TODO
+            turn[coord] = mirror ? -1 : 1 #TODO
+            edge[target] = coord
+            turn[target] = mirror ? -1 : 1 #TODO
             print "fold B"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "B" #XXX
             break
@@ -80,8 +82,18 @@ func fold(fold_type){
         }
       }
 
-      else if(fold_type == 2){
-        #TODO
+      else if(fold_type == 3 && i < 2){ #TODO
+        offset = ((i % 2 ? x : y) - 1) % side_length
+#        Map[x, y] = offset
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, i > 1 ? -(2*(1-offset) + 1) + 2*side_length : -(2*(mirror ? 3 - offset : offset) + 1) + 3*side_length, x SUBSEP y)
+        target = neighbor(i, -side_length, target)
+        if(edge[target] == 0 && map[target] ~ "\\.|#" && map[neighbor(i, 1, target)] !~ "\\.|#"){
+          edge[coord] = target
+          turn[coord] = 2
+          print "fold C"mirror, x, y, target, turn[coord], "XXX", (i + (mirror ? 3 : 1)) % 4, -(2*offset + 1), 3*side_length #XXX
+          Map[x, y] = "C" #XXX
+          Map[target] = "c" #XXX
+        }
       }
 
     }
@@ -111,7 +123,7 @@ END {
     }
   }
 
-  for(f=0; f<=9; f++) fold(f)
+  for(f=1; f<=9; f++) fold(f)
 
   for(coord in edge) connection[coord] = edge[coord]
 
