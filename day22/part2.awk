@@ -106,7 +106,7 @@ func fold(fold_type){
 
       else if(fold_type == 5){
         target = neighbor((i + (mirror ? 3 : 1)) % 4, -2*side_length, x SUBSEP y)
-        target = neighbor(i, -4*side_length + 1, target)
+        target = neighbor(i, -4*side_length, target)
         for(j=0; j<side_length; j++){
           target = neighbor(i, 1, target)
           target = neighbor((i + (mirror ? 3 : 1)) % 4, 1, target)
