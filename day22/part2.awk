@@ -178,11 +178,11 @@ END {
     
     for(j=0; j<dists[i]; j++){
 
-      do_turn = turn[facing, coord]
+      prev_coord = coord
 
       coord = connection[facing, coord]
 
-      facing += do_turn
+      if(coord != prev_coord) facing += turn[facing, prev_coord]
 
       if(facing > 3) facing = 0
       if(facing < 0) facing = 3
