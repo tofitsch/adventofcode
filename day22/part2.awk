@@ -176,18 +176,25 @@ END {
 
   for(i in dists){
     
-    for(j=0; j<dists[i]; j++) coord = connection[facing, coord]
+    for(j=0; j<dists[i]; j++){
+
+      coord = connection[facing, coord]
+
+      if(facing == 0) Map[coord] = ">"
+      if(facing == 1) Map[coord] = "v"
+      if(facing == 2) Map[coord] = "<"
+      if(facing == 3) Map[coord] = "^"
+
+      split(coord, xy, SUBSEP)
+      print facing, xy[1], xy[2]
+
+    }
 
     if(turns[i+1] == "R") facing++
     if(turns[i+1] == "L") facing--
 
     if(facing > 3) facing = 0
     if(facing < 0) facing = 3
-
-#    if(facing == 0) Map[coord] = ">"
-#    if(facing == 1) Map[coord] = "v"
-#    if(facing == 2) Map[coord] = "<"
-#    if(facing == 3) Map[coord] = "^"
 
   }
 
