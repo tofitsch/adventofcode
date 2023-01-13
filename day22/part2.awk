@@ -77,24 +77,24 @@ func fold(fold_type){
             turn[target] = mirror ? -1 : 1 #TODO
             print "fold B"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "B" #XXX
+            Map[target] = "B" #XXX
             break
           }
         }
       }
 
-      #else if(fold_type == 3 && (i + (mirror ? 3 : 1)) % 4 < 2){ #TODO
       else if(fold_type == 3){
         offset = ((i % 2 ? x : y) - 1) % side_length
-#        Map[x, y] = offset
-        test = -(2*(mirror ? 3 - offset : offset) + 1)
-        target = neighbor((i + (mirror ? 3 : 1)) % 4, (i + (mirror ? 3 : 1)) % 4 > 1 ? -(2*(1-offset) + 1) + 2*side_length : test + 3*side_length, x SUBSEP y)
-        target = neighbor(i, -side_length, target)
+        target = neighbor(i, -side_length, x SUBSEP y)
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, (i + (mirror ? 3 : 1)) % 4 > 1 ? -(2*(1-offset) + 1) + 2*side_length : -(2*offset + 1) + 3*side_length, target)
         if(edge[target] == 0 && map[target] ~ "\\.|#" && map[neighbor(i, 1, target)] !~ "\\.|#"){
           edge[coord] = target
           turn[coord] = 2
-          if(mirror == 0)print "fold C"mirror, x, y, target, turn[coord], "XXX", i, offset, test, 3*side_length #XXX
+          edge[target] = coord
+          turn[target] = 2
+          print "fold C"mirror, x, y, target, turn[coord] #XXX
           Map[x, y] = "C" #XXX
-          Map[target] = "c" #XXX
+          Map[target] = "C" #XXX
         }
       }
 
