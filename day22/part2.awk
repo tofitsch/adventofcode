@@ -117,7 +117,7 @@ func fold(fold_type){
             turn[target] = mirror ? -1 : 1 #TODO
             print "fold E"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "E" #XXX
-            Map[target] = "e" #XXX
+            Map[target] = "E" #XXX
             break
           }
         }
@@ -178,7 +178,14 @@ END {
     
     for(j=0; j<dists[i]; j++){
 
+      do_turn = turn[facing, coord]
+
       coord = connection[facing, coord]
+
+      facing += do_turn
+
+      if(facing > 3) facing = 0
+      if(facing < 0) facing = 3
 
       if(facing == 0) Map[coord] = ">"
       if(facing == 1) Map[coord] = "v"
@@ -186,7 +193,7 @@ END {
       if(facing == 3) Map[coord] = "^"
 
       split(coord, xy, SUBSEP)
-      print facing, xy[1], xy[2]
+      print facing, do_turn, xy[1], xy[2]
 
     }
 
