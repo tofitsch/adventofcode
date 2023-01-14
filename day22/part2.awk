@@ -92,7 +92,8 @@ func fold(fold_type){
       else if(fold_type == 3){
         offset = ((i % 2 ? x : y) - 1) % side_length
         target = neighbor(i, -side_length, x SUBSEP y)
-        target = neighbor((i + (mirror ? 3 : 1)) % 4, (i + (mirror ? 3 : 1)) % 4 > 1 ? -(2*(1-offset) + 1) + 2*side_length : -(2*offset + 1) + 3*side_length, target)
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, ((i + (mirror ? 3 : 1)) % 4 > 1 ? -2*(side_length-offset) + 1 : -2*offset - 1) + 3*side_length, target)
+        if(x==1 && y==12) print i, x, y, target, (i + (mirror ? 3 : 1)) % 4, testA, testB, y - (testA + testB)
         if(edge[i, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, 1, target)] !~ "\\.|#"){
           edge[coord] = target
           turn[coord] = 2
