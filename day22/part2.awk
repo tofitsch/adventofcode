@@ -183,7 +183,15 @@ func fold(fold_type){
       }
 
       else if(fold_type == 9){
-        #TODO
+        target = neighbor(i, -3*side_length + 1, x SUBSEP y)
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, 3*side_length, target)
+        if(edge[(i + 2) % 4, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
+          edge[coord] = target
+          edge[(i + 2) % 4, target] = x SUBSEP y
+#          print "fold I", x, y, target, turn[coord] #XXX
+          Map[x, y] = "I" #XXX
+          Map[target] = "I" #XXX
+        }
       }
 
     }
@@ -254,10 +262,10 @@ END {
 
       facing %= 4
 
-#      if(facing == 0) Map[coord] = ">"
-#      if(facing == 1) Map[coord] = "v"
-#      if(facing == 2) Map[coord] = "<"
-#      if(facing == 3) Map[coord] = "^"
+      if(facing == 0) Map[coord] = ">"
+      if(facing == 1) Map[coord] = "v"
+      if(facing == 2) Map[coord] = "<"
+      if(facing == 3) Map[coord] = "^"
 
       #split(coord, xy, SUBSEP)
       #print facing, xy[1], xy[2]
@@ -271,12 +279,12 @@ END {
 
   }
 
-  for(y=1; y<=y_max; y++){
-    for(x=1; x<=x_max; x++){
-      printf Map[x, y]
-    }
-    print ""
-  }
+#  for(y=1; y<=y_max; y++){
+#    for(x=1; x<=x_max; x++){
+#      printf Map[x, y]
+#    }
+#    print ""
+#  }
 
   split(coord, xy, SUBSEP)
 #  print xy[1], xy[2], facing
