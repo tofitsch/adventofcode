@@ -77,9 +77,9 @@ func fold(fold_type){
           target = neighbor((i + (mirror ? 3 : 1)) % 4, 1, target)
           if(edge[(i + (mirror ? 1 : 3)) % 4, target] == 1 && map[target] ~ "\\.|#"){
             edge[coord] = target
-            turn[coord] = mirror ? -1 : 1 #TODO
+            turn[coord] = mirror ? 3 : 1 #TODO
             edge[(i + (mirror ? 1 : 3)) % 4, target] = x SUBSEP y
-            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? -1 : 1 #TODO
+            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 3 : 1 #TODO
 #            print "fold B"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "B" #XXX
             Map[target] = "B" #XXX
@@ -116,9 +116,9 @@ func fold(fold_type){
           target = neighbor((i + (mirror ? 3 : 1)) % 4, 1, target)
           if(edge[(i + (mirror ? 1 : 3)) % 4, target] == 1 && map[target] ~ "\\.|#"){
             edge[coord] = target
-            turn[coord] = mirror ? -1 : 1 #TODO
+            turn[coord] = mirror ? 3 : 1 #TODO
             edge[(i + (mirror ? 1 : 3)) % 4, target] = x SUBSEP y
-            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? -1 : 1 #TODO
+            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 3 : 1 #TODO
 #            print "fold E"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "E" #XXX
             Map[target] = "E" #XXX
@@ -143,6 +143,14 @@ func fold(fold_type){
           Map[x, y] = "G" #XXX
           Map[target] = "G" #XXX
         }
+      }
+
+      else if(fold_type == 8){
+        #TODO
+      }
+
+      else if(fold_type == 9){
+        #TODO
       }
 
     }
@@ -209,8 +217,7 @@ END {
 
       if(coord != prev_coord) facing += turn[facing, prev_coord]
 
-      if(facing > 3) facing = 0
-      if(facing < 0) facing = 3
+      facing %= 4
 
       if(facing == 0) Map[coord] = ">"
       if(facing == 1) Map[coord] = "v"
@@ -222,11 +229,10 @@ END {
 
     }
 
-    if(turns[i+1] == "R") facing++
-    if(turns[i+1] == "L") facing--
+    if(turns[i+1] == "R") facing += 1
+    if(turns[i+1] == "L") facing += 3
 
-    if(facing > 3) facing = 0
-    if(facing < 0) facing = 3
+    facing %= 4
 
   }
 
