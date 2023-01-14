@@ -140,7 +140,22 @@ func fold(fold_type){
       }
 
       else if(fold_type == 6){
-        #TODO
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, -2*side_length + 1, x SUBSEP y)
+        target = neighbor(i, -2*side_length + 1, target)
+        for(j=0; j<side_length; j++){
+          target = neighbor(i, -1, target)
+          target = neighbor((i + (mirror ? 3 : 1)) % 4, -1, target)
+          if(edge[(i + (mirror ? 1 : 3)) % 4, target] == 1 && map[target] ~ "\\.|#"){
+            edge[coord] = target
+            turn[coord] = mirror ? 3 : 1 #TODO
+            edge[(i + (mirror ? 1 : 3)) % 4, target] = x SUBSEP y
+            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 1 : 3 #TODO
+#            print "fold F"mirror, x, y, target, turn[coord] #XXX
+            Map[x, y] = "F" #XXX
+            Map[target] = "F" #XXX
+            break
+          }
+        }
       }
 
       else if(fold_type == 7){
