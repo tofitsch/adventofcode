@@ -79,7 +79,7 @@ func fold(fold_type){
             edge[coord] = target
             turn[coord] = mirror ? 3 : 1 #TODO
             edge[(i + (mirror ? 1 : 3)) % 4, target] = x SUBSEP y
-            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 3 : 1 #TODO
+            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 1 : 3 #TODO
 #            print "fold B"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "B" #XXX
             Map[target] = "B" #XXX
@@ -118,7 +118,7 @@ func fold(fold_type){
             edge[coord] = target
             turn[coord] = mirror ? 3 : 1 #TODO
             edge[(i + (mirror ? 1 : 3)) % 4, target] = x SUBSEP y
-            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 3 : 1 #TODO
+            turn[(i + (mirror ? 1 : 3)) % 4, target] = mirror ? 1 : 3 #TODO
 #            print "fold E"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "E" #XXX
             Map[target] = "E" #XXX
@@ -209,6 +209,8 @@ END {
 
   for(i in dists){
     
+#    if(i == 141) break #XXX
+    
     for(j=0; j<dists[i]; j++){
 
       prev_coord = coord
@@ -224,8 +226,8 @@ END {
       if(facing == 2) Map[coord] = "<"
       if(facing == 3) Map[coord] = "^"
 
-      split(coord, xy, SUBSEP)
-      print facing, xy[1], xy[2]
+      #split(coord, xy, SUBSEP)
+      #print facing, xy[1], xy[2]
 
     }
 
