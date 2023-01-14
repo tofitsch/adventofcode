@@ -1,6 +1,6 @@
 #!/bin/awk
 
-# all 11 possible cube nets (modulo rotations and reflections):
+# all 11 valid cube nets (modulo rotations and reflections):
 #
 #                                                     X
 #  XXX   XX   XX   XX   X    X     X    X   XX    X   X
@@ -10,14 +10,14 @@
 #
 #  3x4                                               2x5
 #
-# all 8 possible folds (modulo rotations and reflections):
+# all 9 valid folds (modulo rotations and reflections):
 #
-#  1   2    3    4    5     6     7     8
-#    |    |    |    |     |     |     |   <
-#  v |    |    |  > |   < |     |   v |
-#    |    |  > |    |     |   v |     |
-#    |  ^ |    |    |     |     |     |
-#  v | >  | <  | v  | v   | <   | v   | <
+#  1   2    3    4    5     6     7     8     9
+#    |    |    |    |     |     |     |   < |
+#  v |    |    |  > |   < |     |   v |     |    <
+#    |    |  > |    |     |   v |     |     |
+#    |  ^ |    |    |     |     |     |     |
+#  v | >  | <  | v  | v   | <   | v   | <   | <
 
 BEGIN {FS=""}
 
@@ -59,7 +59,7 @@ func fold(fold_type){
       if(edge[coord] != 1 || x < 1 || y < 1) continue
 
       if(fold_type == 1){
-        target = neighbor(i, -4 * side_length + 1, x SUBSEP y)
+        target = neighbor(i, -4*side_length + 1, x SUBSEP y)
         if(edge[(i + 2) % 4, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
           edge[coord] = target
           turn[coord] = 2
@@ -128,6 +128,24 @@ func fold(fold_type){
         }
       }
 
+      else if(fold_type == 6){
+        #TODO
+      }
+
+      else if(fold_type == 7){
+        target = neighbor(i, -4*side_length + 1, x SUBSEP y)
+        target = neighbor((i + (mirror ? 3 : 1)) % 4, 2*side_length, target)
+        if(edge[(i + 2) % 4, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
+          edge[coord] = target
+          turn[coord] = 2
+          edge[(i + 2) % 4, target] = x SUBSEP y
+          turn[(i + 2) % 4, target] = 2
+          print "fold G", x, y, target, turn[coord] #XXX
+          Map[x, y] = "G" #XXX
+          Map[target] = "G" #XXX
+        }
+      }
+
     }
 
   }
@@ -192,13 +210,13 @@ END {
       if(facing > 3) facing = 0
       if(facing < 0) facing = 3
 
-#      if(facing == 0) Map[coord] = ">"
-#      if(facing == 1) Map[coord] = "v"
-#      if(facing == 2) Map[coord] = "<"
-#      if(facing == 3) Map[coord] = "^"
-#
-#      split(coord, xy, SUBSEP)
-#      print facing, do_turn, xy[1], xy[2]
+      if(facing == 0) Map[coord] = ">"
+      if(facing == 1) Map[coord] = "v"
+      if(facing == 2) Map[coord] = "<"
+      if(facing == 3) Map[coord] = "^"
+
+      split(coord, xy, SUBSEP)
+      print facing, do_turn, xy[1], xy[2]
 
     }
 
@@ -210,15 +228,16 @@ END {
 
   }
 
-  split(coord, xy, SUBSEP)
-#  print xy[1], xy[2], facing
-  print 1e3 * xy[2] + 4 * xy[1] + facing
-
   for(y=1; y<=y_max; y++){
     for(x=1; x<=x_max; x++){
       printf Map[x, y]
     }
     print ""
   }
+
+  split(coord, xy, SUBSEP)
+  print xy[1], xy[2], facing
+  print 1e3 * xy[2] + 4 * xy[1] + facing
+
 
 }
