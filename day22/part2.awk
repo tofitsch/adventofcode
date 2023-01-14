@@ -61,9 +61,7 @@ func fold(fold_type){
         target = neighbor(i, -4*side_length + 1, x SUBSEP y)
         if(edge[(i + 2) % 4, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
           edge[coord] = target
-          turn[coord] = 2
           edge[(i + 2) % 4, target] = x SUBSEP y
-          turn[(i + 2) % 4, target] = 2
 #          print "fold A", x, y, target, turn[coord] #XXX
           Map[x, y] = "A" #XXX
           Map[target] = "A" #XXX
@@ -92,7 +90,7 @@ func fold(fold_type){
         offset = ((i % 2 ? x : y) - 1) % side_length
         target = neighbor(i, -side_length, x SUBSEP y)
         target = neighbor((i + (mirror ? 3 : 1)) % 4, ((i + (mirror ? 3 : 1)) % 4 > 1 ? -2*(side_length-offset) + 1 : -2*offset - 1) + 3*side_length, target)
-        if(x==1 && y==12) print i, x, y, target, (i + (mirror ? 3 : 1)) % 4, testA, testB, y - (testA + testB)
+#        if(x==1 && y==12) print i, x, y, target, (i + (mirror ? 3 : 1)) % 4, testA, testB, y - (testA + testB)
         if(edge[i, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, 1, target)] !~ "\\.|#"){
           edge[coord] = target
           turn[coord] = 2
@@ -136,9 +134,7 @@ func fold(fold_type){
         target = neighbor((i + (mirror ? 3 : 1)) % 4, 2*side_length, target)
         if(edge[(i + 2) % 4, target] == 1 && map[target] ~ "\\.|#" && map[neighbor(i, -1, target)] !~ "\\.|#"){
           edge[coord] = target
-          turn[coord] = 2
           edge[(i + 2) % 4, target] = x SUBSEP y
-          turn[(i + 2) % 4, target] = 2
 #          print "fold G", x, y, target, turn[coord] #XXX
           Map[x, y] = "G" #XXX
           Map[target] = "G" #XXX
@@ -209,7 +205,7 @@ END {
 
   for(i in dists){
     
-#    if(i == 141) break #XXX
+#    if(i == 3) break #XXX
     
     for(j=0; j<dists[i]; j++){
 
@@ -238,15 +234,15 @@ END {
 
   }
 
-  for(y=1; y<=y_max; y++){
-    for(x=1; x<=x_max; x++){
-      printf Map[x, y]
-    }
-    print ""
-  }
+#  for(y=1; y<=y_max; y++){
+#    for(x=1; x<=x_max; x++){
+#      printf Map[x, y]
+#    }
+#    print ""
+#  }
 
   split(coord, xy, SUBSEP)
-  print xy[1], xy[2], facing
+#  print xy[1], xy[2], facing
   print 1e3 * xy[2] + 4 * xy[1] + facing
 
 
