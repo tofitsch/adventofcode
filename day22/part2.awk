@@ -92,7 +92,7 @@ func fold(fold_type){
         if(edge[target] == 0 && map[target] ~ "\\.|#" && map[neighbor(i, 1, target)] !~ "\\.|#"){
           edge[coord] = target
           turn[coord] = 2
-          edge[target] = coord
+          edge[target] = x SUBSEP y
           turn[target] = 2
           print "fold C"mirror, x, y, target, turn[coord] #XXX
           Map[x, y] = "C" #XXX
@@ -113,7 +113,7 @@ func fold(fold_type){
           if(edge[target] == 0 && map[target] ~ "\\.|#"){
             edge[coord] = target
             turn[coord] = mirror ? -1 : 1 #TODO
-            edge[target] = coord
+            edge[target] = x SUBSEP y
             turn[target] = mirror ? -1 : 1 #TODO
             print "fold E"mirror, x, y, target, turn[coord] #XXX
             Map[x, y] = "E" #XXX
@@ -187,13 +187,13 @@ END {
       if(facing > 3) facing = 0
       if(facing < 0) facing = 3
 
-      if(facing == 0) Map[coord] = ">"
-      if(facing == 1) Map[coord] = "v"
-      if(facing == 2) Map[coord] = "<"
-      if(facing == 3) Map[coord] = "^"
-
-      split(coord, xy, SUBSEP)
-      print facing, do_turn, xy[1], xy[2]
+#      if(facing == 0) Map[coord] = ">"
+#      if(facing == 1) Map[coord] = "v"
+#      if(facing == 2) Map[coord] = "<"
+#      if(facing == 3) Map[coord] = "^"
+#
+#      split(coord, xy, SUBSEP)
+#      print facing, do_turn, xy[1], xy[2]
 
     }
 
