@@ -44,7 +44,6 @@ func neighbor(dir, dist, coord){
 func fold(fold_type){
 
   for(coord in edge){
-#    if(x<0 || y<0) print "TEST", i, x, y
 
     split(coord, ixy, SUBSEP)
 
@@ -65,7 +64,7 @@ func fold(fold_type){
           turn[coord] = 2
           edge[(i + 2) % 4, target] = x SUBSEP y
           turn[(i + 2) % 4, target] = 2
-          print "fold A", x, y, target, turn[coord] #XXX
+#          print "fold A", x, y, target, turn[coord] #XXX
           Map[x, y] = "A" #XXX
           Map[target] = "A" #XXX
         }
@@ -140,7 +139,7 @@ func fold(fold_type){
           turn[coord] = 2
           edge[(i + 2) % 4, target] = x SUBSEP y
           turn[(i + 2) % 4, target] = 2
-          print "fold G", x, y, target, turn[coord] #XXX
+#          print "fold G", x, y, target, turn[coord] #XXX
           Map[x, y] = "G" #XXX
           Map[target] = "G" #XXX
         }
@@ -167,7 +166,10 @@ END {
 
         connection[i, x, y] = neighbor(i, 1, x SUBSEP y)
 
-        if(map[connection[i, x, y]] !~ "\\.|#") edge[i, x, y] = 1
+        if(map[connection[i, x, y]] !~ "\\.|#"){
+          edge_const[i, x, y] = 1
+          edge[i, x, y] = 1
+        }
 
       }
     }
@@ -175,7 +177,7 @@ END {
 
   for(f=1; f<=9; f++) fold(f)
 
-  for(coord in edge) connection[coord] = edge[coord]
+  for(coord in edge_const) connection[coord] = edge[coord]
 
   for(y=1; y<=y_max; y++){
     for(x=1; x<=x_max; x++){
@@ -216,7 +218,7 @@ END {
       if(facing == 3) Map[coord] = "^"
 
       split(coord, xy, SUBSEP)
-      print facing, do_turn, xy[1], xy[2]
+      print facing, xy[1], xy[2]
 
     }
 
