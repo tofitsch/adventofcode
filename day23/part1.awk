@@ -3,8 +3,8 @@
 BEGIN {FS = ""}
 
 func plot(){
-  for(x=x_min; x<=x_max; x++){
-    for(y=y_min; y<=y_max; y++) printf map[x, y] == 1 ? "#" : "."
+  for(y=y_min; y<=y_max; y++){
+    for(x=x_min; x<=x_max; x++) printf map[x, y] == 1 ? "#" : "."
     print ""
   }
   print ""
@@ -13,14 +13,14 @@ func plot(){
 func neighbor(i, x, y){
 
   switch(i % 8){
-    case 0: return x   SUBSEP y+1 ; break
-    case 1: return x+1 SUBSEP y+1 ; break
+    case 0: return x   SUBSEP y-1 ; break
+    case 1: return x+1 SUBSEP y-1 ; break
     case 2: return x+1 SUBSEP y   ; break
-    case 3: return x+1 SUBSEP y-1 ; break
-    case 4: return x   SUBSEP y-1 ; break
-    case 5: return x-1 SUBSEP y-1 ; break
+    case 3: return x+1 SUBSEP y+1 ; break
+    case 4: return x   SUBSEP y+1 ; break
+    case 5: return x-1 SUBSEP y+1 ; break
     case 6: return x-1 SUBSEP y   ; break
-    case 7: return x-1 SUBSEP y+1 ; break
+    case 7: return x-1 SUBSEP y-1 ; break
   }
 
 }
@@ -29,25 +29,30 @@ func neighbor(i, x, y){
 
 END {
 
-  plot()
-
+  x_min = 1
+  y_min = 1
   x_max = NF
   y_max = NR
 
-  for(r=0; r<10; r++){
+  plot()
+
+  for(r=0; r<3; r++){
 
     for(x=x_min; x<=x_max; x++){
       for(y=y_min; y<=y_max; y++){
+        
+        if(map[x, y] != 1) continue
 
         for(i=0; i<8; i++) neighbors += map[neighbor(i, x, y)]
         if(neighbors == 0) continue
 
         for(d=0; d<4; d++){
           target = neighbor(dir + 2*d, x, y)
-          if( map[target]\
+          if(map[target] \
            + map[neighbor(dir + 2*d + 1, x, y)] \
-           + map[neighbor(dir + 2*d - 1 , x, y)] == 0){
+           + map[neighbor(dir + 2*d + 7, x, y)] == 0){
              proposed[x, y] = target
+             print x, y, target
              targeted[target]++
              break
           }
@@ -97,5 +102,3 @@ END {
   print empty
 
 }
-
-
