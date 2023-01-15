@@ -2,14 +2,6 @@
 
 BEGIN {FS = ""}
 
-func plot(){
-  for(y=y_min; y<=y_max; y++){
-    for(x=x_min; x<=x_max; x++) printf map[x, y] == 1 ? "#" : "."
-    print ""
-  }
-  print ""
-}
-
 func neighbor(i, j, x, y){
   
   switch(1 + 3*(i % 4) + j){
@@ -43,8 +35,6 @@ END {
   x_max = NF
   y_max = NR
 
-  plot()
-
   for(r=0; r<10; r++){
 
     for(x=x_min; x<=x_max; x++){
@@ -65,9 +55,13 @@ END {
           if(map[target] \
            + map[neighbor(dir + d, +1, x, y)] \
            + map[neighbor(dir + d, -1, x, y)] == 0){
-             print x, y, target, d
              proposed[x, y] = target
              targeted[target]++
+             split(target, xy, SUBSEP)
+             if(xy[1] > x_max) x_max = xy[1]
+             if(xy[2] > y_max) y_max = xy[2]
+             if(xy[1] < x_min) x_min = xy[1]
+             if(xy[2] < y_min) y_min = xy[2]
              break
           }
         }
@@ -86,15 +80,8 @@ END {
 
     dir = (dir + 1) % 4
 
-    x_min--
-    y_min--
-    x_max++
-    y_max++
-
     delete targeted
     delete proposed
-
-    plot()
 
   }
 
@@ -103,8 +90,8 @@ END {
       if(map[x, y] == 1){
         if(x > x_max_rect) x_max_rect = x
         if(y > y_max_rect) y_max_rect = y
-        if(x < x_min_rect || x_min_rect == x_min) x_min_rect = x
-        if(y < y_min_rect || y_min_rect == y_max) y_min_rect = y
+        if(x < x_min_rect) x_min_rect = x
+        if(y < y_min_rect) y_min_rect = y
       }
     }
   }

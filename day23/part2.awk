@@ -2,14 +2,6 @@
 
 BEGIN {FS = ""}
 
-func plot(){
-  for(y=y_min; y<=y_max; y++){
-    for(x=x_min; x<=x_max; x++) printf map[x, y] == 1 ? "#" : "."
-    print ""
-  }
-  print ""
-}
-
 func neighbor(i, j, x, y){
   
   switch(1 + 3*(i % 4) + j){
@@ -43,8 +35,6 @@ END {
   x_max = NF
   y_max = NR
 
-  #plot()
-
   do{
     
     n_moves = 0
@@ -67,7 +57,6 @@ END {
           if(map[target] \
            + map[neighbor(dir + d, +1, x, y)] \
            + map[neighbor(dir + d, -1, x, y)] == 0){
-             #print x, y, target, d
              proposed[x, y] = target
              targeted[target]++
              n_moves++
@@ -96,10 +85,6 @@ END {
 
     delete targeted
     delete proposed
-
-    if(ctr % 100 == 0) plot()
-
-    print " > "ctr, n_moves
 
     ctr++
 
