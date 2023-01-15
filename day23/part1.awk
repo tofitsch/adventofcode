@@ -3,8 +3,8 @@
 BEGIN {FS = ""}
 
 func plot(){
-  for(x=1; x<=NF; x++){
-    for(y=1; y<=NR; y++) printf map[x, y]
+  for(x=x_min; x<=x_max; x++){
+    for(y=y_min; y<=y_max; y++) printf map[x, y] == 1 ? "#" : "."
     print ""
   }
   print ""
@@ -31,10 +31,13 @@ END {
 
   plot()
 
+  x_max = NF
+  y_max = NR
+
   for(r=0; r<10; r++){
 
-    for(x=1; x<=NF; x++){
-      for(y=1; y<=NR; y++){
+    for(x=x_min; x<=x_max; x++){
+      for(y=y_min; y<=y_max; y++){
 
         for(i=0; i<8; i++) neighbors += map[neighbor(i, x, y)]
         if(neighbors == 0) continue
@@ -53,9 +56,9 @@ END {
       }
     }
 
-    for(x=1; x<=NF; x++){
-      for(y=1; y<=NR; y++){
-        if(targeted[proposed[x, y]] == 1){
+    for(x=x_min; x<=x_max; x++){
+      for(y=y_min; y<=y_max; y++){
+        if(map[x, y] == 1 && targeted[proposed[x, y]] == 1){
           map[x, y] = 0
           map[proposed[x, y]] = 1
         }
@@ -63,25 +66,32 @@ END {
     }
 
     dir = (dir + 2) % 8
+
+    x_min--
+    y_min--
+    x_max++
+    y_max++
+
     delete targeted
+    delete proposed
 
     plot()
 
   }
 
-  for(x=1; x<=NF; x++){
-    for(y=1; y<=NR; y++){
+  for(x=x_min; x<=x_max; x++){
+    for(y=y_min; y<=y_max; y++){
       if(map[x, y] == 1){
-        if(x > x_max) x_max = x
-        if(y > y_max) y_max = y
-        if(x < x_min && x_min < 1) x_min = x
-        if(y < y_min && y_min < 1) y_min = y
+        if(x > x_max_rect) x_max_rect = x
+        if(y > y_max_rect) y_max_rect = y
+        if(x < x_min_rect || x_min_rect == x_min) x_min_rect = x
+        if(y < y_min_rect || y_min_rect == y_max) y_min_rect = y
       }
     }
   }
 
-  for(x=x_min; x<=x_max; x++)
-    for(y=y_min; y<=y_max; y++)
+  for(x=x_min_rect; x<=x_max_rect; x++)
+    for(y=y_min_rect; y<=y_max_rect; y++)
       if(map[x, y] == 0) empty ++
 
   print empty
