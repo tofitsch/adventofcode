@@ -47,9 +47,9 @@ func neighbor_of_elve(i, coord){
 
 func move(){
   
+  for(b in blizz_pos) map[blizz_pos[b]] = "."
 
   for(b in blizz_pos){
-    map[blizz_pos[b]] = "."
     blizz_pos[b] = neighbor_of_blizz(blizz_dir[b], blizz_pos[b])
     map[blizz_pos[b]] = "X"
   }
@@ -61,7 +61,7 @@ func move(){
     for(d=0; d<=4; d++){
       target = neighbor_of_elve(d, elves_pos[e])
       if(map[target] == "." || map[target] == "E"){
-        if(map[target] == "."){
+        if(map[target] == "." || d == 0){
           new_elves_pos[n_elves] = target
           n_elves++
         }
@@ -98,16 +98,16 @@ func move(){
 
 END{
 
-  elves_pos[1] = 2 SUBSEP 1
-  map[elves_pos[1]] = "E"
+  elves_pos[0] = 2 SUBSEP 1
+  map[elves_pos[0]] = "E"
 
   while(map[NF-1, NR] != "E"){
-    plot()
+#    plot()
     move()
     n_moves++
   }
 
-  plot()
+#  plot()
 
   print n_moves
 
