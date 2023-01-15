@@ -102,27 +102,29 @@ END{
   map[elves_pos[0]] = "E"
 
   while(map[NF-1, NR] != "E"){
-    plot()
+#    plot()
     move()
     n_moves++
   }
 
+  for(e in elves_pos) map[elves_pos[e]] = "."
   delete elves_pos
   elves_pos[0] = NF-1 SUBSEP NR
   map[2, 1] = "."
 
   while(map[2, 1] != "E"){
-    plot()
+#    plot()
     move()
     n_moves++
   }
 
+  for(e in elves_pos) map[elves_pos[e]] = "."
   delete elves_pos
   elves_pos[0] = 2 SUBSEP 1
   map[NF-1, NR] = "."
 
   while(map[NF-1, NR] != "E"){
-    plot()
+#    plot()
     move()
     n_moves++
   }
