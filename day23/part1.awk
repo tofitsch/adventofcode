@@ -18,9 +18,9 @@ func neighbor(i, j, x, y){
     case  1: return x   SUBSEP y-1 ; break
     case  2: return x+1 SUBSEP y-1 ; break
 
-    case  3: return x+1 SUBSEP y-1 ; break
-    case  4: return x   SUBSEP y-1 ; break
-    case  5: return x-1 SUBSEP y-1 ; break
+    case  3: return x+1 SUBSEP y+1 ; break
+    case  4: return x   SUBSEP y+1 ; break
+    case  5: return x-1 SUBSEP y+1 ; break
 
     case  6: return x-1 SUBSEP y+1 ; break
     case  7: return x-1 SUBSEP y   ; break
@@ -29,8 +29,6 @@ func neighbor(i, j, x, y){
     case  9: return x+1 SUBSEP y-1 ; break
     case 10: return x+1 SUBSEP y   ; break
     case 11: return x+1 SUBSEP y+1 ; break
-
-    default: print i, "j"j; exit
 
   }
 
@@ -47,12 +45,14 @@ END {
 
   plot()
 
-  for(r=0; r<3; r++){
+  for(r=0; r<10; r++){
 
     for(x=x_min; x<=x_max; x++){
       for(y=y_min; y<=y_max; y++){
         
         if(map[x, y] != 1) continue
+
+        neighbors = 0
 
         for(i=0; i<4; i++)
           for(j=0; j<=1; j++)
@@ -65,8 +65,8 @@ END {
           if(map[target] \
            + map[neighbor(dir + d, +1, x, y)] \
            + map[neighbor(dir + d, -1, x, y)] == 0){
+             print x, y, target, d
              proposed[x, y] = target
-             #print x, y, target
              targeted[target]++
              break
           }
