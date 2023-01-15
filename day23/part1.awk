@@ -10,17 +10,28 @@ func plot(){
   print ""
 }
 
-func neighbor(i, x, y){
+func neighbor(i, j, x, y){
+  
+  switch(1 + 3*(i % 4) + j){
 
-  switch(i % 8){
-    case 0: return x   SUBSEP y-1 ; break
-    case 1: return x+1 SUBSEP y-1 ; break
-    case 2: return x+1 SUBSEP y   ; break
-    case 3: return x+1 SUBSEP y+1 ; break
-    case 4: return x   SUBSEP y+1 ; break
-    case 5: return x-1 SUBSEP y+1 ; break
-    case 6: return x-1 SUBSEP y   ; break
-    case 7: return x-1 SUBSEP y-1 ; break
+    case  0: return x-1 SUBSEP y-1 ; break
+    case  1: return x   SUBSEP y-1 ; break
+    case  2: return x+1 SUBSEP y-1 ; break
+
+    case  3: return x+1 SUBSEP y-1 ; break
+    case  4: return x   SUBSEP y-1 ; break
+    case  5: return x-1 SUBSEP y-1 ; break
+
+    case  6: return x-1 SUBSEP y+1 ; break
+    case  7: return x-1 SUBSEP y   ; break
+    case  8: return x-1 SUBSEP y-1 ; break
+
+    case  9: return x+1 SUBSEP y-1 ; break
+    case 10: return x+1 SUBSEP y   ; break
+    case 11: return x+1 SUBSEP y+1 ; break
+
+    default: print i, "j"j; exit
+
   }
 
 }
@@ -43,16 +54,19 @@ END {
         
         if(map[x, y] != 1) continue
 
-        for(i=0; i<8; i++) neighbors += map[neighbor(i, x, y)]
-        if(neighbors == 0) continue
+        for(i=0; i<4; i++)
+          for(j=0; j<=1; j++)
+            neighbors += map[neighbor(i, j, x, y)]
+
+        if(neighbors < 1) continue
 
         for(d=0; d<4; d++){
-          target = neighbor(dir + 2*d, x, y)
+          target = neighbor(dir + d, 0, x, y)
           if(map[target] \
-           + map[neighbor(dir + 2*d + 1, x, y)] \
-           + map[neighbor(dir + 2*d + 7, x, y)] == 0){
+           + map[neighbor(dir + d, +1, x, y)] \
+           + map[neighbor(dir + d, -1, x, y)] == 0){
              proposed[x, y] = target
-             print x, y, target
+             #print x, y, target
              targeted[target]++
              break
           }
@@ -70,7 +84,7 @@ END {
       }
     }
 
-    dir = (dir + 2) % 8
+    dir = (dir + 1) % 4
 
     x_min--
     y_min--
