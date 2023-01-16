@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for day in day*; do
+for day in 2022/day*; do
 
   for part in 1 2; do
 
@@ -22,7 +22,7 @@ for day in day*; do
 
     timing=$(echo $time_for_solution | awk '{print $4" + "$6}')
 
-    if [ "$day part$part" == "day10 part2" ]; then
+    if [ "$day part$part" == "2022/day10 part2" ]; then
 
       md5=$(echo $computed_solution| md5sum)
 
