@@ -15,21 +15,26 @@ for day in day*; do
       continue
     fi
 
+    {
+      IFS=$'\n' read -r -d '' time_for_solution;
+      IFS=$'\n' read -r -d '' computed_solution;
+    } < <((printf '\0%s\0' "$(time (awk -f "$day/part$part.awk" "$day/input.txt"))" 1>&2) 2>&1)
+
+    timing=$(echo $time_for_solution | awk '{print $4" + "$6}')
+
     if [ "$day part$part" == "day10 part2" ]; then
 
-      md5=$(awk -f "$day/part$part.awk" "$day/input.txt" | md5sum)
+      md5=$(echo $computed_solution| md5sum)
 
-      if [ "$md5" == "93a99521d352462fbc3a857fed6f4c94  -" ]; then
+      if [ "$md5" == "6fffc8e4a2a7b1b31cb7a9b6de5f7db0  -" ]; then
         computed_solution="EHZFZHCZ"
       else
         computed_solution="wrong md5 sum"
       fi
 
-    else
-      computed_solution=$(awk -f "$day/part$part.awk" "$day/input.txt")
     fi
 
-    echo "$day part$part: $computed_solution" 
+    echo "$day part$part : $timing : $computed_solution" 
 
     if [ "$computed_solution" != "$true_solution" ]; then
       echo "[ERROR]: Mismatch of true and computed solution:"
