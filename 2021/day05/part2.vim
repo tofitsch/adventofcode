@@ -12,7 +12,7 @@ endfunction
 let ctr = 0
 let map = {}
 
-for line in readfile('example.txt')
+for line in readfile('input.txt')
   
   let path = split(line, ',\| -> ')
 
@@ -22,8 +22,8 @@ for line in readfile('example.txt')
 
     for i in range(dist + 1)
       
-      let key  = (path[0] < path[2] ? path[0] + i : path[0] - i) . ','
-      let key .= (path[1] < path[3] ? path[1] + i : path[1] - i)
+      let key  = (str2nr(path[0]) < str2nr(path[2]) ? path[0] + i : path[0] - i) . ','
+      let key .= (str2nr(path[1]) < str2nr(path[3]) ? path[1] + i : path[1] - i)
 
       call UseMap(key)
 
@@ -49,13 +49,3 @@ for line in readfile('example.txt')
 endfor
 
 echo ctr
-
-"XXX
-echo ''
-for x in range(10)
-  for y in range(10)
-    let key = y . ',' . x
-    if has_key(map, key) | echon 'X' | else | echon '.' | endif
-  endfor
-  echo ''
-endfor
