@@ -12,21 +12,19 @@ for line in readfile('input.txt')
 
   for x in range(x_range[0], x_range[1])
     for y in range(y_range[0], y_range[1])
+
       let key = x . ',' . y
-      if has_key(map, key) | let ctr += 1 | endif
-      let map[key] = 1
+
+      if has_key(map, key)
+        if map[key] == 1 | let ctr += 1 | endif
+        let map[key] += 1
+      else
+        let map[key] = 1
+      endif
+
     endfor
   endfor
 
 endfor
 
 echo ctr
-
-"echo ''
-"for x in range(10)
-"  for y in range(10)
-"    let key = y . ',' . x
-"    if has_key(map, key) | echon 1 | else | echon 0 | endif
-"  endfor
-"  echo ''
-"endfor
