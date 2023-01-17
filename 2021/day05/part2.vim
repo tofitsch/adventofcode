@@ -1,10 +1,10 @@
-function UseMap()
+function UseMap(key)
 
-  if has_key(g:map, g:key)
-    if g:map[g:key] == 1 | let g:ctr += 1 | endif
-    let g:map[g:key] += 1
+  if has_key(g:map, a:key)
+    if g:map[a:key] == 1 | let g:ctr += 1 | endif
+    let g:map[a:key] += 1
   else
-    let g:map[g:key] = 1
+    let g:map[a:key] = 1
   endif
 
 endfunction
@@ -25,7 +25,7 @@ for line in readfile('example.txt')
       let key  = (path[0] < path[2] ? path[0] + i : path[0] - i) . ','
       let key .= (path[1] < path[3] ? path[1] + i : path[1] - i)
 
-      call UseMap()
+      call UseMap(key)
 
     endfor
 
@@ -39,7 +39,7 @@ for line in readfile('example.txt')
 
         let key = x . ',' . y
 
-        call UseMap()
+        call UseMap(key)
 
       endfor
     endfor
