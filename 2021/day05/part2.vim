@@ -1,7 +1,7 @@
 let ctr = 0
 let map = {}
 
-for line in readfile('example.txt')
+for line in readfile('input.txt')
   
   let path = split(line, ',\| -> ')
 
@@ -13,9 +13,9 @@ for line in readfile('example.txt')
     let dist = x_range[1] - x_range[0]
 
     for i in range(dist)
-
-      let key = (x_range[0] + i) . ',' . (y_range[0] + i)
-"      echo key
+      
+      let key  = (path[0] < path[2] ? path[0] + i : path[0] - i) . ','
+      let key .= (path[1] < path[3] ? path[1] + i : path[1] - i)
 
       if has_key(map, key)
         if map[key] == 1 | let ctr += 1 | endif
@@ -48,12 +48,3 @@ for line in readfile('example.txt')
 endfor
 
 echo ctr
-
-echo ''
-for x in range(10)
-  for y in range(10)
-    let key = y . ',' . x
-    if has_key(map, key) | echon 'X' | else | echon ' ' | endif
-  endfor
-  echo ''
-endfor
