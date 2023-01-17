@@ -32,12 +32,10 @@ for run in [0, 1]
     
     endfor
     
-    let gamma   = ''
+    let gamma = []
 
-    for i in counts | let gamma   .=   2 * i / n_lines | endfor
+    for i in counts | call add(gamma, 2 * i / n_lines) | endfor
   
-    let gamma   = split(gamma,   '\zs')
-    
     let j = 0
   
     for line in arr
