@@ -53,7 +53,7 @@ for n in numbers
 
   for z in range(n_boards)
     
-    if z >= n_boards | let z -= 1 | endif
+    if z >= n_boards | let z = n_boards - 1 | endif
     
     let skip = 0
 
