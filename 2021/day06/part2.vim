@@ -3,7 +3,7 @@ let fish = split(readfile('input.txt')[0], ',')
 let aged = repeat([0], 9)
 for f in fish | let aged[f] += 1 | endfor
 
-for t in range(80 + 1)
+for t in range(256 + 1)
 
   let new_fish = aged[0]
   let aged[0] = 0
