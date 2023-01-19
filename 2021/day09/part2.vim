@@ -15,9 +15,10 @@ function! IntervalsOverlap(a, b)
 endfunction
 
 let mtx = []
+let basinareas = []
 let basinslices = []
 
-for line in readfile('example.txt')
+for line in readfile('input.txt')
 
   call add(mtx, split(line, '\zs'))
   call add(basinslices, [])
@@ -37,12 +38,12 @@ for line in readfile('example.txt')
 
 endfor
 
-echo basinslices
-
 for y in range(len(mtx))
   for x in range(len(mtx[0]))
     
     if IsLocalMinimum(x, y)
+      
+      call add(basinareas, 0)
 
       let basin = []
 
@@ -50,6 +51,7 @@ for y in range(len(mtx))
         if slice[0] <= x && slice[1] >= x
 
           call add(basin, [slice])
+          let basinareas[-1] += slice[1] - slice[0] + 1
 
           let go_on = 1
           let dir_y = 1
@@ -62,10 +64,11 @@ for y in range(len(mtx))
             call add(basin, [])
 
             for s in basin[-2]
-              if Y + dir_y >= len(basinslices) - 1 || Y + dir_y < 0 | break | endif
+              if Y + dir_y > len(basinslices) - 1 || Y + dir_y < 0 | break | endif
               for S in basinslices[Y + dir_y]
                if IntervalsOverlap(s, S)
                  call add(basin[-1], S)
+                 let basinareas[-1] += S[1] - S[0] + 1
                  let go_on = 1
                endif
               endfor
@@ -74,25 +77,25 @@ for y in range(len(mtx))
             let Y += dir_y
 
             if dir_y == 1
-              if Y == len(basinslices) || Y < 0 | let go_on = 0 | endif
-                if go_on == 0
+              if go_on == 0 || Y == len(basinslices) - 1 || Y == 0
                 let go_on = 1
                 let dir_y = -1
-                let Y = y - 1
+                let Y = y
                 call filter(basin, 'len(v:val) > 0')
                 call reverse(basin)
               endif
             endif
-
 
           endwhile
 
         endif
       endfor
 
-      echo x y basin
-
     endif
 
   endfor
 endfor
+
+call sort(basinareas, 'N')
+
+echo  basinareas[-3] * basinareas[-2] * basinareas[-1]
