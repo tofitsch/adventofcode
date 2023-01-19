@@ -1,6 +1,8 @@
-let segmentation = ['012456', '25', '02346', '02355', '1235', '01356', '013456', '025', '0123456', '012356']  
+let segmentation = ['012456', '25', '02346', '02356', '1235', '01356', '013456', '025', '0123456', '012356']  
 
-for line in readfile('example.txt')
+let sum = 0
+
+for line in readfile('input.txt')
   
   let words = split(line, ' | \| ')
 
@@ -32,8 +34,6 @@ for line in readfile('example.txt')
     if char_frequency[i] == 7 && index(code, i) < 0 | let code[3] = i | endif
   endfor
 
-  echo code
-
   let result = ''
 
   for w in range(10, 13)
@@ -41,17 +41,17 @@ for line in readfile('example.txt')
     let decoded = []
 
     for c in split(words[w], '\zs')
-      call add(decoded, code[char2nr(c) - 97])
+      call add(decoded, index(code, char2nr(c) - 97))
     endfor
 
     let segments = join(sort(decoded), '')
-
-    echo segments
 
     let result .= index(segmentation, segments)
 
   endfor
 
-  echo '> ' result
+  let sum += str2nr(result)
 
 endfor
+
+echo sum
