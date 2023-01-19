@@ -39,9 +39,9 @@ endfor
 
 echo basinslices
 
-for x in range(len(mtx[0]))
-  for y in range(len(mtx))
-
+for y in range(len(mtx))
+  for x in range(len(mtx[0]))
+    
     if IsLocalMinimum(x, y)
 
       let basin = []
@@ -51,34 +51,46 @@ for x in range(len(mtx[0]))
 
           call add(basin, [slice])
 
-          let added_slice = 1
+          let go_on = 1
+          let dir_y = 1
           let Y = y
 
-          while added_slice > 0
+          while go_on == 1
             
+            let go_on = 0
+
             call add(basin, [])
 
-            if Y >= len(basinslices) - 1 | break | endif
-
-            let added_slice = 0
-
             for s in basin[-2]
-              for S in basinslices[Y + 1]
+              if Y + dir_y >= len(basinslices) - 1 || Y + dir_y < 0 | break | endif
+              for S in basinslices[Y + dir_y]
                if IntervalsOverlap(s, S)
                  call add(basin[-1], S)
-                 let added_slice = 1
+                 let go_on = 1
                endif
               endfor
             endfor
 
-            let Y += 1
+            let Y += dir_y
+
+            if dir_y == 1
+              if Y == len(basinslices) || Y < 0 | let go_on = 0 | endif
+                if go_on == 0
+                let go_on = 1
+                let dir_y = -1
+                let Y = y - 1
+                call filter(basin, 'len(v:val) > 0')
+                call reverse(basin)
+              endif
+            endif
+
 
           endwhile
 
         endif
       endfor
 
-      echo y basin
+      echo x y basin
 
     endif
 
