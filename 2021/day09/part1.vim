@@ -3,7 +3,11 @@ set nocp
 let sum = 0
 let mtx = []
 
-for line in readfile('input.txt') |  call add(mtx, split(line, '\zs')) | endfor
+for line in readfile('input.txt')
+  call add(mtx, split(line, '\zs'))
+  let test = match(line, '[0-8]+')
+  echo test
+endfor
 
 for x in range(len(mtx[0]))
   for y in range(len(mtx))
