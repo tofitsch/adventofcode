@@ -1,22 +1,20 @@
 set nocp
 
+function! IsLocalMinimum(x, y)
+  return (a:x == 0                 || g:mtx[a:y][a:x - 1] > g:mtx[a:y][a:x]) &&
+       \ (a:x == len(g:mtx[0]) - 1 || g:mtx[a:y][a:x + 1] > g:mtx[a:y][a:x]) &&
+       \ (a:y == 0                 || g:mtx[a:y - 1][a:x] > g:mtx[a:y][a:x]) &&
+       \ (a:y == len(g:mtx)    - 1 || g:mtx[a:y + 1][a:x] > g:mtx[a:y][a:x])
+endfunction
+
 let sum = 0
 let mtx = []
 
-for line in readfile('input.txt')
-  call add(mtx, split(line, '\zs'))
-  let test = match(line, '[0-8]+')
-  echo test
-endfor
+for line in readfile('input.txt') | call add(mtx, split(line, '\zs')) | endfor
 
 for x in range(len(mtx[0]))
   for y in range(len(mtx))
-    if (x == 0               || mtx[y][x - 1] > mtx[y][x]) &&
-     \ (x == len(mtx[0]) - 1 || mtx[y][x + 1] > mtx[y][x]) &&
-     \ (y == 0               || mtx[y - 1][x] > mtx[y][x]) &&
-     \ (y == len(mtx)    - 1 || mtx[y + 1][x] > mtx[y][x])
-      let sum += mtx[y][x] + 1
-    endif
+    if IsLocalMinimum(x, y) | let sum += mtx[y][x] + 1 | endif
   endfor
 endfor
 
