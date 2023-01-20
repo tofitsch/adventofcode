@@ -38,9 +38,9 @@ for year in 2021; do
         echo $output > tmp
         if [ "$USER" == "runner" ]; then #because of different warnings on git CI than locally...
           computed_solution="$(awk 'BEGIN{FS=""}; {for(i=NF-43; i>94; i--) printf $i}' tmp | rev)"
-          t_r=$(echo $output | cut -d' ' -f18)
-          t_u=$(echo $output | cut -d' ' -f20)
-          t_s=$(echo $output | cut -d' ' -f22)
+          t_r=$(echo $output | cut -d' ' -f20)
+          t_u=$(echo $output | cut -d' ' -f22)
+          t_s=$(echo $output | cut -d' ' -f24)
         else
           computed_solution=$(awk 'BEGIN{FS=""}; {for(i=NF-79; i>44; i--) printf $i}' tmp | rev)
           t_r=$(echo $output | cut -d' ' -f13)
