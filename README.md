@@ -13,13 +13,16 @@ The scripts return just the solution, no other printout.
 They are written in a different language for each year.
 Here is how to run them:
 
-* 2022: AWK
+`verify_solutions.sh` runs over all solutions and prints out their running time.
+It also runs as a [github CI](https://github.com/tofitsch/adventofcode/actions/workflows/verify_solutions.yml) and fails it if one of the solutions is wrong.
+
+## 2022: AWK
 
 ```shell
 awk -f part1.awk input.txt
 ```
 
-* 2021: vimscript
+## 2021: vimscript
 
 ```shell
 vim --cmd ':source part1.vim | quit'
