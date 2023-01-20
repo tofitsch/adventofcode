@@ -1,7 +1,9 @@
 #!/bin/bash
 
-echo "year  day  part  : usertime + systime  : solution"
-echo "-------------------------------------------------"
+      2021 day01 part1 : 0m2.029s 0m0.009s 0m0.015s : 1233
+
+echo "year  day  part  : realtime usertime systime  : solution"
+echo "--------------------------------------------------------"
 
 #for year in 2021 2022; do # 2022 disabled for now because some solutions are very slow
 for year in 2021; do
@@ -38,16 +40,18 @@ for year in 2021; do
         echo $output > tmp
         if [ "$USER" == "runner" ]; then #because of different warnings on git CI than locally...
           computed_solution="$(awk 'BEGIN{FS=""}; {for(i=NF-43; i>94; i--) printf $i}' tmp | rev)"
+          t_r=$(echo $output | cut -d' ' -f18)
           t_u=$(echo $output | cut -d' ' -f20)
           t_s=$(echo $output | cut -d' ' -f22)
         else
           computed_solution=$(awk 'BEGIN{FS=""}; {for(i=NF-79; i>44; i--) printf $i}' tmp | rev)
+          t_r=$(echo $output | cut -d' ' -f13)
           t_u=$(echo $output | cut -d' ' -f15)
           t_s=$(echo $output | cut -d' ' -f17)
         fi
         rm tmp
 
-        timing=$(echo $t_u $t_s | awk '{print $1" + "$2}')
+        timing=$(echo $t_r $t_u $t_s)
 
         cd ../..
       fi
