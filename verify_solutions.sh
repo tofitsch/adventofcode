@@ -1,7 +1,5 @@
 #!/bin/bash
 
-      2021 day01 part1 : 0m2.029s 0m0.009s 0m0.015s : 1233
-
 echo "year  day  part  : realtime usertime systime  : solution"
 echo "--------------------------------------------------------"
 
