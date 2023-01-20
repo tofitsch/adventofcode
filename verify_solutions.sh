@@ -1,6 +1,9 @@
 #!/bin/bash
 
-#for year in 2021 2022; do
+echo "year  day  part  : usertime + systime  : solution"
+echo "-------------------------------------------------"
+
+#for year in 2021 2022; do # 2022 disabled for now because some solutions are very slow
 for year in 2021; do
   for day in $year/day*; do
   
@@ -24,18 +27,26 @@ for year in 2021; do
         } < <((printf '\0%s\0' "$(time (awk -f "$day/part$part.awk" "$day/input.txt"))" 1>&2) 2>&1)
         timing=$(echo $time_for_solution | awk '{print $4" + "$6}')
       else
-        # there must be a better way of doing this... but getting both timing and output for a vimscript is not easy...
+        # there must be a better way of doing this...
+        # but getting both timing and output for a vimscript is not easy...
         cd $day
 
-        test=$(((echo "X" ; time (vim --cmd ":so part$part.vim | quit")) 1>&2) 2>&1)
+        output=$(((echo "X" ; time (vim --cmd ":so part$part.vim | quit")) 1>&2) 2>&1)
 
         # horribly contrived way of stripping escape sequences:
-        echo $test > tmp
-        computed_solution=$(awk 'BEGIN{FS=""}; {for(i=NF-79; i>44; i--) printf $i}' tmp | rev)
+        # a wonder that this worked consistently so far
+        echo $output > tmp
+        if [ "$USER" == "runner" ]; then #because of different warnings on git CI than locally...
+          computed_solution="$(awk 'BEGIN{FS=""}; {for(i=NF-43; i>94; i--) printf $i}' tmp | rev)"
+          t_u=$(echo $output | cut -d' ' -f20)
+          t_s=$(echo $output | cut -d' ' -f22)
+        else
+          computed_solution=$(awk 'BEGIN{FS=""}; {for(i=NF-79; i>44; i--) printf $i}' tmp | rev)
+          t_u=$(echo $output | cut -d' ' -f15)
+          t_s=$(echo $output | cut -d' ' -f17)
+        fi
         rm tmp
 
-        t_u=$(echo $test | cut -d' ' -f15)
-        t_s=$(echo $test | cut -d' ' -f17)
         timing=$(echo $t_u $t_s | awk '{print $1" + "$2}')
 
         cd ../..
