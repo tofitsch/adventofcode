@@ -33,3 +33,9 @@ or from within vim:
 ```
 :so %
 ```
+
+## 2020 vim keystrokes
+
+```shell
+vim -c "norm `<part1.vim`" input.txt 2>/dev/null
+```
