@@ -1,1 +1,1 @@
-iall"cd0O:g/./norm @a"BsX@cl"AdTXo"bp:s/\.//g:s/#/x#/gGi0:g/x/norm G:g/x/d0"dDddOolh0"aDddo."bxddoll0"CDdd0"eDddqaqqbqG$y:g/./norm ggP@d@e@d@e@d@e@d@e?#o:g/^#\|\./norm jdd
+iall"cd0O:g/./norm @a"BsX@cl"AdTXo"bp:s/\.//g:s/#/x#/gGi0:g/x/norm G:g/x/d0"dDddOolh0"aDddo."bxddoll0"CDdd0"eDddqaqqbqG$y:g/./norm ggP@d@e@d@e@d@e@d@e?#o:g/^#\|\./norm jddiall"cd0@dkV3k:s/\n/*"fD:!echo =f:q!
