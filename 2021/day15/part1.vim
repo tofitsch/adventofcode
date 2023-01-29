@@ -13,12 +13,11 @@ let x_max = len(map)
 let y_max = len(map[0])
 
 let dijkstra = deepcopy(map)
-let visited = deepcopy(map)
+let frontier = [[0, 0]]
 
 for x in range(x_max)
   for y in range(y_max)
     let dijkstra[y][x] = inf
-    let visited[y][x] = 0
   endfor
 endfor
 
@@ -28,24 +27,24 @@ while dijkstra[y_max - 1][x_max - 1] == inf
 
   let min_dijkstra = inf
 
-  for x in range(x_max)
-    for y in range(y_max)
-      if visited[y][x] == 1 | continue | endif
-      if dijkstra[y][x] < min_dijkstra
-        let min_dijkstra = dijkstra[y][x]
-        let X = x
-        let Y = y
-      endif
-    endfor
+  for coord in frontier
+    if dijkstra[coord[0]][coord[1]] < min_dijkstra
+      let min_dijkstra = dijkstra[coord[0]][coord[1]]
+      let Y = coord[0]
+      let X = coord[1]
+    endif
   endfor
 
-  let visited[Y][X] = 1
+  unlet frontier[index(frontier, [Y, X])]
 
   for dx in [-1, 0, 1]
     for dy in [-1, 0, 1]
       if X + dx >= x_max || X + dx < 0 || Y + dy >= y_max || Y + dy < 0 || (dx != 0 && dy != 0) | continue | endif
       let new_dijkstra = dijkstra[Y][X] + map[Y + dy][X + dx]
-      if dijkstra[Y + dy][X + dx] > new_dijkstra | let dijkstra[Y + dy][X + dx] = new_dijkstra | endif
+      if dijkstra[Y + dy][X + dx] > new_dijkstra
+        if dijkstra[Y + dy][X + dx] == inf | call add(frontier, [Y + dy, X + dx]) | endif
+        let dijkstra[Y + dy][X + dx] = new_dijkstra
+      endif
     endfor
   endfor
 
