@@ -9,8 +9,8 @@ for line in readfile('input.txt')
   call add(map, row)
 endfor
 
-let x_max = len(map)
-let y_max = len(map[0])
+let y_max = len(map)
+let x_max = len(map[0])
 
 let dijkstra = deepcopy(map)
 let frontier = [[0, 0]]
