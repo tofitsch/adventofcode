@@ -1,35 +1,22 @@
 let rules = []
 
-function! ByFirst(a, b)
-  return str2nr(a:a[0]) > str2nr(a:b[0])
-endfunction
-
 for line in readfile('input.txt')
   let tokens = split(line, ' -> ')
   if len(tokens) == 1
     let str = tokens[0]
   elseif len(tokens) == 2
-    cal add(rules, tokens)
+    let c = [tokens[0][:0], substitute(tokens[1], '.', '\L&', ''), tokens[0][1:]]
+    cal add(rules, [c[0].'\zs\ze'.c[2], c[1]])
   endif
 endfor
 
 for step in range(10)
-
-  let insertions = []
-  for rule in rules
-    let matched = -1
-    while 1
-      let matched = match(str, rule[0], matched + 1)
-      if matched < 0 | break | endif
-      call add(insertions, [matched + 1, rule[1]])
-    endwhile
-  endfor
   
-  let ctr = 0
-  for insertion in  sort(insertions, 'ByFirst')
-    let str = str[:insertion[0] + ctr - 1] . insertion[1] . str[insertion[0] + ctr:]
-    let ctr += 1
+  for rule in rules
+    let str = substitute(str, rule[0], rule[1], 'g')
   endfor
+
+  let str = substitute(str, '.*', '\U&', 'g')
 
 endfor
 
