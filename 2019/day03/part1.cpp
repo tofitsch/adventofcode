@@ -12,31 +12,64 @@ class Coordinate{
     
     int x, y;
 
-    Coordinate(int X, int Y){
-
-      x = X;
-      y = Y;
-
-    }
+    Coordinate(int X, int Y): x(X), y(Y) {}
 
     pair<int, int> xy(){return {x, y};}
 
-    void translate(string direction){
+    void translate(string instruction){
+
+      char direction = instruction[0];
+      int length = stoi(instruction.substr(1));
       
-      if(direction == "U") y++;
-      if(direction == "R") x++;
-      if(direction == "D") y--;
-      if(direction == "L") x--;
+      switch(direction){
+
+        case 'U': y += length; break;
+        case 'R': x += length; break;
+        case 'D': y -= length; break;
+        case 'L': x -= length; break;
+
+      }
 
     }
 
 };
 
-vector<Coordinate> get_cable_coordinates(ifstream& in_file){
+Coordinate origin(0, 0);
+
+class Line{
+
+  public:
+    
+    Coordinate beg, end;
+
+    Line(Coordinate BEG, Coordinate END): beg(BEG), end(END) {}
+
+    Coordinate get_intersect(Line other){
+
+        if (beg.x == end.x && other.beg.y == other.end.y) {
+            // Vertical line and horizontal line
+            if (min(beg.y, end.y) <= other.beg.y && other.beg.y <= max(beg.y, end.y) &&
+                min(other.beg.x, other.end.x) <= beg.x && beg.x <= max(other.beg.x, other.end.x)) {
+                return Coordinate(beg.x, other.beg.y);
+            }
+        } else if (beg.y == end.y && other.beg.x == other.end.x) {
+            // Horizontal line and vertical line
+            if (min(beg.x, end.x) <= other.beg.x && other.beg.x <= max(beg.x, end.x) &&
+                min(other.beg.y, other.end.y) <= beg.y && beg.y <= max(other.beg.y, other.end.y)) {
+                return Coordinate(other.beg.x, beg.y);
+            }
+        }
+
+        // No intersect
+        return origin;
+
+    }
+
+};
+
+vector<Line> get_cable_segments(ifstream& in_file){
   
-  Coordinate origin(0, 0);
-  
-  vector<Coordinate> cable = {origin};
+  vector<Line> segments = {{origin, origin}};
 
   string line, field;
 
@@ -46,22 +79,19 @@ vector<Coordinate> get_cable_coordinates(ifstream& in_file){
 
   while(getline(line_stream, field, ',')){
     
-    string direction = field.substr(0, 1);
-    int length = stoi(field.substr(1));
+    Coordinate new_coord = segments.back().end;
 
-    for(int i=0; i<length; i++){
-      
-      Coordinate new_coord = cable.back();
+    new_coord.translate(field);
 
-      new_coord.translate(direction);
+    Line new_line = {segments.back().end, new_coord};
 
-      cable.push_back(new_coord);
-
-    }
+    segments.push_back(new_line);
 
   }
 
-  return cable;
+  segments.erase(segments.begin());
+
+  return segments;
 
 }
 
@@ -69,27 +99,26 @@ int main(){
   
   ifstream in_file("input.txt");
 
-  vector<Coordinate> cable[2];
+  vector<Line> cable[2];
 
-  cable[0] = get_cable_coordinates(in_file);
-  cable[1] = get_cable_coordinates(in_file);
+  cable[0] = get_cable_segments(in_file);
+  cable[1] = get_cable_segments(in_file);
 
-  vector<int> crossing_diatances;
+  vector<int> crossing_distances;
 
-  for(Coordinate c1 : cable[0]){
-    for(Coordinate c2 : cable[1]){
+  for(Line l1 : cable[0]){
+    for(Line l2 : cable[1]){
       
-      cout<<c1.x<<" "<<c1.y<<" | "<<c2.x<<" "<<c2.y<<endl;
+      Coordinate intersect = l1.get_intersect(l2);
       
-      if(c2.x == 0 && c2.y == 0) continue;
-
-      if(c1.xy() == c2.xy()) crossing_diatances.push_back(abs(c1.x) + abs(c1.y));
-
+      if(intersect.xy() != origin.xy())
+        crossing_distances.push_back(abs(intersect.x) + abs(intersect.y));
+      
     }
   }
 
-  sort(crossing_diatances.begin(), crossing_diatances.end());
+  sort(crossing_distances.begin(), crossing_distances.end());
 
-  cout<<crossing_diatances[0]<<endl;
+  cout<<crossing_distances[0]<<endl;
 
 }
