@@ -44,6 +44,8 @@ class Line{
 
     Line(Coordinate BEG, Coordinate END): beg(BEG), end(END) {}
 
+    int length(){return abs(beg.x - end.x) + abs(beg.y - end.y);}
+
     Coordinate get_intersect(Line other){
 
         if (beg.x == end.x && other.beg.y == other.end.y) {
@@ -104,21 +106,37 @@ int main(){
   cable[0] = get_cable_segments(in_file);
   cable[1] = get_cable_segments(in_file);
 
-  vector<int> crossing_distances;
+  vector<int> total_path_lengths;
+
+  int path_length[2] = {0, 0};
 
   for(Line l0 : cable[0]){
+
+    path_length[0] += l0.length();
+
+    path_length[1] = 0;
+
     for(Line l1 : cable[1]){
+
+      path_length[1] += l1.length();
       
       Coordinate intersect = l0.get_intersect(l1);
       
-      if(intersect.xy() != origin.xy())
-        crossing_distances.push_back(abs(intersect.x) + abs(intersect.y));
-      
+      if(intersect.xy() != origin.xy()){
+        
+        Line l0_to_intersect(l0.end, intersect);
+        Line l1_to_intersect(l1.end, intersect);
+
+        total_path_lengths.push_back(path_length[0] + path_length[1] - l0_to_intersect.length() - l1_to_intersect.length());
+
+      }
+
     }
+    
   }
 
-  sort(crossing_distances.begin(), crossing_distances.end());
+  sort(total_path_lengths.begin(), total_path_lengths.end());
 
-  cout<<crossing_distances[0]<<endl;
+  cout<<total_path_lengths[0]<<endl;
 
 }
