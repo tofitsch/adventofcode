@@ -14,6 +14,10 @@ using namespace std;
 const int input = 1;
 
 vector<int> tape;
+int op[4];
+unsigned int pos = 0;
+
+int eval_parameter(int par){return op[par] == 1 ? tape[pos + par] : tape[tape[pos + par]];}
 
 int main(){
   
@@ -23,13 +27,9 @@ int main(){
 
   while(getline(in_file, buffer, ',')) tape.push_back(stoi(buffer));
 
-  unsigned int pos = 0;
-
   int output;
 
   while(true){
-
-    int op[4];
 
     op[0] = tape.at(pos) % 100;
      
@@ -40,12 +40,12 @@ int main(){
     switch(op[0]){
       
       case ADD:
-        tape[tape[pos + 3]] = (op[2] == 1 ? tape[pos + 2] : tape[tape[pos + 2]]) + (op[1] == 1 ? tape[pos + 1] : tape[tape[pos + 1]]);
+        tape[tape[pos + 3]] = eval_parameter(1) + eval_parameter(2);
         pos += 4;
         break;
 
       case MUL:
-        tape[tape[pos + 3]] = (op[2] == 1 ? tape[pos + 2] : tape[tape[pos + 2]]) * (op[1] == 1 ? tape[pos + 1] : tape[tape[pos + 1]]);
+        tape[tape[pos + 3]] = eval_parameter(1) * eval_parameter(2);
         pos += 4;
         break;
 
@@ -55,7 +55,7 @@ int main(){
         break;
 
       case PRNT:
-        output = (op[1] == 1 ? tape[pos + 1] : tape[tape[pos + 1]]);
+        output = eval_parameter(1);
         pos += 2;
         break;
 
