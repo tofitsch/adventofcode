@@ -25,6 +25,8 @@ int main(){
 
   unsigned int pos = 0;
 
+  int output;
+
   while(true){
 
     int op[4];
@@ -53,12 +55,14 @@ int main(){
         break;
 
       case PRNT:
-        cout<<(op[1] == 1 ? tape[pos + 1] : tape[tape[pos + 1]])<<endl;
+        output = (op[1] == 1 ? tape[pos + 1] : tape[tape[pos + 1]]);
         pos += 2;
         break;
 
     }
     
   }
+
+  cout<<output<<endl;
 
 }
