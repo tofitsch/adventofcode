@@ -21,13 +21,9 @@ int main(){
   unsigned int y = 0;
   unsigned int z = 0;
 
-  for(int col=0; col<Y; col++)
-    for(int row=0; row<X; row++)
-      img[row][col] = 2;
-
   for(char c : line){
     
-    if(img[x][y] == 2) img[x][y] = c - '0';
+    if(img[x][y] == 0) img[x][y] = 2 - (c - '0');
     
     x++;
     
@@ -36,7 +32,7 @@ int main(){
 
   }
 
-  char decode[3] = {'.', '#', ' '};
+  char decode[3] = {' ', '#', ' '};
 
   for(int col=0; col<Y; col++){
 
