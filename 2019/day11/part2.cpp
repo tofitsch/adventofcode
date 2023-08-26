@@ -5,7 +5,7 @@
 #include<math.h>
 #include<algorithm>
 
-#define INPUT 0
+#define INPUT 1
 
 #define ADD 1
 #define MUL 2
@@ -191,6 +191,35 @@ int main(){
 
   }
 
-  cout<<trace.size()<<endl;
+  pair<int, int> max = {1e-9, 1e-9};
+  pair<int, int> min = {1e9, 1e9};
+
+  for(const auto &p : trace){
+    
+    int x = p.first.first;
+    int y = p.first.second;
+    
+    if(x > max.first) max.first = x;
+    if(x < min.first) min.first = x;
+
+    if(y > max.second) max.second = y;
+    if(y < min.second) min.second = y;
+
+  }
+
+  for(int y=max.second; y>=min.second; y--){
+    for(int x=max.first; x>=min.first; x--){
+      
+      pair<int, int> key = {x, y};
+      
+      if(trace.find(key) == trace.end() || trace[key] == 0) cout<<'.';
+      else cout<<'#';
+
+    }
+
+    cout<<endl;
+
+  }
 
 }
+
