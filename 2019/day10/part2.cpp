@@ -11,16 +11,11 @@ struct Coord {
   int x;
   int y;
 
-  float angle_to_base;
-
   Coord(int X, int Y) : x(X), y(Y) {}
 
   bool can_see(Coord, vector<vector<bool>> &);
-  void calc_angle_to_base(Coord *);
 
 };
-
-bool compare_angles(const Coord &a, const Coord &b){return a.angle_to_base > b.angle_to_base;}
 
 bool Coord::can_see(Coord c, vector<vector<bool>> &map){
 
@@ -44,19 +39,6 @@ bool Coord::can_see(Coord c, vector<vector<bool>> &map){
   }
 
   return true;
-
-}
-
-void Coord::calc_angle_to_base(Coord *base){
-  
-  float dx = x - base->x;
-  float dy = y - base->y;
-  
-  float rad = sqrt(pow(dx, 2) + pow(dy, 2));
-
-  float ang = acos(dx / rad);
-  
-  angle_to_base = dy < 0 ? -ang : ang;
 
 }
 
@@ -109,19 +91,35 @@ int main(){
 
   }
 
-  Coord base = *base_it;
+  int ctr = 0;
 
-  asteroids.erase(base_it);
+  while(asteroids.size() > 1){
 
-  for(vector<Coord>::iterator it = asteroids.begin(); it != asteroids.end(); it++)
-   it->calc_angle_to_base(&base);
+    for(vector<Coord>::iterator it = asteroids.begin(); it != asteroids.end(); it++){
 
-  sort(asteroids.begin(), asteroids.end(), compare_angles);
+     if(it == base_it) continue;
 
-  cout<<base.x<<" "<<base.y<<endl;
+     if(base_it->can_see(*it, map)){
 
-  cout<<asteroids[0].x<<" "<<asteroids[0].y<<endl;
-  cout<<asteroids.back().x<<" "<<asteroids.back().y<<endl;
+       ctr++;
 
+       cout<<ctr<<" "<<it->x<<" "<<it->y<<endl;
+       
+       if(ctr == 200){
+
+         cout<<it->x * 100 + it->y<<endl;
+//         exit(0);
+
+       }
+
+       map[it->x][it->y] = false;
+
+       asteroids.erase(it);
+
+     }
+
+    }
+
+  }
 
 }
