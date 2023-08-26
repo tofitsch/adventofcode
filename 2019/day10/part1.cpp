@@ -4,6 +4,8 @@
 
 using namespace std;
 
+vector<vector<bool>> map;
+
 struct Coord {
 
   int x;
@@ -11,26 +13,38 @@ struct Coord {
 
   Coord(int X, int Y) : x(X), y(Y) {}
 
+  bool can_see(Coord);
+
 };
 
-int gcd(int a, int b) {
+bool Coord::can_see(Coord c){
 
-  while(b != 0){
+  if(x == c.x && y == c.y) return false;
 
-    int temp = b;
-    b = a % b;
-    a = temp;
+  int dx = abs(c.x - x);
+  int dy = abs(c.y - y);
+
+  int dg = dx > dy ? dx : dy;
+  int ds = dx < dy ? dx : dy;
+
+  for(int i=dg-1; i>0; i--){
+    
+    if((i * ds) % dg != 0) continue;
+
+    int X = x + (dx - (dx > dy ? i : (i * ds) / dg)) * (x > c.x ? -1 : 1);
+    int Y = y + (dy - (dy > dx ? i : (i * ds) / dg)) * (y > c.y ? -1 : 1);
+
+    if(map[X][Y]) return false;
 
   }
 
-  return a;
+  return true;
 
 }
 
 int main(){
 
   vector<Coord> asteroids;
-  vector<vector<bool>> map;
    
   ifstream in_file("input.txt");
 
@@ -65,34 +79,8 @@ int main(){
 
     for(auto b : asteroids){
       
-      if(a.x == b.x && a.y == b.y) continue;
-
-      bool is_obstructed = false;
-
-      int dx = abs(b.x - a.x);
-      int dy = abs(b.y - a.y);
-
-      int dg = dx > dy ? dx : dy;
-      int ds = dx < dy ? dx : dy;
-
-      for(int i=dg-1; i>0; i--){
-        
-        if((i * ds) % dg != 0) continue;
-
-        int x = a.x + (dx - (dx > dy ? i : (i * ds) / dg)) * (a.x > b.x ? -1 : 1);
-        int y = a.y + (dy - (dy > dx ? i : (i * ds) / dg)) * (a.y > b.y ? -1 : 1);
-
-        if(map[x][y]){
-
-          is_obstructed = true;
-          break;
-
-        }
-
-      }
-
-      if(!is_obstructed) n_in_sight++;
-
+      if(a.can_see(b)) n_in_sight++;
+      
     }
 
     if(n_in_sight > max_in_sight) max_in_sight = n_in_sight;
