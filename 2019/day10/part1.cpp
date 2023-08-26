@@ -5,6 +5,7 @@
 using namespace std;
 
 vector<vector<bool>> map;
+vector<Coord> asteroids;
 
 struct Coord {
 
@@ -44,8 +45,6 @@ bool Coord::can_see(Coord c){
 
 int main(){
 
-  vector<Coord> asteroids;
-   
   ifstream in_file("input.txt");
 
   string line;
