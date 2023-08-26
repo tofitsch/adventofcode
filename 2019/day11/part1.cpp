@@ -182,6 +182,7 @@ int main(){
     if(direction == 0) facing--;
 
     if(facing > 3) facing = 0;
+    if(facing < 0) facing = 3;
 
     if(facing == 0) bot_pos.second++;
     if(facing == 1) bot_pos.first++;
