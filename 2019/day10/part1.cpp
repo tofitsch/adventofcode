@@ -4,9 +4,6 @@
 
 using namespace std;
 
-vector<vector<bool>> map;
-vector<Coord> asteroids;
-
 struct Coord {
 
   int x;
@@ -14,11 +11,11 @@ struct Coord {
 
   Coord(int X, int Y) : x(X), y(Y) {}
 
-  bool can_see(Coord);
+  bool can_see(Coord, vector<vector<bool>> &);
 
 };
 
-bool Coord::can_see(Coord c){
+bool Coord::can_see(Coord c, vector<vector<bool>> &map){
 
   if(x == c.x && y == c.y) return false;
 
@@ -44,6 +41,9 @@ bool Coord::can_see(Coord c){
 }
 
 int main(){
+
+  vector<vector<bool>> map;
+  vector<Coord> asteroids;
 
   ifstream in_file("input.txt");
 
@@ -78,7 +78,7 @@ int main(){
 
     for(auto b : asteroids){
       
-      if(a.can_see(b)) n_in_sight++;
+      if(a.can_see(b, map)) n_in_sight++;
       
     }
 
