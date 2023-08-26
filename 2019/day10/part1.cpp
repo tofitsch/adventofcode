@@ -32,7 +32,7 @@ int main(){
   vector<Coord> asteroids;
   vector<vector<bool>> map;
    
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   string line;
 
@@ -72,44 +72,20 @@ int main(){
       int dx = abs(b.x - a.x);
       int dy = abs(b.y - a.y);
 
-      if(dx > dy){
+      int dg = dx > dy ? dx : dy;
+      int ds = dx < dy ? dx : dy;
 
-        for(int i=dx-1; i>0; i--){
-          
-          if((i * dy) %  dx != 0) continue;
+      for(int i=dg-1; i>0; i--){
+        
+        if((i * ds) % dg != 0) continue;
 
-          int x = a.x + (dx - i) * (a.x > b.x ? -1 : 1);
-          int y = a.y + (dy - i * dy / dx) * (a.y > b.y ? -1 : 1);
+        int x = a.x + (dx - (dx > dy ? i : (i * ds) / dg)) * (a.x > b.x ? -1 : 1);
+        int y = a.y + (dy - (dy > dx ? i : (i * ds) / dg)) * (a.y > b.y ? -1 : 1);
 
-          cout<<"A "<<a.x<<" "<<a.y<<" "<<b.x<<" "<<b.y<<" "<<x<<" "<<y<<endl;
+        if(map[x][y]){
 
-          if(map[x][y]){
-
-            is_obstructed = true;
-            break;
-
-          }
-
-        }
-
-      }
-      else{
-
-        for(int i=dy-1; i>0; i--){
-          
-          if((i * dx) %  dy != 0) continue;
-
-          int x = a.x + (dx - i * dx / dy) * (a.x > b.x ? -1 : 1);
-          int y = a.y + (dy - i) * (a.y > b.y ? -1 : 1);
-
-          cout<<"B "<<a.x<<" "<<a.y<<" "<<b.x<<" "<<b.y<<" "<<x<<" "<<y<<endl;
-
-          if(map[x][y]){
-
-            is_obstructed = true;
-            break;
-
-          }
+          is_obstructed = true;
+          break;
 
         }
 
@@ -118,8 +94,6 @@ int main(){
       if(!is_obstructed) n_in_sight++;
 
     }
-
-    cout<<n_in_sight<<endl;
 
     if(n_in_sight > max_in_sight) max_in_sight = n_in_sight;
 
