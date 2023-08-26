@@ -76,11 +76,8 @@ int main(){
     
     int n_in_sight = 0;
 
-    for(auto b : asteroids){
-      
+    for(auto b : asteroids)
       if(a.can_see(b, map)) n_in_sight++;
-      
-    }
 
     if(n_in_sight > max_in_sight) max_in_sight = n_in_sight;
 
