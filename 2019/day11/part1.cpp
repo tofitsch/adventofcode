@@ -174,12 +174,10 @@ int main(){
     int colour    = computer.run();
     int direction = computer.run();
 
-    cout<<colour<<" "<<direction<<endl;
-
     trace[bot_pos] = colour;
 
-    if(direction == 1) facing++;
-    if(direction == 0) facing--;
+    if(direction == 0) facing++;
+    if(direction == 1) facing--;
 
     if(facing > 3) facing = 0;
     if(facing < 0) facing = 3;
@@ -196,8 +194,6 @@ int main(){
 
   for(const auto &p : trace){
     
-    cout<<p.first.first<<" "<<p.first.second<<endl;
-    
     int x = p.first.first;
     int y = p.first.second;
     
@@ -209,13 +205,13 @@ int main(){
 
   }
 
-
-  for(int y=min.second; y<=max.second; y++){
-    for(int x=min.first; x<=max.first; x++){
+  for(int y=max.second; y>=min.second; y--){
+    for(int x=max.first; x>=min.first; x--){
       
-      pair<int, int> tmp = {x, y};
+      pair<int, int> key = {x, y};
       
-      cout<<(trace[tmp] == 1 ? '#' : '.');
+      if(trace.find(key) == trace.end() || trace[key] == 0) cout<<'.';
+      else cout<<'#';
 
     }
 
@@ -223,6 +219,6 @@ int main(){
 
   }
 
-  cout<<trace.size() - 1<<endl;
+  cout<<trace.size()<<endl;
 
 }
