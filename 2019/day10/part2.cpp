@@ -10,10 +10,12 @@ struct Coord {
 
   int x;
   int y;
+  float angle_to_base;
 
   Coord(int X, int Y) : x(X), y(Y) {}
 
   bool can_see(Coord, vector<vector<bool>> &);
+  void calc_angle_to_base(Coord *);
 
 };
 
@@ -42,12 +44,27 @@ bool Coord::can_see(Coord c, vector<vector<bool>> &map){
 
 }
 
+void Coord::calc_angle_to_base(Coord *base){
+
+  float dx = x - base->x;
+  float dy = y - base->y;
+
+  float rad = sqrt(pow(dx, 2) + pow(dy, 2));
+
+  float ang = acos(dx / rad);
+
+  angle_to_base = dy < 0 ? -ang : ang;
+
+}
+
+bool compare_angles(const Coord &a, const Coord &b){return a.angle_to_base > b.angle_to_base;}
+
 int main(){
 
   vector<vector<bool>> map;
   vector<Coord> asteroids;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   string line;
 
@@ -91,34 +108,45 @@ int main(){
 
   }
 
+  Coord base = *base_it;
+
+  asteroids.erase(base_it);
+
+  for(vector<Coord>::iterator it = asteroids.begin(); it != asteroids.end(); it++)
+    it->calc_angle_to_base(&base);
+
+  sort(asteroids.begin(), asteroids.end(), compare_angles);
+
   int ctr = 0;
 
   while(asteroids.size() > 1){
+    
+    vector<vector<bool>> updated_map = map;
 
-    for(vector<Coord>::iterator it = asteroids.begin(); it != asteroids.end(); it++){
+    for(vector<Coord>::iterator it = asteroids.begin(); it != asteroids.end();){
 
-     if(it == base_it) continue;
-
-     if(base_it->can_see(*it, map)){
+     if(base.can_see(*it, map)){
 
        ctr++;
 
-       cout<<ctr<<" "<<it->x<<" "<<it->y<<endl;
-       
        if(ctr == 200){
 
-         cout<<it->x * 100 + it->y<<endl;
-//         exit(0);
+         cout<<it->y * 100 + it->x<<endl;
+         exit(0);
 
        }
 
-       map[it->x][it->y] = false;
+       updated_map[it->x][it->y] = false;
 
        asteroids.erase(it);
 
      }
 
+     else it++;
+
     }
+
+    map = updated_map;
 
   }
 
