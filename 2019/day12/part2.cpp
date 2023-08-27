@@ -70,6 +70,10 @@ bool arr_equal_along_row(T *a, T *b, const int &n_rows, const int &n_cols, int &
 
 }
 
+int gcd(long a, long b){return b == 0 ? a : gcd(b, a % b);}
+
+int lcm(long a, long b){return (a * b) / gcd(a, b);}
+
 int main(){
   
   vector<Moon> moons;
@@ -126,8 +130,12 @@ int main(){
 
   }
 
-  for(int i=0; i<n_dim; i++) cout<<periodicity[i]<<" ";
-  cout<<endl;
+  long lowest_common_multiple = 1;
+
+  for(int d=0; d<n_dim; d++)
+    lowest_common_multiple = lcm(lowest_common_multiple, periodicity[d]);
+
+  cout<<lowest_common_multiple<<endl;
 
 }
 
