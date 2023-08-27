@@ -70,15 +70,15 @@ bool arr_equal_along_row(T *a, T *b, const int &n_rows, const int &n_cols, int &
 
 }
 
-int gcd(long a, long b){return b == 0 ? a : gcd(b, a % b);}
+long gcd(long a, long b){return b == 0 ? a : gcd(b, a % b);}
 
-int lcm(long a, long b){return (a * b) / gcd(a, b);}
+long lcm(long a, long b){return (a * b) / gcd(a, b);}
 
 int main(){
   
   vector<Moon> moons;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   for(string line; getline(in_file, line); moons.emplace_back(line, moons.size())) {}
 
@@ -117,12 +117,8 @@ int main(){
       for(int m=0; m<n_moons; m++)
          current_state[m][d] = {moons[m].pos[d], moons[m].vel[d]};
 
-      if(arr_equal_along_row(*current_state, *initial_state, n_dim, n_moons, d)){
-        
-        cout<<d<<" "<<step<<endl;
+      if(arr_equal_along_row(*current_state, *initial_state, n_dim, n_moons, d))
         periodicity[d] = step;
-
-      }
 
     }
 
@@ -138,4 +134,3 @@ int main(){
   cout<<lowest_common_multiple<<endl;
 
 }
-
