@@ -19,16 +19,6 @@ struct Moon{
   void apply_gravity(Moon &);
   int energy();
 
-  //XXX
-  void print(){
-    
-    for(int p : pos) cout<<p<<" ";
-    cout<<" | ";
-    for(int v : vel) cout<<v<<" ";
-    cout<<" | "<<energy()<<endl;
-
-  }
-
 };
 
 Moon::Moon(string line, int n){
@@ -100,9 +90,6 @@ int main(){
     }
 
     for(Moon &moon : moons) moon.apply_velocity();
-
-    for(Moon &moon : moons) moon.print();
-    cout<<endl;
 
   }
 
