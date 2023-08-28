@@ -159,24 +159,38 @@ int main(){
 
   computer.init(0);
 
+  computer.tape[0] = 2;
+
   map<pair<int, int>, int> map;
 
   pair<int, int> coord;
+
+  int score;
+
+  int x_ball, x_pad;
 
   while(!computer.halted){
     
     coord.first  = computer.run();
     coord.second = computer.run();
-    map[coord]   = computer.run();
+
+    if(coord.first == -1 && coord.second == 0) score = computer.run();
+    else{
+
+      map[coord] = computer.run();
+
+      if(map[coord] == 3) x_ball = coord.first;
+      if(map[coord] == 4) x_pad = coord.first;
+
+    }
+
+    computer.input = 0;
+    if(x_ball > x_pad) computer.input = -1;
+    if(x_ball < x_pad) computer.input = 1;
+
 
   }
 
-  int ctr = 0;
-
-  for(pair<const pair<int, int>, int> &tile : map)
-    if(tile.second == 2)
-      ctr++;
-
-  cout<<ctr<<endl;
+  cout<<score<<endl;
 
 }
