@@ -6,10 +6,10 @@
 
 using namespace std;
 
-map<string, long long> quantities;
-map<string, vector<pair<string, long long>>> recipes;
+map<string, long> quantities;
+map<string, vector<pair<string, long>>> recipes;
 
-void do_recipe(string product, int factor){
+void do_recipe(string product, long factor){
   
   factor /= recipes[product].back().second; 
   if(factor == 0) factor++;
@@ -55,7 +55,7 @@ int main(){
 
     bool is_number = true;
 
-    vector<pair<string, long long>> vec;
+    vector<pair<string, long>> vec;
 
     while(getline(line_stream, field, ' ')){
       
