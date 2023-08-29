@@ -6,15 +6,18 @@
 
 using namespace std;
 
-map<string, int> quantities;
-map<string, vector<pair<string, int>>> recipes;
+map<string, long long> quantities;
+map<string, vector<pair<string, long long>>> recipes;
 
-void do_recipe(string product){
+void do_recipe(string product, int factor){
   
-  quantities[product] += recipes[product].back().second;
+  factor /= recipes[product].back().second; 
+  if(factor == 0) factor++;
+
+  quantities[product] += recipes[product].back().second * factor;
 
   for(int i=0; i<recipes[product].size() - 1; i++)
-    quantities[recipes[product][i].first] -= recipes[product][i].second;
+    quantities[recipes[product][i].first] -= recipes[product][i].second * factor;
 
 }
 
@@ -30,7 +33,7 @@ bool step(){
 
         complete = false;
 
-        do_recipe(x.first);
+        do_recipe(x.first, -x.second);
 
       }
 
@@ -52,7 +55,7 @@ int main(){
 
     bool is_number = true;
 
-    vector<pair<string, int>> vec;
+    vector<pair<string, long long>> vec;
 
     while(getline(line_stream, field, ' ')){
       
