@@ -18,6 +18,28 @@ void do_recipe(string product){
 
 }
 
+bool step(){
+   
+    bool complete = true;
+
+    for(auto &x : quantities){
+
+      if(x.first == "ORE") continue;
+      
+      while(x.second < 0){
+
+        complete = false;
+
+        do_recipe(x.first);
+
+      }
+
+    }
+
+    return complete;
+
+}
+
 int main(){
 
   ifstream in_file("input.txt");
@@ -51,27 +73,7 @@ int main(){
 
   quantities["FUEL"] = -1;
 
-  bool complete;
-
-  do{
-    
-    complete = true;
-
-    for(auto &x : quantities){
-
-      if(x.first == "ORE") continue;
-      
-      while(x.second < 0){
-
-        complete = false;
-
-        do_recipe(x.first);
-
-      }
-
-    }
-
-  }while(!complete);
+  while(!step()){}
 
   cout<<-quantities["ORE"]<<endl;
 
