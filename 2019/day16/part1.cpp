@@ -11,8 +11,6 @@ short apply_pattern(const short *data, const int &data_size, const short* patter
  
   short sum = 0;
 
-  int pattern_idx = 0;
-
   for(int i=0; i<data_size; i++)
     sum += data[i] * pattern[((i + 1) / (pos + 1)) % pattern_size];
 
