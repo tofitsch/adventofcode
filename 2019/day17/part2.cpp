@@ -158,8 +158,6 @@ class Intcode_bot{
 
 bool is_path(pair<int, int> const & coord, vector<vector<char>> & coord_map){
   
-//  cout<<coord_map[coord.second][coord.first]<<endl; //XXX
-  
   if(coord.first < 0 || coord.second < 0) return false;
   if(coord_map.size() < coord.second + 1) return false;
   if(coord_map[coord.second].size() < coord.first + 1) return false;
@@ -176,9 +174,9 @@ pair<int, int> go_forward(pair<int, int> const & coord, short const & facing){
   
   switch(facing){
     
-    case 0: y++; break;
+    case 0: y--; break;
     case 1: x++; break;
-    case 2: y--; break;
+    case 2: y++; break;
     case 3: x--; break;
 
   }
@@ -231,9 +229,7 @@ int main(){
 
   while(!arrived){
     
-    for(short turns_right : {0, 1, 3, 2}){
-      
-//      cout<<"T"<<turns_right<<endl;
+    for(short turns_right : {0, 1, 3, 2}){ //2: backwards => arrived at end
       
       if(turns_right == 2){
 
@@ -244,22 +240,17 @@ int main(){
       }
 
       short next_facing = current_facing + turns_right;
-      if(next_facing < 0) next_facing += 4;
       if(next_facing > 3) next_facing -= 4;
 
       pair<int, int> next_coord = go_forward(current_coord, next_facing);
 
       if(is_path(next_coord, coord_map)){
 
-//        cout<<"T"<<turns_right<<" F"<<next_facing<<" C"<<next_coord.first<<" "<<next_coord.second<<endl;
-
         current_coord = next_coord;
         current_facing = next_facing;
 
         if(turns_right != 0){
           
-//          cout<<turns_right<<endl;
-
           instructions.push_back(-turns_right);
           instructions.push_back(1);
 
@@ -272,8 +263,6 @@ int main(){
 
     }
 
-//    cout<<current_facing<<endl;
-
   }
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
@@ -281,16 +270,16 @@ int main(){
   for(auto & e : instructions){
     if(e == -1) cout<<"R";
     else if(e == -3) cout<<"L";
-//    else cout<<e;
-//    cout<<",";
+    else cout<<e;
+    cout<<",";
   }
   cout<<endl;
 
-//  for(auto & x : coord_map){
-//    for(auto & y : x)
-//      cout<<y;
-//    cout<<endl;
-//  }
+  for(auto & x : coord_map){
+    for(auto & y : x)
+      cout<<y;
+    cout<<endl;
+  }
 
 }
 
