@@ -40,5 +40,5 @@ vim -c "norm `<part1.vim`" input.txt 2>/dev/null
 ## 2019: C++
 
 ```shell
-g++ -o x part1.cpp && ./x
+g++ -std=c++20 -o x part1.cpp && ./x
 ```

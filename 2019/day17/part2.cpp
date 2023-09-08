@@ -2,6 +2,7 @@
 #include<fstream>
 #include<vector>
 #include<map>
+#include<span>
 #include<math.h>
 #include<algorithm>
 
@@ -267,6 +268,23 @@ int main(){
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
 
+  span<int> span_full(instructions);
+
+  for(int end_a=1; end_a<instructions.size(); end_a++){
+    for(int end_b=end_a+1; end_b<instructions.size() && end_b - end_a > 1; end_b++){
+      for(int end_c=end_b+1; end_c<instructions.size() && end_c - end_b > 1; end_c++){
+
+        span<int> a = span_full.subspan(0, end_a);
+        span<int> b = span_full.subspan(end_a + 1, end_b);
+        span<int> c = span_full.subspan(end_b + 1, end_c);
+
+        span<int> span_concat(a.data(), a.size() + b.size());
+        copy(b.begin(), b.end(), span_concat.begin() + a.size());
+
+      }
+    }
+  }
+
   for(auto & e : instructions){
     if(e == -1) cout<<"R";
     else if(e == -3) cout<<"L";
@@ -282,5 +300,3 @@ int main(){
   }
 
 }
-
-//LLLLLLLLRRLRLLLLLLLRLLLLLRRLRLLLLLLLLRR
