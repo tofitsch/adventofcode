@@ -20,6 +20,8 @@
 #define MODE_DIR 1
 #define MODE_REL 2
 
+#define MAX_INSTRUCTION_SIZE 20
+
 using namespace std;
 
 class Intcode_bot{
@@ -209,11 +211,14 @@ vector<T> concat(vector<T> const & vector1, vector<T> const & vector2){
 
 template<typename T>
 bool is_subvector_of(vector<T> const & vector1, vector<T> const & vector2){
+  
+//  print_instructions(vector1);
+//  print_instructions(vector2);
+//  cout<<endl;
 
-  for(int i=0; i<vector1.size(); i++){
-    if(vector1[i] != vector2[i])
+  for(int i=0; i<vector1.size(); i++)
+    if(vector1.at(i) != vector2.at(i))
       return false;
-  }
 
   return true;
 
@@ -230,18 +235,24 @@ vector<T> subvec(vector<T> const & vec, int start, int end){
 
 }
 
-int recursive_find_main_routine(vector<int> const & vector_full, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine){
-  
+int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine){
+
+//  print_instructions(routines.at(0));
+//  print_instructions(routines.at(1));
+//  print_instructions(routines.at(2));
+//  cout<<endl;
+
   if(n_routine >= routines.size()
-    || conc.size() > vector_full.size()
-    || !is_subvector_of(conc, vector_full)
+    || conc.size() > instructions.size()
+    || !is_subvector_of(conc, instructions)
     ) return n_routine;
 
   print_instructions(conc);
+  print_instructions(instructions);
 
-  if(conc.size() == vector_full.size()){
+  if(conc.size() == instructions.size()){
 
-    print_instructions(vector_full);
+    print_instructions(instructions);
     print_instructions(conc);
     exit(0);
 
@@ -249,7 +260,7 @@ int recursive_find_main_routine(vector<int> const & vector_full, vector<int> con
 
   vector<int> new_conc = concat(conc, routines.at(n_routine));
   
-  return recursive_find_main_routine(vector_full, new_conc, routines, n_routine + 1);
+  return recursive_find_main_routine(instructions, new_conc, routines, n_routine + 1);
 
 }
 
@@ -335,15 +346,21 @@ int main(){
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
 
-  print_instructions(instructions);
+//  print_instructions(instructions);
 
-  for(int end_a=1; end_a<instructions.size(); end_a++){
-    for(int end_b=end_a+2; end_b<instructions.size(); end_b++){
-      for(int end_c=end_b+2; end_c<instructions.size(); end_c++){
+  for(int end_a=1; end_a<=instructions.size() && end_a < MAX_INSTRUCTION_SIZE; end_a++){
+    for(int end_b=end_a+1; end_b<=instructions.size() && end_b - end_a < MAX_INSTRUCTION_SIZE; end_b++){
+      for(int end_c=end_b+1; end_c<=instructions.size() && end_c - end_b < MAX_INSTRUCTION_SIZE; end_c++){
         
         vector<int> a = subvec(instructions, 0, end_a);
-        vector<int> b = subvec(instructions, end_a + 1, end_b);
-        vector<int> c = subvec(instructions, end_b + 1, end_c);
+        vector<int> b = subvec(instructions, end_a, end_b);
+        vector<int> c = subvec(instructions, end_b, end_c);
+
+        cout<<endl;
+        print_instructions(a);
+        print_instructions(b);
+        print_instructions(c);
+        cout<<endl;
 
         vector<vector<int>> routines = {a, b, c};
 
