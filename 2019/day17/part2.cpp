@@ -2,7 +2,6 @@
 #include<fstream>
 #include<vector>
 #include<map>
-#include<span>
 #include<math.h>
 #include<algorithm>
 
@@ -186,7 +185,6 @@ pair<int, int> go_forward(pair<int, int> const & coord, short const & facing){
 
 }
 
-
 template<typename T>
 void print_instructions(T instructions){//XXX
   for(auto & e : instructions){
@@ -198,23 +196,22 @@ void print_instructions(T instructions){//XXX
   cout<<endl;
 }
 
-
 template<typename T>
-span<T> concat(span<T> const & span1, span<T> const & span2){
+vector<T> concat(vector<T> const & vector1, vector<T> const & vector2){
 
-  span<T> return_span(span1.data(), span1.size() + span2.size());
+  vector<T> return_vector(vector1);
 
-  copy(span2.begin(), span2.end(), return_span.begin() + span1.size());
+  for(auto & x : vector2) return_vector.push_back(x);
 
-  return return_span;
+  return return_vector;
 
 }
 
 template<typename T>
-bool is_subspan_of(span<T> const & span1, span<T> const & span2){
+bool is_subvector_of(vector<T> const & vector1, vector<T> const & vector2){
 
-  for(int i=0; i<span1.size(); i++){
-    if(span1[i] != span2[i])
+  for(int i=0; i<vector1.size(); i++){
+    if(vector1[i] != vector2[i])
       return false;
   }
 
@@ -233,23 +230,26 @@ vector<T> subvec(vector<T> const & vec, int start, int end){
 
 }
 
-int recursive_find_main_routine(span<int> const & span_full, span<int> const & conc, vector<span<int>> const & routines, int n_routine){
+int recursive_find_main_routine(vector<int> const & vector_full, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine){
   
   if(n_routine >= routines.size()
-    || conc.size() > span_full.size()
-    || !is_subspan_of(conc, span_full)
+    || conc.size() > vector_full.size()
+    || !is_subvector_of(conc, vector_full)
     ) return n_routine;
-  else if(conc.size() == span_full.size()){
 
-    print_instructions(span_full);
+  print_instructions(conc);
+
+  if(conc.size() == vector_full.size()){
+
+    print_instructions(vector_full);
     print_instructions(conc);
     exit(0);
 
   }
 
-  span<int> new_conc = concat(conc, routines.at(n_routine));
+  vector<int> new_conc = concat(conc, routines.at(n_routine));
   
-  return recursive_find_main_routine(span_full, new_conc, routines, n_routine + 1);
+  return recursive_find_main_routine(vector_full, new_conc, routines, n_routine + 1);
 
 }
 
@@ -335,24 +335,21 @@ int main(){
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
 
-  span<int> span_full(instructions);
-
   print_instructions(instructions);
 
   for(int end_a=1; end_a<instructions.size(); end_a++){
     for(int end_b=end_a+2; end_b<instructions.size(); end_b++){
       for(int end_c=end_b+2; end_c<instructions.size(); end_c++){
+        
+        vector<int> a = subvec(instructions, 0, end_a);
+        vector<int> b = subvec(instructions, end_a + 1, end_b);
+        vector<int> c = subvec(instructions, end_b + 1, end_c);
 
-        span<int> a = span_full.subspan(0, end_a);
-        span<int> b = span_full.subspan(end_a + 1, end_b);
-        span<int> c = span_full.subspan(end_b + 1, end_c);
-        print_instructions(span_full);
+        vector<vector<int>> routines = {a, b, c};
 
-        vector<span<int>> routines = {a, b, c};
-
-        span<int> conc = concat(concat(a, b), c);
+        vector<int> conc = concat(concat(a, b), c);
          
-        recursive_find_main_routine(span_full, conc, routines, 0);
+        recursive_find_main_routine(instructions, conc, routines, 0);
 
       }
     }
