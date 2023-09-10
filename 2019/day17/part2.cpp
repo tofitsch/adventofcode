@@ -20,7 +20,7 @@
 #define MODE_DIR 1
 #define MODE_REL 2
 
-#define MAX_INSTRUCTION_SIZE 20
+#define MAX_INSTRUCTION_SIZE 10
 
 using namespace std;
 
@@ -229,13 +229,20 @@ vector<T> subvec(vector<T> const & vec, int start, int end){
   
   vector<T> subvec;
 
-  for(int i=start; i<end; i++) subvec.push_back(vec.at(i));
+  for(int i=start; i<=end; i++) subvec.push_back(vec.at(i));
 
   return subvec;
 
 }
 
-int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine){
+vector<int> best_applied_routines;
+vector<int> best_conc;
+vector<vector<int>> best_routines;
+
+int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine, vector<int> applied_routines){
+  
+//  for(int & x : applied_routines) cout<<x;
+//  cout<<endl;
 
 //  print_instructions(routines.at(0));
 //  print_instructions(routines.at(1));
@@ -247,20 +254,68 @@ int recursive_find_main_routine(vector<int> const & instructions, vector<int> co
     || !is_subvector_of(conc, instructions)
     ) return n_routine;
 
-  print_instructions(conc);
-  print_instructions(instructions);
+//  print_instructions(conc);
+//  print_instructions(instructions);
+
+  if(conc.size() > best_conc.size()){
+
+    best_applied_routines = applied_routines;
+    best_conc = conc;
+    best_routines = routines;
+
+  }
 
   if(conc.size() == instructions.size()){
 
     print_instructions(instructions);
     print_instructions(conc);
+    cout<<endl;
+    print_instructions(applied_routines);
+    print_instructions(routines.at(0));
+    print_instructions(routines.at(1));
+    print_instructions(routines.at(2));
     exit(0);
 
   }
 
   vector<int> new_conc = concat(conc, routines.at(n_routine));
+
+  applied_routines.push_back(n_routine);
   
-  return recursive_find_main_routine(instructions, new_conc, routines, n_routine + 1);
+  for(int i=0; i<3; i++)
+    recursive_find_main_routine(instructions, new_conc, routines, i, applied_routines);
+
+  return n_routine;
+
+}
+
+//void generate_subsets(vector<int> & vec, vector<int> & subset, int index, vector<vector<int>> & subsets){
+//  
+//  cout<<index<<endl;
+//
+//  subsets.push_back(subset);
+//
+//  for(int i=index; i<vec.size(); i++){
+//
+//    subset.push_back(vec[i]);
+//
+//    generate_subsets(vec, subset, i + 1, subsets);
+//
+//    subset.pop_back();
+//
+//  }
+//
+//}
+
+vector<vector<int>> get_subsets(vector<int>& vec, int min_size, int max_size) {
+  
+  vector<vector<int>> subsets;
+  
+  for(int s=min_size; s<vec.size() && s<=max_size; s++)
+    for(int p=0; p<vec.size() - s; p++)
+      subsets.push_back(subvec(vec, p, p + s));
+
+  return subsets;
 
 }
 
@@ -346,31 +401,50 @@ int main(){
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
 
-//  print_instructions(instructions);
+  print_instructions(instructions);
+  
+  vector<int> tmp = subvec(instructions, 0, instructions.size() / 3);
 
-  for(int end_a=1; end_a<=instructions.size() && end_a < MAX_INSTRUCTION_SIZE; end_a++){
-    for(int end_b=end_a+1; end_b<=instructions.size() && end_b - end_a < MAX_INSTRUCTION_SIZE; end_b++){
-      for(int end_c=end_b+1; end_c<=instructions.size() && end_c - end_b < MAX_INSTRUCTION_SIZE; end_c++){
+  vector<vector<int>> possible_routines = get_subsets(instructions, 1, MAX_INSTRUCTION_SIZE);
+
+  cout<<possible_routines.size()<<endl;
+
+  sort(possible_routines.begin(), possible_routines.end());
+  auto new_end = unique(possible_routines.begin(), possible_routines.end());
+  possible_routines.erase(new_end, possible_routines.end());
+
+  cout<<possible_routines.size()<<endl;
+
+  for(int end_a=1; end_a<=instructions.size() && end_a <= MAX_INSTRUCTION_SIZE; end_a++){
+    vector<int> a = subvec(instructions, 0, end_a);
+    for(vector<int> & b : possible_routines){
+      if(a == b) continue;
+      for(vector<int> & c : possible_routines){
         
-        vector<int> a = subvec(instructions, 0, end_a);
-        vector<int> b = subvec(instructions, end_a, end_b);
-        vector<int> c = subvec(instructions, end_b, end_c);
-
+        if(a == c || b == c) continue;
+        
         cout<<endl;
-        print_instructions(a);
-        print_instructions(b);
-        print_instructions(c);
+        cout<<"a "; print_instructions(a);
+        cout<<"b ";print_instructions(b);
+        cout<<"c ";print_instructions(c);
         cout<<endl;
 
         vector<vector<int>> routines = {a, b, c};
 
-        vector<int> conc = concat(concat(a, b), c);
-         
-        recursive_find_main_routine(instructions, conc, routines, 0);
+        for(int i=0; i<3; i++)
+          recursive_find_main_routine(instructions, a, routines, i, {0});
 
       }
     }
   }
+
+cout<<"best:"<<endl;
+print_instructions(best_routines.at(0));
+print_instructions(best_routines.at(1));
+print_instructions(best_routines.at(2));
+print_instructions(best_applied_routines);
+print_instructions(best_conc);
+print_instructions(instructions);
 
 //  print_instructions(instructions);
 
