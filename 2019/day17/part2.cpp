@@ -2,6 +2,7 @@
 #include<fstream>
 #include<vector>
 #include<map>
+#include<queue>
 #include<math.h>
 #include<algorithm>
 
@@ -21,6 +22,8 @@
 #define MODE_REL 2
 
 #define MAX_INSTRUCTION_SIZE 10
+
+#define ASCII_OFFSET 48
 
 using namespace std;
 
@@ -55,10 +58,10 @@ class Intcode_bot{
     pair<int, int> coord;
 
     int output = 0;
-    int input = 0;
+    queue<int> input;
     bool halted = false;
 
-    void init(int IN, pair<int, int> COORD){
+    void init(pair<int, int> COORD){
       
       coord = COORD;
       
@@ -67,8 +70,6 @@ class Intcode_bot{
       relative_base = 0;
       halted = false;
 
-      input = IN;
-      
       ifstream in_file("input.txt");
 
       while(getline(in_file, buffer, ',')){
@@ -114,7 +115,8 @@ class Intcode_bot{
             break;
     
           case SAVE:
-            tape[tape[pos + 1] + (op[1] == MODE_REL ? relative_base : 0)] = input;
+            tape[tape[pos + 1] + (op[1] == MODE_REL ? relative_base : 0)] = input.front();
+            input.pop();
             pos += 2;
             break;
     
@@ -193,7 +195,7 @@ void print_instructions(T instructions){//XXX
     if(e == -1) cout<<"R";
     else if(e == -3) cout<<"L";
     else cout<<e;
-    cout<<",";
+//    cout<<",";
   }
   cout<<endl;
 }
@@ -235,13 +237,95 @@ vector<T> subvec(vector<T> const & vec, int start, int end){
 
 }
 
-vector<int> best_applied_routines;
-vector<int> best_conc;
-vector<vector<int>> best_routines;
-
-int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine, vector<int> applied_routines){
+void run_solution(vector<int> const & solution){
   
-//  for(int & x : applied_routines) cout<<x;
+//  for(int const & x : solution) cout<<x<<" ";
+//  cout<<endl;
+
+  Intcode_bot bot;
+
+  vector<vector<char>> coord_map = {{}};
+
+  bot.init({0, 0});
+
+  bot.tape.at(0) = 2;
+
+  int ctr = 0;
+
+//  solution = {6544654466446744654467446644674465446610 76 44 52 44 76 44 49 48 44 76 44 54 10 76 44 54 44 76 44 52 44 82 44 56 44 82 44 56 10 76 44 54 44 82 44 56 44 76 44 49 48 44 76 44 56 44 76 44 56 10 121 10 }
+
+  while(!bot.halted){
+    
+    bot.run();
+
+    char c = bot.output;
+    
+    if(c == '\n')
+      coord_map.push_back({});
+    else if(c == ':'){
+
+      queue<int> input;
+
+      while(ctr < solution.size()){
+        
+        input.push(solution[ctr]);
+
+        if(solution[ctr] + '0' == '\n') break;
+
+        ctr++;
+
+      }
+
+      bot.input = input;
+
+    }
+    else
+      coord_map.back().push_back(c);
+
+  }
+
+  for(auto & x : coord_map){
+    for(auto & y : x)
+      cout<<y;
+    cout<<endl;
+  }
+
+  exit(0);
+
+//  for(int i=0; i<100; i++){
+//
+//    vector<vector<char>> coord_map = {{}};
+//
+//    bot.init({0, 0});
+//
+//    while(!bot.halted){
+//      
+//      bot.run();
+//
+//      char c = bot.output;
+//      
+//      if(c == '\n')
+//        coord_map.push_back({});
+//      else
+//        coord_map.back().push_back(c);
+//
+//    }
+//
+//    for(auto & x : coord_map){
+//      for(auto & y : x)
+//        cout<<y;
+//      cout<<endl;
+//    }
+//
+//    cout<<bot.output<<endl;
+//
+//  }
+
+}
+
+int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine, vector<int> main_routine){
+  
+//  for(int & x : main_routine) cout<<x;
 //  cout<<endl;
 
 //  print_instructions(routines.at(0));
@@ -257,33 +341,76 @@ int recursive_find_main_routine(vector<int> const & instructions, vector<int> co
 //  print_instructions(conc);
 //  print_instructions(instructions);
 
-  if(conc.size() > best_conc.size()){
-
-    best_applied_routines = applied_routines;
-    best_conc = conc;
-    best_routines = routines;
-
-  }
-
   if(conc.size() == instructions.size()){
 
     print_instructions(instructions);
     print_instructions(conc);
     cout<<endl;
-    print_instructions(applied_routines);
+    print_instructions(main_routine);
     print_instructions(routines.at(0));
     print_instructions(routines.at(1));
     print_instructions(routines.at(2));
+
+    vector<int> solution;
+
+    for(int const & e : main_routine){
+
+      switch(e){
+        
+        case 0: solution.push_back((int) 'A'); break;
+        case 1: solution.push_back((int) 'B'); break;
+        case 2: solution.push_back((int) 'C'); break;
+
+      }
+
+      solution.push_back((int) ',');
+
+    }
+
+    solution.back() = (int) '\n';
+
+    for(vector<int> const & r : {routines.at(0), routines.at(1), routines.at(2)}){
+  
+      for(int const & e : r){
+        
+        switch(e){
+          
+          case -1: solution.push_back((int) 'R'); break;
+          case -3: solution.push_back((int) 'L'); break;
+          default:
+            if(e > 9) solution.push_back(e / 10 + '0');
+            solution.push_back(e % 10 + '0');
+            break;
+
+        }
+
+        solution.push_back((int) ',');
+  
+      }
+  
+      solution.back() = (int) '\n';
+  
+    }
+
+    solution.push_back((int) 'y'); //XXX
+    solution.push_back((int) '\n');
+
+    cout<<"TEST"<<endl;
+    print_instructions(solution);
+    cout<<"TEST"<<endl;
+
+    run_solution(solution);
+
     exit(0);
 
   }
 
   vector<int> new_conc = concat(conc, routines.at(n_routine));
 
-  applied_routines.push_back(n_routine);
+  main_routine.push_back(n_routine);
   
   for(int i=0; i<3; i++)
-    recursive_find_main_routine(instructions, new_conc, routines, i, applied_routines);
+    recursive_find_main_routine(instructions, new_conc, routines, i, main_routine);
 
   return n_routine;
 
@@ -326,7 +453,7 @@ int main(){
   vector<vector<char>> coord_map = {{}};
   vector<pair<int, int>> path;
 
-  bot.init(0, {0, 0});
+  bot.init({0, 0});
 
   pair<int, int> start;
 
@@ -423,11 +550,11 @@ int main(){
         
         if(a == c || b == c) continue;
         
-        cout<<endl;
-        cout<<"a "; print_instructions(a);
-        cout<<"b ";print_instructions(b);
-        cout<<"c ";print_instructions(c);
-        cout<<endl;
+//        cout<<endl;
+//        cout<<"a "; print_instructions(a);
+//        cout<<"b ";print_instructions(b);
+//        cout<<"c ";print_instructions(c);
+//        cout<<endl;
 
         vector<vector<int>> routines = {a, b, c};
 
@@ -438,12 +565,6 @@ int main(){
     }
   }
 
-cout<<"best:"<<endl;
-print_instructions(best_routines.at(0));
-print_instructions(best_routines.at(1));
-print_instructions(best_routines.at(2));
-print_instructions(best_applied_routines);
-print_instructions(best_conc);
 print_instructions(instructions);
 
 //  print_instructions(instructions);
