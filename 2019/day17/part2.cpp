@@ -190,17 +190,6 @@ pair<int, int> go_forward(pair<int, int> const & coord, short const & facing){
 }
 
 template<typename T>
-void print_instructions(T instructions){//XXX
-  for(auto & e : instructions){
-    if(e == -1) cout<<"R";
-    else if(e == -3) cout<<"L";
-    else cout<<e;
-//    cout<<",";
-  }
-  cout<<endl;
-}
-
-template<typename T>
 vector<T> concat(vector<T> const & vector1, vector<T> const & vector2){
 
   vector<T> return_vector(vector1);
@@ -214,10 +203,6 @@ vector<T> concat(vector<T> const & vector1, vector<T> const & vector2){
 template<typename T>
 bool is_subvector_of(vector<T> const & vector1, vector<T> const & vector2){
   
-//  print_instructions(vector1);
-//  print_instructions(vector2);
-//  cout<<endl;
-
   for(int i=0; i<vector1.size(); i++)
     if(vector1.at(i) != vector2.at(i))
       return false;
@@ -239,9 +224,6 @@ vector<T> subvec(vector<T> const & vec, int start, int end){
 
 void run_solution(vector<int> const & solution){
   
-//  for(int const & x : solution) cout<<x<<" ";
-//  cout<<endl;
-
   Intcode_bot bot;
 
   vector<vector<char>> coord_map = {{}};
@@ -251,8 +233,6 @@ void run_solution(vector<int> const & solution){
   bot.tape.at(0) = 2;
 
   int ctr = 0;
-
-//  solution = {6544654466446744654467446644674465446610 76 44 52 44 76 44 49 48 44 76 44 54 10 76 44 54 44 76 44 52 44 82 44 56 44 82 44 56 10 76 44 54 44 82 44 56 44 76 44 49 48 44 76 44 56 44 76 44 56 10 121 10 }
 
   while(!bot.halted){
     
@@ -284,74 +264,20 @@ void run_solution(vector<int> const & solution){
 
   }
 
-  for(auto & x : coord_map){
-    for(auto & y : x)
-      cout<<y;
-    cout<<endl;
-  }
-
   cout<<bot.output<<endl;
 
   exit(0);
-
-//  for(int i=0; i<100; i++){
-//
-//    vector<vector<char>> coord_map = {{}};
-//
-//    bot.init({0, 0});
-//
-//    while(!bot.halted){
-//      
-//      bot.run();
-//
-//      char c = bot.output;
-//      
-//      if(c == '\n')
-//        coord_map.push_back({});
-//      else
-//        coord_map.back().push_back(c);
-//
-//    }
-//
-//    for(auto & x : coord_map){
-//      for(auto & y : x)
-//        cout<<y;
-//      cout<<endl;
-//    }
-//
-//    cout<<bot.output<<endl;
-//
-//  }
 
 }
 
 int recursive_find_main_routine(vector<int> const & instructions, vector<int> const & conc, vector<vector<int>> const & routines, int n_routine, vector<int> main_routine){
   
-//  for(int & x : main_routine) cout<<x;
-//  cout<<endl;
-
-//  print_instructions(routines.at(0));
-//  print_instructions(routines.at(1));
-//  print_instructions(routines.at(2));
-//  cout<<endl;
-
   if(n_routine >= routines.size()
     || conc.size() > instructions.size()
     || !is_subvector_of(conc, instructions)
     ) return n_routine;
 
-//  print_instructions(conc);
-//  print_instructions(instructions);
-
   if(conc.size() == instructions.size()){
-
-    print_instructions(instructions);
-    print_instructions(conc);
-    cout<<endl;
-    print_instructions(main_routine);
-    print_instructions(routines.at(0));
-    print_instructions(routines.at(1));
-    print_instructions(routines.at(2));
 
     vector<int> solution;
 
@@ -397,13 +323,7 @@ int recursive_find_main_routine(vector<int> const & instructions, vector<int> co
     solution.push_back((int) 'n');
     solution.push_back((int) '\n');
 
-    cout<<"TEST"<<endl;
-    print_instructions(solution);
-    cout<<"TEST"<<endl;
-
     run_solution(solution);
-
-    exit(0);
 
   }
 
@@ -417,24 +337,6 @@ int recursive_find_main_routine(vector<int> const & instructions, vector<int> co
   return n_routine;
 
 }
-
-//void generate_subsets(vector<int> & vec, vector<int> & subset, int index, vector<vector<int>> & subsets){
-//  
-//  cout<<index<<endl;
-//
-//  subsets.push_back(subset);
-//
-//  for(int i=index; i<vec.size(); i++){
-//
-//    subset.push_back(vec[i]);
-//
-//    generate_subsets(vec, subset, i + 1, subsets);
-//
-//    subset.pop_back();
-//
-//  }
-//
-//}
 
 vector<vector<int>> get_subsets(vector<int>& vec, int min_size, int max_size) {
   
@@ -530,19 +432,13 @@ int main(){
 
   if(instructions.at(0) == 0) instructions.erase(instructions.begin());
 
-  print_instructions(instructions);
-  
   vector<int> tmp = subvec(instructions, 0, instructions.size() / 3);
 
   vector<vector<int>> possible_routines = get_subsets(instructions, 1, MAX_INSTRUCTION_SIZE);
 
-  cout<<possible_routines.size()<<endl;
-
   sort(possible_routines.begin(), possible_routines.end());
   auto new_end = unique(possible_routines.begin(), possible_routines.end());
   possible_routines.erase(new_end, possible_routines.end());
-
-  cout<<possible_routines.size()<<endl;
 
   for(int end_a=1; end_a<=instructions.size() && end_a <= MAX_INSTRUCTION_SIZE; end_a++){
     vector<int> a = subvec(instructions, 0, end_a);
@@ -552,12 +448,6 @@ int main(){
         
         if(a == c || b == c) continue;
         
-//        cout<<endl;
-//        cout<<"a "; print_instructions(a);
-//        cout<<"b ";print_instructions(b);
-//        cout<<"c ";print_instructions(c);
-//        cout<<endl;
-
         vector<vector<int>> routines = {a, b, c};
 
         for(int i=0; i<3; i++)
@@ -566,15 +456,5 @@ int main(){
       }
     }
   }
-
-print_instructions(instructions);
-
-//  print_instructions(instructions);
-
-//  for(auto & x : coord_map){
-//    for(auto & y : x)
-//      cout<<y;
-//    cout<<endl;
-//  }
 
 }

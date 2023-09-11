@@ -221,10 +221,4 @@ int main(){
 
   cout<<sum<<endl;
 
-//  for(auto & x : coord_map){
-//    for(auto & y : x)
-//      cout<<y;
-//    cout<<endl;
-//  }
-
 }
