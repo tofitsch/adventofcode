@@ -290,6 +290,8 @@ void run_solution(vector<int> const & solution){
     cout<<endl;
   }
 
+  cout<<bot.output<<endl;
+
   exit(0);
 
 //  for(int i=0; i<100; i++){
@@ -392,7 +394,7 @@ int recursive_find_main_routine(vector<int> const & instructions, vector<int> co
   
     }
 
-    solution.push_back((int) 'y'); //XXX
+    solution.push_back((int) 'n');
     solution.push_back((int) '\n');
 
     cout<<"TEST"<<endl;
