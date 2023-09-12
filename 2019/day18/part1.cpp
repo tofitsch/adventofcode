@@ -6,57 +6,51 @@
 
 using namespace std;
 
-template <typename T, typename U> //T: type of nodes, U: type of weights
+template <typename T> //T: type of nodes
 struct Graph{
   
-  map<T, vector<pair<T, U>>> edges;
+  map<T, vector<T>> edges;
 
-  void add_edge(T, T, U);
-  void add_edge(T a, T b){add_edge(a, b, 1);}
+  void add_edge(T, T);
 
   void print_pairs();
   void print_scalars();
 
 };
 
-template <typename T, typename U>
-bool nested_compare (const pair<T, U>& a, const pair<T, U>& b){
-  return a.first == b.first && a.second == b.second;
-}
-
-template <typename T, typename U>
-void Graph<T, U>::add_edge(T a, T b, U weight){
+template <typename T>
+void Graph<T>::add_edge(T a, T b){
   
-  if(edges.count(a) > 0) edges[a].push_back({b, weight});
-  else edges[a] = {{b, weight}};
+  if(edges.count(a) > 0) edges[a].push_back(b);
+  else edges[a] = {b};
 
   sort(edges[a].begin(), edges[a].end());
-  edges[a].erase(unique(edges[a].begin(), edges[a].end(), nested_compare<T, U>), edges[a].end());
+  edges[a].erase(unique(edges[a].begin(), edges[a].end()), edges[a].end());
 
-  if(edges.count(b) > 0) edges[b].push_back({a, weight});
-  else edges[b] = {{a, weight}};
+  if(edges.count(b) > 0) edges[b].push_back(a);
+  else edges[b] = {a};
 
   sort(edges[b].begin(), edges[b].end());
-  edges[b].erase(unique(edges[b].begin(), edges[b].end(), nested_compare<T, U>), edges[b].end());
+  edges[b].erase(unique(edges[b].begin(), edges[b].end()), edges[b].end());
 
 }
 
-template <typename T, typename U>
-void Graph<T, U>::print_pairs(){
+template <typename T>
+void Graph<T>::print_pairs(){
   for(auto & key : edges){
     cout<<"("<<key.first.first<<","<<key.first.second<<")"<<endl;
     for(auto & x : key.second){
-      cout<<"  ("<<x.first.first<<","<<x.first.second<<") "<<x.second<<endl;
+      cout<<"  ("<<x.first<<","<<x.second<<")"<<endl;
     }
   }
 }
 
-template <typename T, typename U>
-void Graph<T, U>::print_scalars(){
+template <typename T>
+void Graph<T>::print_scalars(){
   for(auto & key : edges){
     cout<<key.first<<endl;
     for(auto & x : key.second){
-      cout<<"  "<<x.first<<" "<<x.second<<endl;
+      cout<<"  "<<x<<endl;
     }
   }
 }
@@ -99,13 +93,19 @@ int main(){
     
   }
 
-  Graph<pair<int, int>, int> grid_graph;
+  Graph<pair<int, int>> grid_graph;
 
-  for(int y=0; y<grid.size(); y++)
-    for(int x=0; x<grid[y].size(); x++)
+  for(int y=0; y<grid.size(); y++){
+    for(int x=0; x<grid[y].size(); x++){
+
+      if(grid[y][x] == '#') continue; 
+
       for(pair<int, int> & neighbour : get_neighbours({y, x}, grid))
         if(grid[neighbour.first][neighbour.second] != '#')
           grid_graph.add_edge({y, x}, neighbour);
+
+    }
+  }
 
   grid_graph.print_pairs();
 
