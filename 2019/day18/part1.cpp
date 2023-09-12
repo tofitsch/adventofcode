@@ -6,6 +6,8 @@
 
 using namespace std;
 
+typedef pair<int, int> Coordinate;
+
 template <typename T>
 struct Graph{
   
@@ -81,16 +83,16 @@ void Graph<T>::print_scalars(){
   }
 }
 
-vector<pair<int, int>> get_neighbours(pair<int, int> coord, vector<vector<char>> & grid){
+vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid){
   
   int y = coord.first;
   int x = coord.second;
 
-  vector<pair<int, int>> neighbours;
+  vector<Coordinate> neighbours;
 
-  vector<pair<int, int>> possible_neighbours = {{y + 1, x}, {y, x + 1}, {y - 1, x}, {y, x - 1}};
+  vector<Coordinate> possible_neighbours = {{y + 1, x}, {y, x + 1}, {y - 1, x}, {y, x - 1}};
 
-  for(pair<int, int> neighbour : possible_neighbours)
+  for(Coordinate neighbour : possible_neighbours)
     if(neighbour.first > 0
        && neighbour.first < grid.size()
        && neighbour.second > 0
@@ -119,9 +121,9 @@ int main(){
     
   }
 
-  Graph<pair<int, int>> graph;
-  vector<pair<int, int>> gates;
-  vector<pair<int, int>> keys;
+  Graph<Coordinate> graph;
+  vector<Coordinate> gates;
+  vector<Coordinate> keys;
 
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
@@ -131,14 +133,14 @@ int main(){
 
       if(grid[y][x] == '#') continue; 
 
-      for(pair<int, int> & neighbour : get_neighbours({y, x}, grid))
+      for(Coordinate & neighbour : get_neighbours({y, x}, grid))
         if(grid[neighbour.first][neighbour.second] != '#')
           graph.add_edge({y, x}, neighbour);
 
     }
   }
 
-  for(pair<int, int> gate : gates)
+  for(Coordinate gate : gates)
     graph.deactivate_node(gate);
 
   graph.print_pairs();
