@@ -6,17 +6,43 @@
 
 using namespace std;
 
-template <typename T> //T: type of nodes
+template <typename T>
 struct Graph{
   
   map<T, vector<T>> edges;
+  map<T, vector<T>> deactivated_edges;
 
   void add_edge(T, T);
+
+  void deactivate_node(T);
+  void reactivate_node(T);
 
   void print_pairs();
   void print_scalars();
 
 };
+
+template <typename T>
+void Graph<T>::deactivate_node(T a){
+  
+  for(T & b : edges[a])
+    edges[b].erase(remove(edges[b].begin(), edges[b].end(), a), edges[b].end());
+
+  deactivated_edges[a] = edges[a];
+
+  edges[a] = {};
+    
+}
+
+template <typename T>
+void Graph<T>::reactivate_node(T a){
+  
+  for(T & b : deactivated_edges[a])
+    edges[b].push_back(a);
+
+  edges[a] = deactivated_edges[a];
+    
+}
 
 template <typename T>
 void Graph<T>::add_edge(T a, T b){
@@ -93,20 +119,28 @@ int main(){
     
   }
 
-  Graph<pair<int, int>> grid_graph;
+  Graph<pair<int, int>> graph;
+  vector<pair<int, int>> gates;
+  vector<pair<int, int>> keys;
 
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
+
+      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gates.push_back({y, x}); 
+      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') keys.push_back({y, x}); 
 
       if(grid[y][x] == '#') continue; 
 
       for(pair<int, int> & neighbour : get_neighbours({y, x}, grid))
         if(grid[neighbour.first][neighbour.second] != '#')
-          grid_graph.add_edge({y, x}, neighbour);
+          graph.add_edge({y, x}, neighbour);
 
     }
   }
 
-  grid_graph.print_pairs();
+  for(pair<int, int> gate : gates)
+    graph.deactivate_node(gate);
+
+  graph.print_pairs();
 
 }
