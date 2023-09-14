@@ -162,12 +162,17 @@ map<vector<char>, int> dist_min_for_given_keys_collected;
 
 void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, vector<char> keys_collected, int dist_total, Coordinate start){
 
+  if(dist_total >= dist_min) return;
+
   if(dist_min_for_given_keys_collected.find(keys_collected) == dist_min_for_given_keys_collected.end()
     || dist_min_for_given_keys_collected[keys_collected] > dist_total
     )
     dist_min_for_given_keys_collected[keys_collected] = dist_total;
   else
     return;
+
+  if(dist_min_for_given_keys_collected[keys_collected] > dist_min)
+    dist_min_for_given_keys_collected.erase(keys_collected);
   
   if(remaining_key_coords.size() == 0){
     
@@ -192,7 +197,6 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
   for(char & c : reachable_keys){
 
     int new_dist_total = dist_total + graph.dist[remaining_key_coords[c]];
-    if(new_dist_total >= dist_min) return;
 
     map<char, Coordinate> new_remaining_key_coords(remaining_key_coords);
     vector<char> new_keys_collected(keys_collected);
