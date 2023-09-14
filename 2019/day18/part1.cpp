@@ -182,13 +182,14 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
 
   for(char & c : reachable_keys){
 
+    int new_dist_total = dist_total + graph.dist[key_coords[c]];
+    if(new_dist_total >= dist_min) return;
+
     vector<char> new_keys_collected(keys_collected);
     Graph<Coordinate> new_graph(graph); 
-    int new_dist_total(dist_total);
 
     new_keys_collected.push_back(c);
     new_graph.reactivate_node(gate_coords[toupper(c)]);
-    new_dist_total += graph.dist[key_coords[c]];
 
     recursive_search(dist_min, new_graph, key_coords, gate_coords, new_keys_collected, new_dist_total, key_coords[c]);
 
