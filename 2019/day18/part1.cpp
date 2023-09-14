@@ -8,6 +8,8 @@ using namespace std;
 
 typedef pair<int, int> Coordinate;
 
+const int infinity = 1e8;
+
 template <typename T>
 class Graph{
   
@@ -16,12 +18,11 @@ class Graph{
     map<T, vector<T>> edges;
     map<T, vector<T>> deactivated_edges;
 
-    map<T, int> dist;
     vector<T> queue;
 
-    int infinity = 1e8;
-
   public:
+
+    map<T, int> dist;
 
     void add_edge(T, T);
 
@@ -118,9 +119,9 @@ void Graph<T>::add_edge(T a, T b){
 
 template <typename T>
 void Graph<T>::print_pairs(){
-  for(auto & key : edges){
-    cout<<"("<<key.first.first<<","<<key.first.second<<")"<<endl;
-    for(auto & x : key.second){
+  for(auto & edge : edges){
+    cout<<"("<<edge.first.first<<","<<edge.first.second<<")"<<endl;
+    for(auto & x : edge.second){
       cout<<"  ("<<x.first<<","<<x.second<<")"<<endl;
     }
   }
@@ -128,9 +129,9 @@ void Graph<T>::print_pairs(){
 
 template <typename T>
 void Graph<T>::print_scalars(){
-  for(auto & key : edges){
-    cout<<key.first<<endl;
-    for(auto & x : key.second){
+  for(auto & edge : edges){
+    cout<<edge.first<<endl;
+    for(auto & x : edge.second){
       cout<<"  "<<x<<endl;
     }
   }
@@ -157,6 +158,44 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 
 }
 
+void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & key_coords, map<char, Coordinate> & gate_coords, vector<char> keys_collected, int dist_total, Coordinate start){
+  
+  if(keys_collected.size() == key_coords.size()){
+    
+    if(dist_total < dist_min) dist_min = dist_total;
+
+    for(char & c : keys_collected) cout<<c;
+    cout<<endl<<dist_total<<endl;
+    return;
+
+  }
+
+  graph.run_dijkstra(start);
+
+  vector<char> reachable_keys;
+
+  for(auto & key : key_coords)
+    if(graph.dist[key.second] != infinity
+      && count(keys_collected.begin(), keys_collected.end(), key.first) == 0
+    )
+      reachable_keys.push_back(key.first);
+
+  for(char & c : reachable_keys){
+
+    vector<char> new_keys_collected(keys_collected);
+    Graph<Coordinate> new_graph(graph); 
+    int new_dist_total(dist_total);
+
+    new_keys_collected.push_back(c);
+    new_graph.reactivate_node(gate_coords[toupper(c)]);
+    new_dist_total += graph.dist[key_coords[c]];
+
+    recursive_search(dist_min, new_graph, key_coords, gate_coords, new_keys_collected, new_dist_total, key_coords[c]);
+
+  }
+
+}
+
 int main(){
   
   ifstream in_file("example.txt");
@@ -175,15 +214,15 @@ int main(){
   }
 
   Graph<Coordinate> graph;
-  map<char, Coordinate> gates;
-  map<char, Coordinate> keys;
+  map<char, Coordinate> gate_coords;
+  map<char, Coordinate> key_coords;
   Coordinate start;
 
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
 
-      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gates[grid[y][x]] = {y, x}; 
-      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') keys[grid[y][x]] = {y, x}; 
+      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gate_coords[grid[y][x]] = {y, x}; 
+      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') key_coords[grid[y][x]] = {y, x}; 
       if(grid[y][x] == '@') start = {y, x}; 
 
       if(grid[y][x] == '#') continue; 
@@ -195,11 +234,15 @@ int main(){
     }
   }
 
-  for(auto & key : gates)
-    graph.deactivate_node(key.second);
+  for(auto & gate : gate_coords)
+    graph.deactivate_node(gate.second);
+
+  int dist_min = infinity;
+
+  recursive_search(dist_min, graph, key_coords, gate_coords, {}, 0, start);
+
+  cout<<dist_min<<endl;
 
 //  graph.print_pairs();
-
-  graph.run_dijkstra(start);
 
 }
