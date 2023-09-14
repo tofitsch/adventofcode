@@ -9,20 +9,73 @@ using namespace std;
 typedef pair<int, int> Coordinate;
 
 template <typename T>
-struct Graph{
+class Graph{
   
-  map<T, vector<T>> edges;
-  map<T, vector<T>> deactivated_edges;
+  private:
 
-  void add_edge(T, T);
+    map<T, vector<T>> edges;
+    map<T, vector<T>> deactivated_edges;
 
-  void deactivate_node(T);
-  void reactivate_node(T);
+    map<T, int> dist;
+    vector<T> queue;
 
-  void print_pairs();
-  void print_scalars();
+    int infinity = 1e8;
+
+  public:
+
+    void add_edge(T, T);
+
+    void deactivate_node(T);
+    void reactivate_node(T);
+
+    void print_pairs();
+    void print_scalars();
+
+    void run_dijkstra(T);
 
 };
+
+
+template <typename T>
+void Graph<T>::run_dijkstra(T source){
+  
+  dist.clear();
+
+  for(auto & key : edges){
+    
+    T node = key.first;
+
+    dist[node] = node == source ? 0 : infinity;
+
+    queue.push_back(node);
+
+  }
+
+  while(queue.size() > 0){
+    
+    int min_dist = infinity;
+    int min_dist_pos;
+
+    for(int i=0; i<queue.size(); i++){
+      if(dist[queue.at(i)] <= min_dist){
+        
+        min_dist = dist[queue.at(i)];
+        min_dist_pos = i;
+        
+      }
+    }
+
+    T node = queue.at(min_dist_pos);
+
+    queue.erase(queue.begin() + min_dist_pos);
+
+    for(T & neighbor : edges[node])
+      if(dist[node] + 1 < dist[neighbor])
+        dist[neighbor] = dist[node] + 1;
+
+  }
+
+}
 
 template <typename T>
 void Graph<T>::deactivate_node(T a){
@@ -122,14 +175,16 @@ int main(){
   }
 
   Graph<Coordinate> graph;
-  vector<Coordinate> gates;
-  vector<Coordinate> keys;
+  map<char, Coordinate> gates;
+  map<char, Coordinate> keys;
+  Coordinate start;
 
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
 
-      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gates.push_back({y, x}); 
-      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') keys.push_back({y, x}); 
+      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gates[grid[y][x]] = {y, x}; 
+      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') keys[grid[y][x]] = {y, x}; 
+      if(grid[y][x] == '@') start = {y, x}; 
 
       if(grid[y][x] == '#') continue; 
 
@@ -140,9 +195,11 @@ int main(){
     }
   }
 
-  for(Coordinate gate : gates)
-    graph.deactivate_node(gate);
+  for(auto & key : gates)
+    graph.deactivate_node(key.second);
 
-  graph.print_pairs();
+//  graph.print_pairs();
+
+  graph.run_dijkstra(start);
 
 }
