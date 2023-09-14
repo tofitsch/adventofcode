@@ -158,13 +158,22 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 
 }
 
-void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & key_coords, map<char, Coordinate> & gate_coords, vector<char> keys_collected, int dist_total, Coordinate start){
+map<vector<char>, int> dist_min_for_given_keys_collected;
+
+void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, vector<char> keys_collected, int dist_total, Coordinate start){
+
+  if(dist_min_for_given_keys_collected.find(keys_collected) == dist_min_for_given_keys_collected.end()
+    || dist_min_for_given_keys_collected[keys_collected] > dist_total
+    )
+    dist_min_for_given_keys_collected[keys_collected] = dist_total;
+  else
+    return;
   
-  if(keys_collected.size() == key_coords.size()){
+  if(remaining_key_coords.size() == 0){
     
     if(dist_total < dist_min) dist_min = dist_total;
 
-    for(char & c : keys_collected) cout<<c;
+    for(char c : keys_collected) cout<<c;
     cout<<endl<<dist_total<<endl;
     return;
 
@@ -174,7 +183,7 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
 
   vector<char> reachable_keys;
 
-  for(auto & key : key_coords)
+  for(auto & key : remaining_key_coords)
     if(graph.dist[key.second] != infinity
       && count(keys_collected.begin(), keys_collected.end(), key.first) == 0
     )
@@ -182,16 +191,20 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
 
   for(char & c : reachable_keys){
 
-    int new_dist_total = dist_total + graph.dist[key_coords[c]];
+    int new_dist_total = dist_total + graph.dist[remaining_key_coords[c]];
     if(new_dist_total >= dist_min) return;
 
+    map<char, Coordinate> new_remaining_key_coords(remaining_key_coords);
     vector<char> new_keys_collected(keys_collected);
     Graph<Coordinate> new_graph(graph); 
+  
+    sort(new_keys_collected.begin(), new_keys_collected.end());
 
     new_keys_collected.push_back(c);
     new_graph.reactivate_node(gate_coords[toupper(c)]);
+    new_remaining_key_coords.erase(c);
 
-    recursive_search(dist_min, new_graph, key_coords, gate_coords, new_keys_collected, new_dist_total, key_coords[c]);
+    recursive_search(dist_min, new_graph, new_remaining_key_coords, gate_coords, new_keys_collected, new_dist_total, remaining_key_coords[c]);
 
   }
 
