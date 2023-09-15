@@ -2,9 +2,15 @@
 #include<fstream>
 #include<map>
 #include<vector>
+#include<chrono>
 #include<algorithm>
 
 using namespace std;
+
+auto g_start = chrono::steady_clock::now();
+
+double time_total = 0;
+double time_in_dijkstra = 0;
 
 typedef pair<int, int> Coordinate;
 
@@ -39,6 +45,8 @@ class Graph{
 
 template <typename T>
 void Graph<T>::run_dijkstra(T source){
+
+  auto this_start = chrono::steady_clock::now();
   
   dist.clear();
 
@@ -75,6 +83,12 @@ void Graph<T>::run_dijkstra(T source){
         dist[neighbor] = dist[node] + 1;
 
   }
+
+  auto this_end = chrono::steady_clock::now();
+
+  chrono::duration<double> elapsed_seconds = this_end - this_start;
+
+  time_in_dijkstra += elapsed_seconds.count();
 
 }
 
@@ -158,53 +172,61 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 
 }
 
-map<vector<char>, int> dist_min_for_given_keys_collected;
+map<string, pair<vector<pair<char, int>>, int>> dists_for_pos;
 
-void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, vector<char> keys_collected, int dist_total, Coordinate start){
+void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, string keys_collected, int dist_total, Coordinate start){
 
   if(dist_total >= dist_min) return;
 
-  if(dist_min_for_given_keys_collected.find(keys_collected) == dist_min_for_given_keys_collected.end()
-    || dist_min_for_given_keys_collected[keys_collected] > dist_total
-    )
-    dist_min_for_given_keys_collected[keys_collected] = dist_total;
-  else
-    return;
+  vector<pair<char, int>> reachable_keys_dists;
 
-  if(dist_min_for_given_keys_collected[keys_collected] > dist_min)
-    dist_min_for_given_keys_collected.erase(keys_collected);
+  if(dists_for_pos.find(keys_collected) == dists_for_pos.end()){
+    
+    graph.run_dijkstra(start);
+
+    for(auto & key : remaining_key_coords)
+      if(graph.dist[key.second] != infinity
+        && count(keys_collected.begin(), keys_collected.end(), key.first) == 0
+      )
+        reachable_keys_dists.push_back({key.first, graph.dist[key.second]});
+
+    dists_for_pos[keys_collected] = {reachable_keys_dists, dist_total};
+
+  }
+  else{
+    
+    reachable_keys_dists = dists_for_pos[keys_collected].first;
+
+    if(dists_for_pos[keys_collected].second > dist_total)
+      dists_for_pos[keys_collected].second = dist_total;
+    else
+      return;
+
+  }
+
+  sort(keys_collected.begin(), keys_collected.end());
   
   if(remaining_key_coords.size() == 0){
     
     if(dist_total < dist_min) dist_min = dist_total;
 
-    for(char c : keys_collected) cout<<c;
-    cout<<endl<<dist_total<<endl;
+    cout<<dist_total<<endl;
     return;
 
   }
 
-  graph.run_dijkstra(start);
+  for(auto & key : reachable_keys_dists){
+    
+    char & c = key.first;
 
-  vector<char> reachable_keys;
-
-  for(auto & key : remaining_key_coords)
-    if(graph.dist[key.second] != infinity
-      && count(keys_collected.begin(), keys_collected.end(), key.first) == 0
-    )
-      reachable_keys.push_back(key.first);
-
-  for(char & c : reachable_keys){
-
-    int new_dist_total = dist_total + graph.dist[remaining_key_coords[c]];
+    int new_dist_total = dist_total + key.second;
 
     map<char, Coordinate> new_remaining_key_coords(remaining_key_coords);
-    vector<char> new_keys_collected(keys_collected);
+    string new_keys_collected(keys_collected);
     Graph<Coordinate> new_graph(graph); 
-  
-    sort(new_keys_collected.begin(), new_keys_collected.end());
 
-    new_keys_collected.push_back(c);
+    new_keys_collected += c;
+
     new_graph.reactivate_node(gate_coords[toupper(c)]);
     new_remaining_key_coords.erase(c);
 
@@ -257,9 +279,17 @@ int main(){
 
   int dist_min = infinity;
 
-  recursive_search(dist_min, graph, key_coords, gate_coords, {}, 0, start);
+  recursive_search(dist_min, graph, key_coords, gate_coords, "", 0, start);
 
   cout<<dist_min<<endl;
+
+  auto this_end = chrono::steady_clock::now();
+
+  chrono::duration<double> elapsed_seconds = this_end - g_start;
+
+  time_total += elapsed_seconds.count();
+
+  cout<<time_total<<" "<<time_in_dijkstra<<endl;
 
 //  graph.print_pairs();
 
