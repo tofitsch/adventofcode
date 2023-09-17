@@ -111,7 +111,11 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 
         edges[neighbors.at(i).first].erase(remove(edges[neighbors.at(i).first].begin(), edges[neighbors.at(i).first].end(), (pair<T, int>){edge, neighbors.at(i).second}), edges[neighbors.at(i).first].end());
 
-        edges[neighbors.at(i).first].push_back(neighbors.at((i + 1) % 2));
+        pair<T, int> neighbor = neighbors.at((i + 1) % 2);
+
+        neighbor.second = neighbors.at(0).second + neighbors.at(1).second;
+
+        edges[neighbors.at(i).first].push_back(neighbor);
 
         sort_neighbors(neighbors.at(i).first);
 
