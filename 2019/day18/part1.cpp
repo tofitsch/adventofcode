@@ -164,7 +164,7 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 
 }
 
-map<string, pair<vector<pair<char, int>>, int>> dists_for_pos;
+map<string, vector<pair<char, int>>> dists_for_pos;
 map<string, int> min_dist_for_keys;
 
 void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, string keys_collected, int dist_total, Coordinate start){
@@ -185,7 +185,7 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
       )
         reachable_keys_dists.push_back({key.first, graph.dist[key.second]});
 
-    dists_for_pos[keys_collected] = {reachable_keys_dists, dist_total};
+    dists_for_pos[keys_collected] = reachable_keys_dists;
 
     auto routine_end = chrono::steady_clock::now(); //XXX
     chrono::duration<double> elapsed_seconds = routine_end - routine_start; //XXX
@@ -194,12 +194,7 @@ void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coord
   }
   else{
     
-    reachable_keys_dists = dists_for_pos[keys_collected].first;
-
-    if(dists_for_pos[keys_collected].second > dist_total)
-      dists_for_pos[keys_collected].second = dist_total;
-    else
-      return;
+    reachable_keys_dists = dists_for_pos[keys_collected];
 
   }
 
