@@ -21,8 +21,8 @@ class Graph{
   
   private:
 
-    map<T, vector<T>> edges;
-    map<T, vector<T>> deactivated_edges;
+    map<T, vector<pair<T, int>>> edges;
+    map<T, vector<pair<T, int>>> deactivated_edges;
 
     vector<T> queue;
 
@@ -77,9 +77,15 @@ void Graph<T>::run_dijkstra(T source){
 
     queue.erase(queue.begin() + min_dist_pos);
 
-    for(T & neighbor : edges[node])
+    for(auto & key : edges[node]){
+
+      T & neighbor = key.first;
+      int & weight = key.second;
+
       if(dist[node] + 1 < dist[neighbor])
-        dist[neighbor] = dist[node] + 1;
+        dist[neighbor] = dist[node] + weight;
+
+    }
 
   }
 
@@ -97,17 +103,17 @@ void Graph<T>::prune(vector<vector<char>> & grid){
     for(auto & key : edges){
 
       T edge = key.first;
-      vector<T> neighbors = key.second;
+      auto neighbors = key.second;
       
       if(neighbors.size() != 2 || grid[edge.first][edge.second] != '.') continue;
 
       for(int i : {0, 1}){
 
-        edges[neighbors.at(i)].erase(remove(edges[neighbors.at(i)].begin(), edges[neighbors.at(i)].end(), edge), edges[neighbors.at(i)].end());
+        edges[neighbors.at(i).first].erase(remove(edges[neighbors.at(i).first].begin(), edges[neighbors.at(i).first].end(), (pair<T, int>){edge, neighbors.at(i).second}), edges[neighbors.at(i).first].end());
 
-        edges[neighbors.at(i)].push_back(neighbors.at((i + 1) % 2));
+        edges[neighbors.at(i).first].push_back(neighbors.at((i + 1) % 2));
 
-        sort_neighbors(neighbors.at(i));
+        sort_neighbors(neighbors.at(i).first);
 
       }
 
@@ -128,8 +134,14 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 template <typename T>
 void Graph<T>::deactivate_node(T a){
   
-  for(T & b : edges[a])
-    edges[b].erase(remove(edges[b].begin(), edges[b].end(), a), edges[b].end());
+  for(auto & key : edges[a]){
+
+    T & b = key.first;
+    int & w_b = key.second;
+
+    edges[b].erase(remove(edges[b].begin(), edges[b].end(), (pair<T, int>){a, w_b}), edges[b].end());
+
+  }
 
   deactivated_edges[a] = edges[a];
 
@@ -140,8 +152,14 @@ void Graph<T>::deactivate_node(T a){
 template <typename T>
 void Graph<T>::reactivate_node(T a){
   
-  for(T & b : deactivated_edges[a])
-    edges[b].push_back(a);
+  for(auto & key : deactivated_edges[a]){
+
+    T & b = key.first;
+    int & w_b = key.second;
+
+    edges[b].push_back({a, w_b});
+
+  }
 
   edges[a] = deactivated_edges[a];
     
@@ -150,11 +168,11 @@ void Graph<T>::reactivate_node(T a){
 template <typename T>
 void Graph<T>::add_edge(T a, T b){
   
-  if(edges.count(a) > 0) edges[a].push_back(b);
-  else edges[a] = {b};
+  if(edges.count(a) > 0) edges[a].push_back({b, 1});
+  else edges[a] = {{b, 1}};
 
-  if(edges.count(b) > 0) edges[b].push_back(a);
-  else edges[b] = {a};
+  if(edges.count(b) > 0) edges[b].push_back({a, 1});
+  else edges[b] = {{a, 1}};
 
   sort_neighbors(a);
   sort_neighbors(b);
@@ -174,7 +192,7 @@ void Graph<T>::print(vector<vector<char>> & grid){
   for(auto & edge : edges){
     cout<<"("<<edge.first.first<<","<<edge.first.second<<") '"<<grid[edge.first.first][edge.first.second]<<"'"<<endl;
     for(auto & x : edge.second){
-      cout<<"  ("<<x.first<<","<<x.second<<") '"<<grid[x.first][x.second]<<"'"<<endl;
+      cout<<"  ("<<x.first.first<<","<<x.first.second<<") '"<<grid[x.first.first][x.first.second]<<"' "<<x.second<<endl;
     }
   }
 }
