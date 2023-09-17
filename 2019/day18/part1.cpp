@@ -35,10 +35,11 @@ class Graph{
     void deactivate_node(T);
     void reactivate_node(T);
 
-    void print_pairs();
-    void print_scalars();
+    void print(vector<vector<char>> &);
 
+    void sort_neighbors(T);
     void run_dijkstra(T);
+    void prune(vector<vector<char>> &);
 
 };
 
@@ -85,6 +86,46 @@ void Graph<T>::run_dijkstra(T source){
 }
 
 template <typename T>
+void Graph<T>::prune(vector<vector<char>> & grid){
+  
+  bool done = false;
+  
+  while(!done){
+ 
+    done = true;
+
+    for(auto & key : edges){
+
+      T edge = key.first;
+      vector<T> neighbors = key.second;
+      
+      if(neighbors.size() != 2 || grid[edge.first][edge.second] != '.') continue;
+
+      for(int i : {0, 1}){
+
+        edges[neighbors.at(i)].erase(remove(edges[neighbors.at(i)].begin(), edges[neighbors.at(i)].end(), edge), edges[neighbors.at(i)].end());
+
+        edges[neighbors.at(i)].push_back(neighbors.at((i + 1) % 2));
+
+        sort_neighbors(neighbors.at(i));
+
+      }
+
+      cout<<"pruning "<<edge.first<<" "<<edge.second<<" '"<<grid[edge.first][edge.second]<<"'"<<endl;
+
+      edges.erase(edge);
+
+      done = false;
+
+      break;
+
+    }
+
+  }
+
+}
+
+template <typename T>
 void Graph<T>::deactivate_node(T a){
   
   for(T & b : edges[a])
@@ -112,33 +153,28 @@ void Graph<T>::add_edge(T a, T b){
   if(edges.count(a) > 0) edges[a].push_back(b);
   else edges[a] = {b};
 
-  sort(edges[a].begin(), edges[a].end());
-  edges[a].erase(unique(edges[a].begin(), edges[a].end()), edges[a].end());
-
   if(edges.count(b) > 0) edges[b].push_back(a);
   else edges[b] = {a};
 
-  sort(edges[b].begin(), edges[b].end());
-  edges[b].erase(unique(edges[b].begin(), edges[b].end()), edges[b].end());
+  sort_neighbors(a);
+  sort_neighbors(b);
 
 }
 
 template <typename T>
-void Graph<T>::print_pairs(){
-  for(auto & edge : edges){
-    cout<<"("<<edge.first.first<<","<<edge.first.second<<")"<<endl;
-    for(auto & x : edge.second){
-      cout<<"  ("<<x.first<<","<<x.second<<")"<<endl;
-    }
-  }
+void Graph<T>::sort_neighbors(T a){
+
+  sort(edges[a].begin(), edges[a].end());
+  edges[a].erase(unique(edges[a].begin(), edges[a].end()), edges[a].end());
+
 }
 
 template <typename T>
-void Graph<T>::print_scalars(){
+void Graph<T>::print(vector<vector<char>> & grid){
   for(auto & edge : edges){
-    cout<<edge.first<<endl;
+    cout<<"("<<edge.first.first<<","<<edge.first.second<<") '"<<grid[edge.first.first][edge.first.second]<<"'"<<endl;
     for(auto & x : edge.second){
-      cout<<"  "<<x<<endl;
+      cout<<"  ("<<x.first<<","<<x.second<<") '"<<grid[x.first][x.second]<<"'"<<endl;
     }
   }
 }
@@ -168,7 +204,7 @@ map<string, vector<pair<char, int>>> dists_for_pos;
 map<string, int> min_dist_for_keys;
 
 void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, string keys_collected, int dist_total, Coordinate start){
-
+  
   if(dist_total >= dist_min) return;
 
   vector<pair<char, int>> reachable_keys_dists;
@@ -272,9 +308,14 @@ int main(){
 
     }
   }
+   
+
+  graph.prune(grid);
 
   for(auto & gate : gate_coords)
     graph.deactivate_node(gate.second);
+
+  graph.print(grid);
 
   int dist_min = infinity;
 
@@ -289,7 +330,5 @@ int main(){
   time_total += elapsed_seconds.count();
 
   cout<<time_total<<" "<<time_in_routine<<endl;
-
-//  graph.print_pairs();
 
 }
