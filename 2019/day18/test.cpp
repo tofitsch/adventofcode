@@ -26,6 +26,7 @@ class Graph{
 
     T* nodes;
     vector<Edge<T>> edges;
+    vector<int> non_empty_nodes;
 
     vector<int> get_connections(T*, bool);
 
@@ -81,6 +82,7 @@ void Graph<T>::add_edge(T a, T b, int weight){
     
     nodes[n_nodes] = a;
     ptr_a = &nodes[n_nodes];
+    non_empty_nodes.push_back(n_nodes);
     n_nodes++;
 
   }
@@ -89,6 +91,7 @@ void Graph<T>::add_edge(T a, T b, int weight){
     
     nodes[n_nodes] = b;
     ptr_b = &nodes[n_nodes];
+    non_empty_nodes.push_back(n_nodes);
     n_nodes++;
 
   }
@@ -143,7 +146,7 @@ void Graph<T>::prune(vector<vector<char>> & grid){
  
     done = true;
 
-    for(int n=0; n<n_nodes; n++){
+    for(int n : non_empty_nodes){
       
       char tile = grid[nodes[n].first][nodes[n].second];
       
@@ -177,6 +180,8 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 
       for(int & e : edges_all)
         edges.erase(edges.begin() + e);
+
+      non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
 
       done = false;
 
@@ -248,7 +253,7 @@ int main(){
   map<char, Coordinate> key_coords;
   Coordinate start;
 
-  read_grid("example.txt", grid, gate_coords, key_coords, start);
+  read_grid("input.txt", grid, gate_coords, key_coords, start);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
