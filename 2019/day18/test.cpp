@@ -27,13 +27,17 @@ class Graph{
     T* nodes;
     vector<Edge<T>> edges;
     vector<int> non_empty_nodes;
+    int n_nodes = 0;
+    map<char, T*> node_of;
+    map<char, vector<Edge<T>*>> edges_in_of;
+    map<char, vector<Edge<T>*>> edges_out_of;
 
     vector<int> get_connections(T*, bool);
 
   public:
-
-    int n_nodes = 0;
     
+    string chars = "";
+
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
     
@@ -41,6 +45,7 @@ class Graph{
     void add_edge_or_update_weight(T*, T*, int);
     void prune(vector<vector<char>> &);
     void print(vector<vector<char>> &);
+    void calc_maps(vector<vector<char>> &);
 
 };
 
@@ -138,6 +143,32 @@ vector<int> Graph<T>::get_connections(T* node, bool in){
 }
 
 template <typename T>
+void Graph<T>::calc_maps(vector<vector<char>> & grid){
+
+ for(int & n : non_empty_nodes){
+
+   char tile = grid[nodes[n].first][nodes[n].second];
+
+   chars += tile;
+
+   node_of[tile] = &nodes[n];
+
+   edges_in_of[tile] = {};
+   edges_out_of[tile] = {};
+
+   vector<int> edges_in = get_connections(&nodes[n], true);
+   vector<int> edges_out = get_connections(&nodes[n], true);
+
+   for(int & i : edges_in)  edges_in_of[tile].push_back(&edges[i]);
+   for(int & i : edges_out) edges_out_of[tile].push_back(&edges[i]);
+
+ }
+
+ sort(chars.begin(), chars.end());
+
+}
+
+template <typename T>
 void Graph<T>::prune(vector<vector<char>> & grid){
   
   bool done = false;
@@ -146,7 +177,7 @@ void Graph<T>::prune(vector<vector<char>> & grid){
  
     done = true;
 
-    for(int n : non_empty_nodes){
+    for(int & n : non_empty_nodes){
       
       char tile = grid[nodes[n].first][nodes[n].second];
       
@@ -208,7 +239,7 @@ void Graph<T>::print(vector<vector<char>> & grid){
 }
 
 void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords, Coordinate & start){
-
+  
   ifstream in_file(in_file_name);
 
   string line, field;
@@ -253,7 +284,7 @@ int main(){
   map<char, Coordinate> key_coords;
   Coordinate start;
 
-  read_grid("input.txt", grid, gate_coords, key_coords, start);
+  read_grid("example.txt", grid, gate_coords, key_coords, start);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
@@ -265,7 +296,11 @@ int main(){
 
   graph.prune(grid);
 
+  graph.calc_maps(grid);
+
   cout<<endl;
   graph.print(grid);
+
+  cout<<graph.chars<<endl;
 
 }
