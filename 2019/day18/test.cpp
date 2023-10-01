@@ -8,6 +8,8 @@ using namespace std;
 
 typedef pair<int, int> Coordinate;
 
+const int infinity = 1e8;
+
 template <typename T>
 struct Edge{
   
@@ -26,17 +28,28 @@ class Graph{
 
     T* nodes;
     vector<Edge<T>> edges;
-    vector<int> non_empty_nodes;
-    int n_nodes = 0;
-    map<char, T*> node_of;
-    map<char, vector<Edge<T>*>> edges_in_of;
-    map<char, vector<Edge<T>*>> edges_out_of;
 
-    vector<int> get_connections(T*, bool);
+    vector<int> non_empty_nodes;
+
+    int n_nodes = 0;
+
+    vector<int> queue;
+
+    map<int, vector<int>> neighbours_of;
+    map<int, vector<int>> weights_of;
+
+    map<T*, int> idx_of_node;
+    map<char, int> idx_of_char;
+    map<int, char> char_of_idx;
+
+    map<int, int> dist_to_node;
+
+    vector<int> get_connections(T*, string);
 
   public:
     
     string chars = "";
+    map<char, int> dist_to_char;
 
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
@@ -46,8 +59,72 @@ class Graph{
     void prune(vector<vector<char>> &);
     void print(vector<vector<char>> &);
     void calc_maps(vector<vector<char>> &);
+    void run_dijkstra(int);
+    void run_dijkstra(char);
 
 };
+
+template <typename T>
+void Graph<T>::run_dijkstra(char source){
+  
+  run_dijkstra(idx_of_char[source]);
+
+}
+
+template <typename T>
+void Graph<T>::run_dijkstra(int idx_source){
+
+  queue.clear();
+  dist_to_node.clear();
+
+  for(int & n : non_empty_nodes){
+    
+    dist_to_node[n] = (n == idx_source) ? 0 : infinity;
+
+    queue.push_back(n);
+
+  }
+
+  while(queue.size() > 0){
+
+    int min_dist = infinity;
+    int min_dist_pos;
+
+    for(int i=0; i<queue.size(); i++){
+      if(dist_to_node[queue.at(i)] <= min_dist){
+        
+        min_dist = dist_to_node[queue.at(i)];
+        min_dist_pos = i;
+        
+      }
+    }
+
+    int node_idx = queue.at(min_dist_pos);
+
+    queue.erase(queue.begin() + min_dist_pos);
+
+    for(int i=0; i<neighbours_of[node_idx].size(); i++){
+      
+      if(find(queue.begin(), queue.end(), neighbours_of[node_idx][i]) == queue.end()) continue;
+      
+      int neighbour_idx = neighbours_of[node_idx][i];
+      int neighbour_weight = weights_of[node_idx][i];
+
+      cout<<"TEST "<<node_idx<<" "<<dist_to_node[node_idx] + neighbour_weight<<" "<<dist_to_node[neighbour_idx]<<endl;
+
+      if(dist_to_node[node_idx] + neighbour_weight < dist_to_node[neighbour_idx])
+        dist_to_node[neighbour_idx] = dist_to_node[node_idx] + neighbour_weight;
+
+    }
+
+  }
+
+  dist_to_char.clear();
+
+  for(pair<int, int> key : dist_to_node)
+    dist_to_char[char_of_idx[key.first]] = key.second;
+
+}
 
 template <typename T>
 void Graph<T>::add_edge_or_update_weight(T* ptr_a, T* ptr_b, int weight){
@@ -127,16 +204,18 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 }
 
 template <typename T>
-vector<int> Graph<T>::get_connections(T* node, bool in){
+vector<int> Graph<T>::get_connections(T* node, string type){
   
- vector<int> connections;
+  vector<int> connections;
   
   for(int e=0; e<edges.size(); e++){
 
-    if(!in && edges.at(e).in == node) connections.push_back(e);
-    if(in && edges.at(e).out == node) connections.push_back(e);
+    if((type == "all" || type == "in")  && edges.at(e).in == node)  connections.push_back(e);
+    if((type == "all" || type == "out") && edges.at(e).out == node) connections.push_back(e);
      
   }
+
+  if(type == "all") cout<<"test "<<connections.size()<<endl;
 
   return connections;
 
@@ -144,6 +223,14 @@ vector<int> Graph<T>::get_connections(T* node, bool in){
 
 template <typename T>
 void Graph<T>::calc_maps(vector<vector<char>> & grid){
+  
+ idx_of_char.clear();
+ char_of_idx.clear();
+ neighbours_of.clear();
+ weights_of.clear();
+
+ for(int & n : non_empty_nodes)
+   idx_of_node[&nodes[n]] = n;
 
  for(int & n : non_empty_nodes){
 
@@ -151,16 +238,19 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
 
    chars += tile;
 
-   node_of[tile] = &nodes[n];
+   idx_of_char[tile] = n;
+   char_of_idx[n] = tile;
 
-   edges_in_of[tile] = {};
-   edges_out_of[tile] = {};
+   neighbours_of[n] = {};
 
-   vector<int> edges_in = get_connections(&nodes[n], true);
-   vector<int> edges_out = get_connections(&nodes[n], true);
+   vector<int> edges_in = get_connections(&nodes[n], "in");
+   vector<int> edges_out = get_connections(&nodes[n], "out");
 
-   for(int & i : edges_in)  edges_in_of[tile].push_back(&edges[i]);
-   for(int & i : edges_out) edges_out_of[tile].push_back(&edges[i]);
+   for(int & i : edges_in) neighbours_of[n].push_back(idx_of_node[edges[i].out]);
+   for(int & i : edges_out) neighbours_of[n].push_back(idx_of_node[edges[i].in]);
+
+   for(int & i : edges_in) weights_of[n].push_back(edges[i].weight);
+   for(int & i : edges_out) weights_of[n].push_back(edges[i].weight);
 
  }
 
@@ -183,14 +273,9 @@ void Graph<T>::prune(vector<vector<char>> & grid){
       
       if(isalpha(tile) || tile == '@') continue;
       
-      vector<int> edges_in  = get_connections(&nodes[n], true);
-      vector<int> edges_out = get_connections(&nodes[n], false);
-
-      vector<int> edges_all = edges_in;
-
-      edges_all.insert(edges_all.end(), edges_out.begin(), edges_out.end());
-      sort(edges_all.begin(), edges_all.end(), greater<>());
-      edges_all.erase(unique(edges_all.begin(), edges_all.end()), edges_all.end());
+      vector<int> edges_in  = get_connections(&nodes[n], "in");
+      vector<int> edges_out = get_connections(&nodes[n], "out");
+      vector<int> edges_all = get_connections(&nodes[n], "all");
 
       if(edges_all.size() == 0) continue;
 
@@ -232,7 +317,7 @@ void Graph<T>::print(vector<vector<char>> & grid){
       char tile_in = grid[edge.in->first][edge.in->second];
       char tile_out = grid[edge.out->first][edge.out->second];
 
-      cout<<tile_in<<" ("<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
+      cout<<tile_in<<" ("<<edge.in<<" | "<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out<<" | "<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
     
   }
 
@@ -292,14 +377,16 @@ int main(){
 
   make_graph(grid, graph);
 
-  graph.print(grid);
-
   graph.prune(grid);
 
   graph.calc_maps(grid);
 
-  cout<<endl;
   graph.print(grid);
+
+  graph.run_dijkstra('@');
+
+  for(pair<char, int> key : graph.dist_to_char)
+    cout<<key.first<<" : "<<key.second<<endl;
 
   cout<<graph.chars<<endl;
 
