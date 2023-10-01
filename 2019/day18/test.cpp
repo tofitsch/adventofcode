@@ -4,6 +4,8 @@
 #include<vector>
 #include<algorithm>
 
+#define ASCII_UPPER_LOWER_CASE_DIFF 32
+
 using namespace std;
 
 typedef pair<int, int> Coordinate;
@@ -49,7 +51,7 @@ class Graph{
   public:
     
     string chars = "";
-    map<char, int> dist_to_char;
+    map<int, char> dist_to_key;
 
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
@@ -59,25 +61,29 @@ class Graph{
     void prune(vector<vector<char>> &);
     void print(vector<vector<char>> &);
     void calc_maps(vector<vector<char>> &);
-    void run_dijkstra(int);
-    void run_dijkstra(char);
+    void run_dijkstra(int, string);
+    void run_dijkstra(char, string);
 
 };
 
 template <typename T>
-void Graph<T>::run_dijkstra(char source){
+void Graph<T>::run_dijkstra(char source, string keys){
   
-  run_dijkstra(idx_of_char[source]);
+  run_dijkstra(idx_of_char[source], keys);
 
 }
 
 template <typename T>
-void Graph<T>::run_dijkstra(int idx_source){
+void Graph<T>::run_dijkstra(int idx_source, string keys){
 
   queue.clear();
   dist_to_node.clear();
 
   for(int & n : non_empty_nodes){
+    
+    char tile = char_of_idx[n];
+
+    if(isupper(tile) && find(keys.begin(), keys.end(), tile + ASCII_UPPER_LOWER_CASE_DIFF) == keys.end()) continue;
     
     dist_to_node[n] = (n == idx_source) ? 0 : infinity;
 
@@ -117,10 +123,20 @@ void Graph<T>::run_dijkstra(int idx_source){
 
   }
 
-  dist_to_char.clear();
+  dist_to_key.clear();
 
-  for(pair<int, int> key : dist_to_node)
-    dist_to_char[char_of_idx[key.first]] = key.second;
+  for(pair<int, int> key : dist_to_node){
+
+    char tile = char_of_idx[key.first];
+    int dist = key.second;
+
+    if(islower(tile) &&
+       dist < infinity &&
+       find(keys.begin(), keys.end(), tile) == keys.end()
+      )
+      dist_to_key[tile] = dist;
+
+  }
 
 }
 
@@ -385,9 +401,9 @@ int main(){
 
   graph.print(grid);
 
-  graph.run_dijkstra('@');
+  graph.run_dijkstra('@', "ab");
 
-  for(pair<char, int> key : graph.dist_to_char)
+  for(pair<char, int> key : graph.dist_to_key)
     cout<<key.first<<" : "<<key.second<<endl;
 
   cout<<graph.chars<<endl;
