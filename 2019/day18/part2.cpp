@@ -364,15 +364,15 @@ void replace_entrances(vector<vector<char>> & grid, Coordinate & start){
   int y = start.first;
   int x = start.second;
 
-  grid[x + 1][y] = '#';
-  grid[x - 1][y] = '#';
-  grid[x][y + 1] = '#';
-  grid[x][y + 1] = '#';
+  grid[y + 1][x] = '#';
+  grid[y - 1][x] = '#';
+  grid[y][x + 1] = '#';
+  grid[y][x + 1] = '#';
 
-  grid[x - 1][y - 1] = '0';
-  grid[x + 1][y - 1] = '1';
-  grid[x - 1][y + 1] = '2';
-  grid[x + 1][y + 1] = '3';
+  grid[y - 1][x - 1] = '0';
+  grid[y + 1][x - 1] = '1';
+  grid[y - 1][x + 1] = '2';
+  grid[y + 1][x + 1] = '3';
 
 }
 
@@ -470,7 +470,7 @@ int main(){
   map<char, Coordinate> gate_coords;
   map<char, Coordinate> key_coords;
 
-  read_grid("input.txt", grid, gate_coords, key_coords);
+  read_grid("example.txt", grid, gate_coords, key_coords);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
