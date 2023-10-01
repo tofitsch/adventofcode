@@ -46,7 +46,7 @@ class Graph{
 
     map<int, int> dist_to_node;
 
-    map<string, map<int, char>> dijkstra_memoized;
+    map<string, map<char, int>> dijkstra_memoized;
 
     vector<int> get_connections(T*, string);
 
@@ -54,7 +54,7 @@ class Graph{
     
     string chars = "";
     string keys = "";
-    map<int, char> dist_to_key;
+    map<char, int> dist_to_key;
 
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
@@ -419,7 +419,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
   
   graph.run_dijkstra(source, keys);
 
-  map<int, char> dist_to_key = graph.dist_to_key;
+  map<char, int> dist_to_key = graph.dist_to_key;
 
   for(pair<char, int> key : dist_to_key){
     
@@ -441,7 +441,7 @@ int main(){
   map<char, Coordinate> key_coords;
   Coordinate start;
 
-  read_grid("example.txt", grid, gate_coords, key_coords, start);
+  read_grid("input.txt", grid, gate_coords, key_coords, start);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
