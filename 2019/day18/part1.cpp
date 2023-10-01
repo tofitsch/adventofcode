@@ -399,7 +399,7 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 }
 
 template <typename T>
-void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & dists_memoized, int dist, char source, string keys){
+void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dists_memoized, int dist, char source, string keys){
   
   if(dist >= min_dist) return;
 
@@ -407,8 +407,12 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & dists_m
 
   if(keys.size() == graph.keys.size()) cout<<state<<" "<<dist<<endl;
   
-  if(dists_memoized.find(state) == dists_memoized.end()) dists_memoized[state] = dist;
-  else if(dists_memoized[state] <= dist) return;
+  if(min_dists_memoized.find(state) == min_dists_memoized.end() ||
+     min_dists_memoized[state] > dist
+    )
+    min_dists_memoized[state] = dist;
+  else
+    return;
   
   if(keys.size() == graph.keys.size() && dist < min_dist)
     min_dist = dist;
@@ -424,7 +428,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & dists_m
 
     sort(new_keys.begin(), new_keys.end());
 
-    recursive_find(graph, min_dist, dists_memoized, new_dist, key.first, new_keys);
+    recursive_find(graph, min_dist, min_dists_memoized, new_dist, key.first, new_keys);
 
   }
 
@@ -453,9 +457,9 @@ int main(){
 
   int min_dist = infinity;
   
-  map<string, int> dists_memoized;
+  map<string, int> min_dists_memoized;
 
-  recursive_find(graph, min_dist, dists_memoized, 0, '@', "");
+  recursive_find(graph, min_dist, min_dists_memoized, 0, '@', "");
 
   cout<<min_dist<<endl;
 
