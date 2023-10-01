@@ -2,203 +2,200 @@
 #include<fstream>
 #include<map>
 #include<vector>
-#include<chrono>
 #include<algorithm>
 
+#define ASCII_UPPER_LOWER_CASE_DIFF 32
+
 using namespace std;
-
-auto g_start = chrono::steady_clock::now();
-
-double time_total = 0;
-double time_in_routine = 0;
 
 typedef pair<int, int> Coordinate;
 
 const int infinity = 1e8;
 
 template <typename T>
-class Graph{
+struct Edge{
   
-  private:
+  T* in;
+  T* out;
+  int weight;
 
-    map<T, vector<pair<T, int>>> edges;
-    map<T, vector<pair<T, int>>> deactivated_edges;
-
-    vector<T> queue;
-
-  public:
-
-    map<T, int> dist;
-
-    void add_edge(T, T);
-
-    void deactivate_node(T);
-    void reactivate_node(T);
-
-    void print(vector<vector<char>> &);
-
-    void sort_neighbors(T);
-    void run_dijkstra(T);
-    void prune(vector<vector<char>> &);
+  Edge(T* a, T* b, int w) : in(a), out(b), weight(w) {}
 
 };
 
+template <typename T>
+class Graph{
+ 
+  private:
+
+    T* nodes;
+    vector<Edge<T>> edges;
+
+    vector<int> non_empty_nodes;
+
+    int n_nodes = 0;
+
+    vector<int> queue;
+
+    map<int, vector<int>> neighbours_of;
+    map<int, vector<int>> weights_of;
+
+    map<T*, int> idx_of_node;
+    map<char, int> idx_of_char;
+    map<int, char> char_of_idx;
+
+    map<int, int> dist_to_node;
+
+    vector<int> get_connections(T*, string);
+
+  public:
+    
+    string chars = "";
+    map<int, char> dist_to_key;
+
+    Graph(int size) : nodes(new T[size]) {}
+    ~Graph(){delete[] nodes;}
+    
+    void add_edge(T, T, int);
+    void add_edge_or_update_weight(T*, T*, int);
+    void prune(vector<vector<char>> &);
+    void print(vector<vector<char>> &);
+    void calc_maps(vector<vector<char>> &);
+    void run_dijkstra(int, string);
+    void run_dijkstra(char, string);
+
+};
 
 template <typename T>
-void Graph<T>::run_dijkstra(T source){
+void Graph<T>::run_dijkstra(char source, string keys){
+  
+  run_dijkstra(idx_of_char[source], keys);
 
-  dist.clear();
+}
 
-  for(auto & key : edges){
+template <typename T>
+void Graph<T>::run_dijkstra(int idx_source, string keys){
+
+  queue.clear();
+  dist_to_node.clear();
+
+  for(int & n : non_empty_nodes){
     
-    T node = key.first;
+    char tile = char_of_idx[n];
 
-    dist[node] = node == source ? 0 : infinity;
+    if(isupper(tile) && find(keys.begin(), keys.end(), tile + ASCII_UPPER_LOWER_CASE_DIFF) == keys.end()) continue;
+    
+    dist_to_node[n] = (n == idx_source) ? 0 : infinity;
 
-    queue.push_back(node);
+    queue.push_back(n);
 
   }
 
   while(queue.size() > 0){
-    
+
     int min_dist = infinity;
     int min_dist_pos;
 
     for(int i=0; i<queue.size(); i++){
-      if(dist[queue.at(i)] <= min_dist){
+      if(dist_to_node[queue.at(i)] <= min_dist){
         
-        min_dist = dist[queue.at(i)];
+        min_dist = dist_to_node[queue.at(i)];
         min_dist_pos = i;
         
       }
     }
 
-    T node = queue.at(min_dist_pos);
+    int node_idx = queue.at(min_dist_pos);
 
     queue.erase(queue.begin() + min_dist_pos);
 
-    for(auto & key : edges[node]){
-
-      T & neighbor = key.first;
-      int & weight = key.second;
-
-      if(dist[node] + 1 < dist[neighbor])
-        dist[neighbor] = dist[node] + weight;
-
-    }
-
-  }
-
-}
-
-template <typename T>
-void Graph<T>::prune(vector<vector<char>> & grid){
-  
-  bool done = false;
-  
-  while(!done){
- 
-    done = true;
-
-    for(auto & key : edges){
-
-      T edge = key.first;
-      auto neighbors = key.second;
+    for(int i=0; i<neighbours_of[node_idx].size(); i++){
       
-      if(neighbors.size() != 2 || grid[edge.first][edge.second] != '.') continue;
+      if(find(queue.begin(), queue.end(), neighbours_of[node_idx][i]) == queue.end()) continue;
+      
+      int neighbour_idx = neighbours_of[node_idx][i];
+      int neighbour_weight = weights_of[node_idx][i];
 
-      for(int i : {0, 1}){
-
-        edges[neighbors.at(i).first].erase(remove(edges[neighbors.at(i).first].begin(), edges[neighbors.at(i).first].end(), (pair<T, int>){edge, neighbors.at(i).second}), edges[neighbors.at(i).first].end());
-
-        pair<T, int> neighbor = neighbors.at((i + 1) % 2);
-
-        neighbor.second = neighbors.at(0).second + neighbors.at(1).second;
-
-        edges[neighbors.at(i).first].push_back(neighbor);
-
-        sort_neighbors(neighbors.at(i).first);
-
-      }
-
-      cout<<"pruning "<<edge.first<<" "<<edge.second<<" '"<<grid[edge.first][edge.second]<<"'"<<endl;
-
-      edges.erase(edge);
-
-      done = false;
-
-      break;
+      if(dist_to_node[node_idx] + neighbour_weight < dist_to_node[neighbour_idx])
+        dist_to_node[neighbour_idx] = dist_to_node[node_idx] + neighbour_weight;
 
     }
 
   }
 
-}
+  dist_to_key.clear();
 
-template <typename T>
-void Graph<T>::deactivate_node(T a){
-  
-  for(auto & key : edges[a]){
+  for(pair<int, int> key : dist_to_node){
 
-    T & b = key.first;
-    int & w_b = key.second;
+    char tile = char_of_idx[key.first];
+    int dist = key.second;
 
-    edges[b].erase(remove(edges[b].begin(), edges[b].end(), (pair<T, int>){a, w_b}), edges[b].end());
-
-  }
-
-  deactivated_edges[a] = edges[a];
-
-  edges[a] = {};
-    
-}
-
-template <typename T>
-void Graph<T>::reactivate_node(T a){
-  
-  for(auto & key : deactivated_edges[a]){
-
-    T & b = key.first;
-    int & w_b = key.second;
-
-    edges[b].push_back({a, w_b});
+    if(islower(tile) &&
+       dist < infinity &&
+       find(keys.begin(), keys.end(), tile) == keys.end()
+      )
+      dist_to_key[tile] = dist;
 
   }
 
-  edges[a] = deactivated_edges[a];
-    
 }
 
 template <typename T>
-void Graph<T>::add_edge(T a, T b){
+void Graph<T>::add_edge_or_update_weight(T* ptr_a, T* ptr_b, int weight){
   
-  if(edges.count(a) > 0) edges[a].push_back({b, 1});
-  else edges[a] = {{b, 1}};
+  if(ptr_a == ptr_b) return;
 
-  if(edges.count(b) > 0) edges[b].push_back({a, 1});
-  else edges[b] = {{a, 1}};
+  for(Edge<T> & edge : edges){
 
-  sort_neighbors(a);
-  sort_neighbors(b);
+    if((edge.in == ptr_a && edge.out == ptr_b) ||
+       (edge.in == ptr_b && edge.out == ptr_a)
+    ){
+      
+      if(edge.weight > weight) edge.weight = weight;
+      
+      return;
 
-}
-
-template <typename T>
-void Graph<T>::sort_neighbors(T a){
-
-  sort(edges[a].begin(), edges[a].end());
-  edges[a].erase(unique(edges[a].begin(), edges[a].end()), edges[a].end());
-
-}
-
-template <typename T>
-void Graph<T>::print(vector<vector<char>> & grid){
-  for(auto & edge : edges){
-    cout<<"("<<edge.first.first<<","<<edge.first.second<<") '"<<grid[edge.first.first][edge.first.second]<<"'"<<endl;
-    for(auto & x : edge.second){
-      cout<<"  ("<<x.first.first<<","<<x.first.second<<") '"<<grid[x.first.first][x.first.second]<<"' "<<x.second<<endl;
     }
+
   }
+
+  edges.push_back(Edge<T>(ptr_a, ptr_b, weight));
+
+}
+
+template <typename T>
+void Graph<T>::add_edge(T a, T b, int weight){
+  
+  T* ptr_a = nullptr;
+  T* ptr_b = nullptr;
+
+  for(int n=0; n<n_nodes; n++){
+
+    if(nodes[n] == a) ptr_a = &nodes[n];
+    if(nodes[n] == b) ptr_b = &nodes[n];
+
+  }
+
+  if(ptr_a == nullptr){
+    
+    nodes[n_nodes] = a;
+    ptr_a = &nodes[n_nodes];
+    non_empty_nodes.push_back(n_nodes);
+    n_nodes++;
+
+  }
+
+  if(ptr_b == nullptr){
+    
+    nodes[n_nodes] = b;
+    ptr_b = &nodes[n_nodes];
+    non_empty_nodes.push_back(n_nodes);
+    n_nodes++;
+
+  }
+
+  add_edge_or_update_weight(ptr_a, ptr_b, weight);
+
 }
 
 vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid){
@@ -222,84 +219,133 @@ vector<Coordinate> get_neighbours(Coordinate coord, vector<vector<char>> & grid)
 
 }
 
-map<string, vector<pair<char, int>>> dists_for_pos;
-map<string, int> min_dist_for_keys;
-
-void recursive_search(int & dist_min, Graph<Coordinate> & graph, map<char, Coordinate> & remaining_key_coords, map<char, Coordinate> & gate_coords, string keys_collected, int dist_total, Coordinate start){
+template <typename T>
+vector<int> Graph<T>::get_connections(T* node, string type){
   
-  if(dist_total >= dist_min) return;
-
-  vector<pair<char, int>> reachable_keys_dists;
-
-  if(dists_for_pos.find(keys_collected) == dists_for_pos.end()){
-    
-    auto routine_start = chrono::steady_clock::now(); //XXX
-
-    graph.run_dijkstra(start);
-
-    for(auto & key : remaining_key_coords)
-      if(graph.dist[key.second] != infinity
-        && count(keys_collected.begin(), keys_collected.end(), key.first) == 0
-      )
-        reachable_keys_dists.push_back({key.first, graph.dist[key.second]});
-
-    dists_for_pos[keys_collected] = reachable_keys_dists;
-
-    auto routine_end = chrono::steady_clock::now(); //XXX
-    chrono::duration<double> elapsed_seconds = routine_end - routine_start; //XXX
-    time_in_routine += elapsed_seconds.count(); //XXX
-
-  }
-  else{
-    
-    reachable_keys_dists = dists_for_pos[keys_collected];
-
-  }
-
-  sort(keys_collected.begin(), keys_collected.end());
-    
-  if(min_dist_for_keys[keys_collected] > 0 && min_dist_for_keys[keys_collected] <= dist_total )
-    return;
-  else
-    min_dist_for_keys[keys_collected] = dist_total;
+  vector<int> connections;
   
-  if(remaining_key_coords.size() == 0){
-    
-    if(dist_total < dist_min) dist_min = dist_total;
+  for(int e=0; e<edges.size(); e++){
 
-    cout<<dist_total<<endl;
-    return;
-
+    if((type == "all" || type == "in")  && edges.at(e).in == node)  connections.push_back(e);
+    if((type == "all" || type == "out") && edges.at(e).out == node) connections.push_back(e);
+     
   }
 
-  for(auto & key : reachable_keys_dists){
-    
-    char & c = key.first;
+  sort(connections.begin(), connections.end(), greater<int>());
 
-    int new_dist_total = dist_total + key.second;
+  return connections;
 
-    map<char, Coordinate> new_remaining_key_coords(remaining_key_coords);
-    string new_keys_collected(keys_collected);
-    Graph<Coordinate> new_graph(graph); 
+}
 
-    new_keys_collected += c;
+template <typename T>
+void Graph<T>::calc_maps(vector<vector<char>> & grid){
+  
+ idx_of_char.clear();
+ char_of_idx.clear();
+ neighbours_of.clear();
+ weights_of.clear();
 
-    new_graph.reactivate_node(gate_coords[toupper(c)]);
-    new_remaining_key_coords.erase(c);
+ for(int & n : non_empty_nodes)
+   idx_of_node[&nodes[n]] = n;
 
-    recursive_search(dist_min, new_graph, new_remaining_key_coords, gate_coords, new_keys_collected, new_dist_total, remaining_key_coords[c]);
+ for(int & n : non_empty_nodes){
+
+   char tile = grid[nodes[n].first][nodes[n].second];
+
+   chars += tile;
+
+   idx_of_char[tile] = n;
+   char_of_idx[n] = tile;
+
+   neighbours_of[n] = {};
+
+   vector<int> edges_in = get_connections(&nodes[n], "in");
+   vector<int> edges_out = get_connections(&nodes[n], "out");
+
+   for(int & i : edges_in) neighbours_of[n].push_back(idx_of_node[edges[i].out]);
+   for(int & i : edges_out) neighbours_of[n].push_back(idx_of_node[edges[i].in]);
+
+   for(int & i : edges_in) weights_of[n].push_back(edges[i].weight);
+   for(int & i : edges_out) weights_of[n].push_back(edges[i].weight);
+
+ }
+
+ sort(chars.begin(), chars.end());
+
+}
+
+template <typename T>
+void Graph<T>::prune(vector<vector<char>> & grid){
+  
+  bool done = false;
+  
+  while(!done){
+ 
+    done = true;
+
+    for(int & n : non_empty_nodes){
+      
+      char tile = grid[nodes[n].first][nodes[n].second];
+      
+      if(isalpha(tile) || tile == '@') continue;
+      
+      vector<int> edges_in  = get_connections(&nodes[n], "in");
+      vector<int> edges_out = get_connections(&nodes[n], "out");
+      vector<int> edges_all = get_connections(&nodes[n], "all");
+
+      for(int & i : edges_in)
+        for(int & j : edges_in)
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & i : edges_out)
+        for(int & j : edges_out)
+          add_edge_or_update_weight(edges.at(i).in, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & i : edges_in)
+        for(int & j : edges_out)
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & e : edges_all)
+        edges.erase(edges.begin() + e);
+
+      non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
+
+      done = false;
+
+      break;
+
+    }
 
   }
 
 }
 
-int main(){
+template <typename T>
+void Graph<T>::print(vector<vector<char>> & grid){
+
+  cout<<"edges:"<<endl;
+
+  for(Edge<T> & edge : edges){
+
+      char tile_in = grid[edge.in->first][edge.in->second];
+      char tile_out = grid[edge.out->first][edge.out->second];
+
+      cout<<tile_in<<" ("<<edge.in<<" | "<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out<<" | "<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
+    
+  }
+
+  cout<<"number of connections of nodes:"<<endl;
+
+  for(int & n : non_empty_nodes)
+    cout<<grid[nodes[n].first][nodes[n].second]<<" "<<&nodes[n]<<" "<<get_connections(&nodes[n], "all").size()<<endl;
+
+}
+
+void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords, Coordinate & start){
   
-  ifstream in_file("example.txt");
+  ifstream in_file(in_file_name);
 
   string line, field;
-
-  vector<vector<char>> grid;
 
   while(getline(in_file, line)){
     
@@ -310,11 +356,6 @@ int main(){
     
   }
 
-  Graph<Coordinate> graph;
-  map<char, Coordinate> gate_coords;
-  map<char, Coordinate> key_coords;
-  Coordinate start;
-
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
 
@@ -322,35 +363,89 @@ int main(){
       if(grid[y][x] >= 'a' && grid[y][x] <= 'z') key_coords[grid[y][x]] = {y, x}; 
       if(grid[y][x] == '@') start = {y, x}; 
 
-      if(grid[y][x] == '#') continue; 
-
-      for(Coordinate & neighbour : get_neighbours({y, x}, grid))
-        if(grid[neighbour.first][neighbour.second] != '#')
-          graph.add_edge({y, x}, neighbour);
-
     }
   }
-   
+
+}
+
+template <typename T>
+void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
+
+  for(int y=0; y<grid.size(); y++)
+    for(int x=0; x<grid[y].size(); x++)
+      if(grid[y][x] != '#')
+        for(Coordinate & neighbour : get_neighbours({y, x}, grid))
+          if(grid[neighbour.first][neighbour.second] != '#')
+            graph.add_edge({y, x}, neighbour, 1);
+
+}
+
+template <typename T>
+void recursive_find(Graph<T> & graph, int & min_dist, int dist, char source, string keys){
+  
+  if(!isalpha(source) && source != '@') return;
+  
+  cout<<source<<" "<<keys<<" "<<dist<<endl;
+  
+  graph.run_dijkstra(source, keys);
+
+//  for(pair<char, int> key : graph.dist_to_key)
+//    cout<<key.first<<" : "<<key.second<<endl;
+
+//  cout<<graph.dist_to_key.size()<<endl;
+
+  for(pair<char, int> key : graph.dist_to_key){
+    
+    int new_dist = dist + key.second;
+    string new_keys = keys + key.first;
+
+    if(new_keys.size() == graph.chars.size() && new_dist < min_dist){
+
+      cout<<new_dist<<endl;
+      min_dist = new_dist;
+
+    }
+
+    sort(new_keys.begin(), new_keys.end());
+
+    recursive_find(graph, min_dist, new_dist, key.first, new_keys);
+
+  }
+
+}
+
+int main(){
+
+  vector<vector<char>> grid;
+  map<char, Coordinate> gate_coords;
+  map<char, Coordinate> key_coords;
+  Coordinate start;
+
+  read_grid("example.txt", grid, gate_coords, key_coords, start);
+
+  int n_coordinates = grid.at(0).size() * grid.size();
+
+  Graph<Coordinate> graph(n_coordinates);
+
+  make_graph(grid, graph);
 
   graph.prune(grid);
 
-  for(auto & gate : gate_coords)
-    graph.deactivate_node(gate.second);
+  graph.calc_maps(grid);
 
   graph.print(grid);
 
-  int dist_min = infinity;
+//  graph.run_dijkstra('@', "ab");
+//
+//  for(pair<char, int> key : graph.dist_to_key)
+//    cout<<key.first<<" : "<<key.second<<endl;
+//
+//  cout<<graph.chars<<endl;
 
-  recursive_search(dist_min, graph, key_coords, gate_coords, "", 0, start);
+  int min_dist = infinity;
 
-  cout<<dist_min<<endl;
+  recursive_find(graph, min_dist, 0, '@', "");
 
-  auto routine_end = chrono::steady_clock::now();
-
-  chrono::duration<double> elapsed_seconds = routine_end - g_start;
-
-  time_total += elapsed_seconds.count();
-
-  cout<<time_total<<" "<<time_in_routine<<endl;
+  cout<<min_dist<<endl;
 
 }
