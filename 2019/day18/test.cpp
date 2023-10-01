@@ -219,7 +219,7 @@ vector<int> Graph<T>::get_connections(T* node, string type){
      
   }
 
-  sort(connections.begin(), connections.end());
+  sort(connections.begin(), connections.end(), greater<int>());
 
   return connections;
 
@@ -282,8 +282,6 @@ void Graph<T>::prune(vector<vector<char>> & grid){
       vector<int> edges_all = get_connections(&nodes[n], "all");
 
       int before = edges.size();
-
-      if(edges_all.size() == 0) continue;
 
       cout<<edges_in.size()<<" "<<edges_out.size()<<endl;
 
