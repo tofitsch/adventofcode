@@ -77,8 +77,6 @@ void Graph<T>::run_dijkstra(char source, string keys){
 template <typename T>
 void Graph<T>::run_dijkstra(int idx_source, string keys){
   
-  cout<<keys<<endl;
-
   queue.clear();
   dist_to_node.clear();
 
@@ -387,7 +385,16 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 }
 
 template <typename T>
-void recursive_find(Graph<T> & graph, int & min_dist, int dist, char source, string keys){
+void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & memoizations, int dist, char source, string keys){
+
+  string state = keys + "_" + source;
+
+  if(keys.size() == graph.keys.size()) cout<<state<<" "<<min_dist<<endl;
+  
+  if(dist >= min_dist) return;
+  
+  if(memoizations.find(state) == memoizations.end()) memoizations[state] = dist;
+  else if(memoizations[state] <= dist) return;
   
   if(keys.size() == graph.keys.size() && dist < min_dist)
     min_dist = dist;
@@ -401,9 +408,9 @@ void recursive_find(Graph<T> & graph, int & min_dist, int dist, char source, str
     int new_dist = dist + key.second;
     string new_keys = keys + key.first;
 
-//    sort(new_keys.begin(), new_keys.end());
+    sort(new_keys.begin(), new_keys.end());
 
-    recursive_find(graph, min_dist, new_dist, key.first, new_keys);
+    recursive_find(graph, min_dist, memoizations, new_dist, key.first, new_keys);
 
   }
 
@@ -430,16 +437,11 @@ int main(){
 
   graph.print(grid);
 
-//  graph.run_dijkstra('@', "ab");
-//
-//  for(pair<char, int> key : graph.dist_to_key)
-//    cout<<key.first<<" : "<<key.second<<endl;
-//
-//  cout<<graph.chars<<endl;
-
   int min_dist = infinity;
+  
+  map<string, int> memoizations;
 
-  recursive_find(graph, min_dist, 0, '@', "");
+  recursive_find(graph, min_dist, memoizations, 0, '@', "");
 
   cout<<min_dist<<endl;
 
