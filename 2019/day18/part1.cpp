@@ -51,6 +51,7 @@ class Graph{
   public:
     
     string chars = "";
+    string keys = "";
     map<int, char> dist_to_key;
 
     Graph(int size) : nodes(new T[size]) {}
@@ -75,6 +76,8 @@ void Graph<T>::run_dijkstra(char source, string keys){
 
 template <typename T>
 void Graph<T>::run_dijkstra(int idx_source, string keys){
+  
+  cout<<keys<<endl;
 
   queue.clear();
   dist_to_node.clear();
@@ -254,6 +257,8 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
 
    chars += tile;
 
+   if(islower(tile)) keys += tile;
+
    idx_of_char[tile] = n;
    char_of_idx[n] = tile;
 
@@ -271,6 +276,7 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
  }
 
  sort(chars.begin(), chars.end());
+ sort(keys.begin(), keys.end());
 
 }
 
@@ -383,30 +389,19 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 template <typename T>
 void recursive_find(Graph<T> & graph, int & min_dist, int dist, char source, string keys){
   
-  if(!isalpha(source) && source != '@') return;
-  
-  cout<<source<<" "<<keys<<" "<<dist<<endl;
+  if(keys.size() == graph.keys.size() && dist < min_dist)
+    min_dist = dist;
   
   graph.run_dijkstra(source, keys);
 
-//  for(pair<char, int> key : graph.dist_to_key)
-//    cout<<key.first<<" : "<<key.second<<endl;
+  map<int, char> dist_to_key = graph.dist_to_key;
 
-//  cout<<graph.dist_to_key.size()<<endl;
-
-  for(pair<char, int> key : graph.dist_to_key){
+  for(pair<char, int> key : dist_to_key){
     
     int new_dist = dist + key.second;
     string new_keys = keys + key.first;
 
-    if(new_keys.size() == graph.chars.size() && new_dist < min_dist){
-
-      cout<<new_dist<<endl;
-      min_dist = new_dist;
-
-    }
-
-    sort(new_keys.begin(), new_keys.end());
+//    sort(new_keys.begin(), new_keys.end());
 
     recursive_find(graph, min_dist, new_dist, key.first, new_keys);
 
