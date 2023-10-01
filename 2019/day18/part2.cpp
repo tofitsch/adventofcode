@@ -367,7 +367,7 @@ void replace_entrances(vector<vector<char>> & grid, Coordinate & start){
   grid[y + 1][x] = '#';
   grid[y - 1][x] = '#';
   grid[y][x + 1] = '#';
-  grid[y][x + 1] = '#';
+  grid[y][x - 1] = '#';
 
   grid[y - 1][x - 1] = '0';
   grid[y + 1][x - 1] = '1';
@@ -420,7 +420,7 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 }
 
 template <typename T>
-void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dists_memoized, int dist, string bots, string keys){
+void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dists_memoized, int dist, string bots, string keys, string history){
   
   for(int idx_bot=0; idx_bot<bots.size(); idx_bot++){
   
@@ -430,7 +430,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
 
     string state = keys + "_" + source;
 
-    if(keys.size() == graph.keys.size()) cout<<state<<" "<<dist<<endl;
+    if(keys.size() == graph.keys.size()) cout<<history<<"_"<<source<<" "<<dist<<endl;
     
     if(min_dists_memoized.find(state) == min_dists_memoized.end() ||
        min_dists_memoized[state] > dist
@@ -450,13 +450,14 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
       
       int new_dist = dist + key.second;
       string new_keys = keys + key.first;
+      string new_history = history + key.first + to_string(idx_bot) + "_" + to_string(key.second);
 
       string new_bots = bots;
       bots[idx_bot] = key.first;
 
       sort(new_keys.begin(), new_keys.end());
 
-      recursive_find(graph, min_dist, min_dists_memoized, new_dist, new_bots, new_keys);
+      recursive_find(graph, min_dist, min_dists_memoized, new_dist, new_bots, new_keys, new_history);
 
     }
 
@@ -471,6 +472,13 @@ int main(){
   map<char, Coordinate> key_coords;
 
   read_grid("example.txt", grid, gate_coords, key_coords);
+
+  for(int y=0; y<grid.size(); y++){
+    for(int x=0; x<grid[y].size(); x++){
+      cout<<grid[y][x];
+    }
+    cout<<endl;
+  }
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
@@ -488,7 +496,7 @@ int main(){
   
   map<string, int> min_dists_memoized;
 
-  recursive_find(graph, min_dist, min_dists_memoized, 0, "0123", "");
+  recursive_find(graph, min_dist, min_dists_memoized, 0, "0123", "", "");
 
   cout<<min_dist<<endl;
 
