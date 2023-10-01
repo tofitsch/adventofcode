@@ -128,6 +128,10 @@ void Graph<T>::run_dijkstra(int idx_source){
 
 template <typename T>
 void Graph<T>::add_edge_or_update_weight(T* ptr_a, T* ptr_b, int weight){
+  
+  cout<<ptr_a<<" "<<ptr_b<<endl;
+
+  if(ptr_a == ptr_b) return;
 
   for(Edge<T> & edge : edges){
 
@@ -215,7 +219,7 @@ vector<int> Graph<T>::get_connections(T* node, string type){
      
   }
 
-  if(type == "all") cout<<"test "<<connections.size()<<endl;
+  sort(connections.begin(), connections.end());
 
   return connections;
 
@@ -277,25 +281,30 @@ void Graph<T>::prune(vector<vector<char>> & grid){
       vector<int> edges_out = get_connections(&nodes[n], "out");
       vector<int> edges_all = get_connections(&nodes[n], "all");
 
+      int before = edges.size();
+
       if(edges_all.size() == 0) continue;
+
+      cout<<edges_in.size()<<" "<<edges_out.size()<<endl;
 
       for(int & i : edges_in)
         for(int & j : edges_in)
-          if(i != j)
-            add_edge_or_update_weight(edges.at(i).in, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
 
       for(int & i : edges_out)
         for(int & j : edges_out)
-          if(i != j)
-            add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
+          add_edge_or_update_weight(edges.at(i).in, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
 
       for(int & i : edges_in)
         for(int & j : edges_out)
-          if(i != j)
-            add_edge_or_update_weight(edges.at(i).in, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+
+      int mid = edges.size();
 
       for(int & e : edges_all)
         edges.erase(edges.begin() + e);
+
+      cout<<"test "<<before<<" "<<mid<<" "<<edges.size()<<endl;
 
       non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
 
@@ -312,6 +321,8 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 template <typename T>
 void Graph<T>::print(vector<vector<char>> & grid){
 
+  cout<<"edges:"<<endl;
+
   for(Edge<T> & edge : edges){
 
       char tile_in = grid[edge.in->first][edge.in->second];
@@ -320,6 +331,11 @@ void Graph<T>::print(vector<vector<char>> & grid){
       cout<<tile_in<<" ("<<edge.in<<" | "<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out<<" | "<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
     
   }
+
+  cout<<"number of connections of nodes:"<<endl;
+
+  for(int & n : non_empty_nodes)
+    cout<<grid[nodes[n].first][nodes[n].second]<<" "<<&nodes[n]<<" "<<get_connections(&nodes[n], "all").size()<<endl;
 
 }
 
@@ -376,6 +392,8 @@ int main(){
   Graph<Coordinate> graph(n_coordinates);
 
   make_graph(grid, graph);
+
+  cout<<endl;//XXX
 
   graph.prune(grid);
 
