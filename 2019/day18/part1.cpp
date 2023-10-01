@@ -359,7 +359,7 @@ void Graph<T>::print(vector<vector<char>> & grid){
 
 }
 
-void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords, Coordinate & start){
+void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords){
   
   ifstream in_file(in_file_name);
 
@@ -377,9 +377,8 @@ void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coord
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
 
-      if(grid[y][x] >= 'A' && grid[y][x] <= 'Z') gate_coords[grid[y][x]] = {y, x}; 
-      if(grid[y][x] >= 'a' && grid[y][x] <= 'z') key_coords[grid[y][x]] = {y, x}; 
-      if(grid[y][x] == '@') start = {y, x}; 
+      if(isupper(grid[y][x])) gate_coords[grid[y][x]] = {y, x}; 
+      if(islower(grid[y][x])) key_coords[grid[y][x]] = {y, x}; 
 
     }
   }
@@ -439,9 +438,8 @@ int main(){
   vector<vector<char>> grid;
   map<char, Coordinate> gate_coords;
   map<char, Coordinate> key_coords;
-  Coordinate start;
 
-  read_grid("input.txt", grid, gate_coords, key_coords, start);
+  read_grid("input.txt", grid, gate_coords, key_coords);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
