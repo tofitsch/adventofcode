@@ -46,6 +46,8 @@ class Graph{
 
     map<int, int> dist_to_node;
 
+    map<string, map<int, char>> dijkstra_memoized;
+
     vector<int> get_connections(T*, string);
 
   public:
@@ -77,6 +79,16 @@ void Graph<T>::run_dijkstra(char source, string keys){
 template <typename T>
 void Graph<T>::run_dijkstra(int idx_source, string keys){
   
+  string state = keys + "_" + char_of_idx[idx_source];
+
+  if(dijkstra_memoized.find(state) != dijkstra_memoized.end()){
+    
+    dist_to_key = dijkstra_memoized[state];
+
+    return;
+
+  }
+
   queue.clear();
   dist_to_node.clear();
 
@@ -138,6 +150,8 @@ void Graph<T>::run_dijkstra(int idx_source, string keys){
       dist_to_key[tile] = dist;
 
   }
+
+  dijkstra_memoized[state] = dist_to_key;
 
 }
 
@@ -385,16 +399,16 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 }
 
 template <typename T>
-void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & memoizations, int dist, char source, string keys){
+void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & dists_memoized, int dist, char source, string keys){
+  
+  if(dist >= min_dist) return;
 
   string state = keys + "_" + source;
 
-  if(keys.size() == graph.keys.size()) cout<<state<<" "<<min_dist<<endl;
+  if(keys.size() == graph.keys.size()) cout<<state<<" "<<dist<<endl;
   
-  if(dist >= min_dist) return;
-  
-  if(memoizations.find(state) == memoizations.end()) memoizations[state] = dist;
-  else if(memoizations[state] <= dist) return;
+  if(dists_memoized.find(state) == dists_memoized.end()) dists_memoized[state] = dist;
+  else if(dists_memoized[state] <= dist) return;
   
   if(keys.size() == graph.keys.size() && dist < min_dist)
     min_dist = dist;
@@ -410,7 +424,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & memoiza
 
     sort(new_keys.begin(), new_keys.end());
 
-    recursive_find(graph, min_dist, memoizations, new_dist, key.first, new_keys);
+    recursive_find(graph, min_dist, dists_memoized, new_dist, key.first, new_keys);
 
   }
 
@@ -439,9 +453,9 @@ int main(){
 
   int min_dist = infinity;
   
-  map<string, int> memoizations;
+  map<string, int> dists_memoized;
 
-  recursive_find(graph, min_dist, memoizations, 0, '@', "");
+  recursive_find(graph, min_dist, dists_memoized, 0, '@', "");
 
   cout<<min_dist<<endl;
 
