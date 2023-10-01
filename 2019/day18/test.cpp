@@ -380,6 +380,40 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 
 }
 
+template <typename T>
+void recursive_find(Graph<T> & graph, int & min_dist, int dist, char source, string keys){
+  
+  if(!isalpha(source) && source != '@') return;
+  
+  cout<<source<<" "<<keys<<" "<<dist<<endl;
+  
+  graph.run_dijkstra(source, keys);
+
+//  for(pair<char, int> key : graph.dist_to_key)
+//    cout<<key.first<<" : "<<key.second<<endl;
+
+//  cout<<graph.dist_to_key.size()<<endl;
+
+  for(pair<char, int> key : graph.dist_to_key){
+    
+    int new_dist = dist + key.second;
+    string new_keys = keys + key.first;
+
+    if(new_keys.size() == graph.chars.size() && new_dist < min_dist){
+
+      cout<<new_dist<<endl;
+      min_dist = new_dist;
+
+    }
+
+    sort(new_keys.begin(), new_keys.end());
+
+    recursive_find(graph, min_dist, new_dist, key.first, new_keys);
+
+  }
+
+}
+
 int main(){
 
   vector<vector<char>> grid;
@@ -401,11 +435,17 @@ int main(){
 
   graph.print(grid);
 
-  graph.run_dijkstra('@', "ab");
+//  graph.run_dijkstra('@', "ab");
+//
+//  for(pair<char, int> key : graph.dist_to_key)
+//    cout<<key.first<<" : "<<key.second<<endl;
+//
+//  cout<<graph.chars<<endl;
 
-  for(pair<char, int> key : graph.dist_to_key)
-    cout<<key.first<<" : "<<key.second<<endl;
+  int min_dist = infinity;
 
-  cout<<graph.chars<<endl;
+  recursive_find(graph, min_dist, 0, '@', "");
+
+  cout<<min_dist<<endl;
 
 }
