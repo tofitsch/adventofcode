@@ -143,6 +143,8 @@ void Graph<T>::run_dijkstra(int idx_source, string keys){
     char tile = char_of_idx[key.first];
     int dist = key.second;
 
+    if(tile == char_of_idx[idx_source]) continue;
+
     if(islower(tile) &&
        dist < infinity &&
        find(keys.begin(), keys.end(), tile) == keys.end()
