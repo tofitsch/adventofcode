@@ -110,8 +110,6 @@ void Graph<T>::run_dijkstra(int idx_source){
       int neighbour_idx = neighbours_of[node_idx][i];
       int neighbour_weight = weights_of[node_idx][i];
 
-      cout<<"TEST "<<node_idx<<" "<<dist_to_node[node_idx] + neighbour_weight<<" "<<dist_to_node[neighbour_idx]<<endl;
-
       if(dist_to_node[node_idx] + neighbour_weight < dist_to_node[neighbour_idx])
         dist_to_node[neighbour_idx] = dist_to_node[node_idx] + neighbour_weight;
 
@@ -129,8 +127,6 @@ void Graph<T>::run_dijkstra(int idx_source){
 template <typename T>
 void Graph<T>::add_edge_or_update_weight(T* ptr_a, T* ptr_b, int weight){
   
-  cout<<ptr_a<<" "<<ptr_b<<endl;
-
   if(ptr_a == ptr_b) return;
 
   for(Edge<T> & edge : edges){
@@ -281,10 +277,6 @@ void Graph<T>::prune(vector<vector<char>> & grid){
       vector<int> edges_out = get_connections(&nodes[n], "out");
       vector<int> edges_all = get_connections(&nodes[n], "all");
 
-      int before = edges.size();
-
-      cout<<edges_in.size()<<" "<<edges_out.size()<<endl;
-
       for(int & i : edges_in)
         for(int & j : edges_in)
           add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
@@ -297,12 +289,8 @@ void Graph<T>::prune(vector<vector<char>> & grid){
         for(int & j : edges_out)
           add_edge_or_update_weight(edges.at(i).out, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
 
-      int mid = edges.size();
-
       for(int & e : edges_all)
         edges.erase(edges.begin() + e);
-
-      cout<<"test "<<before<<" "<<mid<<" "<<edges.size()<<endl;
 
       non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
 
@@ -390,8 +378,6 @@ int main(){
   Graph<Coordinate> graph(n_coordinates);
 
   make_graph(grid, graph);
-
-  cout<<endl;//XXX
 
   graph.prune(grid);
 
