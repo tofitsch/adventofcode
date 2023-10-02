@@ -7,7 +7,6 @@
 #include<algorithm>
 
 #define SIZE 100
-#define debug false
 
 #define ADD 1
 #define MUL 2
@@ -189,8 +188,6 @@ int main(){
 
     if(x < beg.back()){
 
-      if(debug) cout<<'.';
-
       prev = 0;
 
       continue;
@@ -198,8 +195,6 @@ int main(){
     }
 
     if(end.back() > 0 && x < end.back() - 1 && prev == 1){
-
-      if(debug) cout<<'#';
 
       prev = 1;
 
@@ -216,8 +211,6 @@ int main(){
 
     computer.run();
 
-    if(debug) cout<<(computer.output ? '#' : '.');
-
     if(computer.output == 1) sum++;
 
     if((prev == 1 || x > end.back() + 10) && computer.output == 0){
@@ -228,8 +221,6 @@ int main(){
       x = -1;
 
       prev = -1;
-
-      if(debug) cout<<endl;
 
       continue;
 
