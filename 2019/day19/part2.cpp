@@ -6,8 +6,8 @@
 #include<math.h>
 #include<algorithm>
 
-#define SIZE 10
-#define debug true
+#define SIZE 100
+#define debug false
 
 #define ADD 1
 #define MUL 2
@@ -178,7 +178,7 @@ int main(){
       if(end.back() - beg.back() >= SIZE){
         if(end.at(end.size() - SIZE - 1) >= beg.back() + SIZE){
 
-          if(debug) cout<<y<<endl;
+          cout<<y<<endl;
           exit(0);
 
         }
@@ -189,7 +189,7 @@ int main(){
 
     if(x < beg.back()){
 
-      cout<<'.';
+      if(debug) cout<<'.';
 
       prev = 0;
 
