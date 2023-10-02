@@ -176,9 +176,9 @@ int main(){
     
     if(beg.size() > SIZE && end.size() > SIZE){
       if(end.back() - beg.back() >= SIZE){
-        if(end.at(end.size() - SIZE - 1) >= beg.back() + SIZE){
+        if(end.at(end.size() - SIZE) >= beg.back() + SIZE - 1){
 
-          cout<<y<<endl;
+          cout<<beg.back() * 10'000 + y - SIZE<<endl;
           exit(0);
 
         }
