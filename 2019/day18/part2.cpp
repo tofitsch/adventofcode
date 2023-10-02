@@ -455,7 +455,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
       string new_history = history + key.first + to_string(idx_bot) + "_" + to_string(key.second);
 
       string new_bots = bots;
-      bots[idx_bot] = key.first;
+      new_bots[idx_bot] = key.first;
 
       sort(new_keys.begin(), new_keys.end());
 
