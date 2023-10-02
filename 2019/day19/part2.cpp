@@ -6,8 +6,8 @@
 #include<math.h>
 #include<algorithm>
 
-#define MAX_X 500
-#define MAX_Y 500
+#define SIZE 10
+#define debug true
 
 #define ADD 1
 #define MUL 2
@@ -164,66 +164,82 @@ int main(){
 
   Intcode_computer computer;
 
-  int start = 0;
-  int end = 0;
+  vector<int> beg = {0};
+  vector<int> end = {0};
 
-  for(int y=0; y<MAX_Y; y++){
+  int y = 0;
+  int x = -1;
+
+  int prev = -1;
+
+  while(true){
     
-    int prev = -1;
+    if(beg.size() > SIZE && end.size() > SIZE){
+      if(end.back() - beg.back() >= SIZE){
+        if(end.at(end.size() - SIZE - 1) >= beg.back() + SIZE){
 
-    for(int x=0; x<MAX_X; x++){
-      
-      if(x < start){
+          if(debug) cout<<y<<endl;
+          exit(0);
 
-        cout<<'.';
-
-        prev = 0;
-
-        continue;
-
+        }
       }
+    }
+    
+    x++;
 
-      if(end > 0 && x < end - 1 && prev == 1){
+    if(x < beg.back()){
 
-        cout<<'#';
+      cout<<'.';
 
-        prev = 1;
+      prev = 0;
 
-        continue;
-
-      }
-
-      queue<long> input;
-
-      input.push(x);
-      input.push(y);
-
-      computer.init(input);
-
-      computer.run();
-
-      cout<<(computer.output ? '#' : '.');
-
-      if(computer.output == 1) sum++;
-
-      if(prev == 1 && computer.output == 0){
-        
-        end = x - 1;
-
-        break;
-
-      }
-
-      if(prev !=1 && computer.output == 1) start = x;
-
-      prev = computer.output;
+      continue;
 
     }
 
-    cout<<endl;
+    if(end.back() > 0 && x < end.back() - 1 && prev == 1){
+
+      if(debug) cout<<'#';
+
+      prev = 1;
+
+      continue;
+
+    }
+
+    queue<long> input;
+
+    input.push(x);
+    input.push(y);
+
+    computer.init(input);
+
+    computer.run();
+
+    if(debug) cout<<(computer.output ? '#' : '.');
+
+    if(computer.output == 1) sum++;
+
+    if((prev == 1 || x > end.back() + 10) && computer.output == 0){
+      
+      end.push_back(x - 1);
+
+      y++;
+      x = -1;
+
+      prev = -1;
+
+      if(debug) cout<<endl;
+
+      continue;
+
+    }
+
+    if(prev !=1 && computer.output == 1) beg.push_back(x);
+
+
+    prev = computer.output;
 
   }
-
-  cout<<sum<<endl;
 
 }
