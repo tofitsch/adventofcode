@@ -430,7 +430,7 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
     
     if(dist >= min_dist) return;
 
-    string state = keys + "_" + source;
+    string state = keys + "_" + source + "_" + bots;
 
     if(keys.size() == graph.keys.size()) cout<<history<<"_"<<source<<" "<<dist<<endl;
     
@@ -473,7 +473,7 @@ int main(){
   map<char, Coordinate> gate_coords;
   map<char, Coordinate> key_coords;
 
-  read_grid("example.txt", grid, gate_coords, key_coords);
+  read_grid("input.txt", grid, gate_coords, key_coords);
 
   for(int y=0; y<grid.size(); y++){
     for(int x=0; x<grid[y].size(); x++){
