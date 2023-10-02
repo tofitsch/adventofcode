@@ -62,7 +62,6 @@ class Graph{
     void add_edge(T, T, int);
     void add_edge_or_update_weight(T*, T*, int);
     void prune(vector<vector<char>> &);
-    void print(vector<vector<char>> &);
     void calc_maps(vector<vector<char>> &);
     void run_dijkstra(int, string);
     void run_dijkstra(char, string);
@@ -340,27 +339,6 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 
 }
 
-template <typename T>
-void Graph<T>::print(vector<vector<char>> & grid){
-
-  cout<<"edges:"<<endl;
-
-  for(Edge<T> & edge : edges){
-
-      char tile_in = grid[edge.in->first][edge.in->second];
-      char tile_out = grid[edge.out->first][edge.out->second];
-
-      cout<<tile_in<<" ("<<edge.in<<" | "<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out<<" | "<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
-    
-  }
-
-  cout<<"number of connections of nodes:"<<endl;
-
-  for(int & n : non_empty_nodes)
-    cout<<grid[nodes[n].first][nodes[n].second]<<" "<<&nodes[n]<<" "<<get_connections(&nodes[n], "all").size()<<endl;
-
-}
-
 void replace_entrances(vector<vector<char>> & grid, Coordinate & start){
   
   int y = start.first;
@@ -432,8 +410,6 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
 
     string state = keys + "_" + source + "_" + bots;
 
-    if(keys.size() == graph.keys.size()) cout<<history<<"_"<<source<<" "<<dist<<endl;
-    
     if(min_dists_memoized.find(state) == min_dists_memoized.end() ||
        min_dists_memoized[state] > dist
       )
@@ -475,13 +451,6 @@ int main(){
 
   read_grid("input.txt", grid, gate_coords, key_coords);
 
-  for(int y=0; y<grid.size(); y++){
-    for(int x=0; x<grid[y].size(); x++){
-      cout<<grid[y][x];
-    }
-    cout<<endl;
-  }
-
   int n_coordinates = grid.at(0).size() * grid.size();
 
   Graph<Coordinate> graph(n_coordinates);
@@ -491,8 +460,6 @@ int main(){
   graph.prune(grid);
 
   graph.calc_maps(grid);
-
-  graph.print(grid);
 
   int min_dist = infinity;
   

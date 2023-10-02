@@ -62,7 +62,6 @@ class Graph{
     void add_edge(T, T, int);
     void add_edge_or_update_weight(T*, T*, int);
     void prune(vector<vector<char>> &);
-    void print(vector<vector<char>> &);
     void calc_maps(vector<vector<char>> &);
     void run_dijkstra(int, string);
     void run_dijkstra(char, string);
@@ -338,27 +337,6 @@ void Graph<T>::prune(vector<vector<char>> & grid){
 
 }
 
-template <typename T>
-void Graph<T>::print(vector<vector<char>> & grid){
-
-  cout<<"edges:"<<endl;
-
-  for(Edge<T> & edge : edges){
-
-      char tile_in = grid[edge.in->first][edge.in->second];
-      char tile_out = grid[edge.out->first][edge.out->second];
-
-      cout<<tile_in<<" ("<<edge.in<<" | "<<edge.in->first<<", "<<edge.in->second<<") -> "<<tile_out<<" ("<<edge.out<<" | "<<edge.out->first<<", "<<edge.out->second<<") "<<edge.weight<<endl;
-    
-  }
-
-  cout<<"number of connections of nodes:"<<endl;
-
-  for(int & n : non_empty_nodes)
-    cout<<grid[nodes[n].first][nodes[n].second]<<" "<<&nodes[n]<<" "<<get_connections(&nodes[n], "all").size()<<endl;
-
-}
-
 void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords){
   
   ifstream in_file(in_file_name);
@@ -404,8 +382,6 @@ void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dis
 
   string state = keys + "_" + source;
 
-  if(keys.size() == graph.keys.size()) cout<<state<<" "<<dist<<endl;
-  
   if(min_dists_memoized.find(state) == min_dists_memoized.end() ||
      min_dists_memoized[state] > dist
     )
@@ -450,8 +426,6 @@ int main(){
   graph.prune(grid);
 
   graph.calc_maps(grid);
-
-  graph.print(grid);
 
   int min_dist = infinity;
   
