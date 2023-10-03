@@ -53,14 +53,15 @@ class Graph{
 
     void calc_maps();
 
-    void run_dijkstra(T, string);
+    int run_dijkstra(T, T);
 
 };
 
 template <typename T>
-void Graph<T>::run_dijkstra(T source, string keys){
+int Graph<T>::run_dijkstra(T source, T goal){
   
   int idx_source = idx_of[source];
+  int idx_goal = idx_of[goal];
   
   queue.clear();
   dist_to_node.clear();
@@ -101,9 +102,14 @@ void Graph<T>::run_dijkstra(T source, string keys){
       if(dist_to_node[node_idx] + neighbour_weight < dist_to_node[neighbour_idx])
         dist_to_node[neighbour_idx] = dist_to_node[node_idx] + neighbour_weight;
 
+      if(neighbour_idx == idx_goal && dist_to_node[idx_goal] != infinity)
+        return dist_to_node[idx_goal];
+
     }
 
   }
+
+  return infinity;
 
 }
 
@@ -230,8 +236,36 @@ void Graph<T>::calc_maps(){
 
 }
 
-template <typename T>
-void read_grid(string in_file_name, vector<vector<char>> & grid, map<string, Coordinate> & portal_coords){
+string join(vector<char> chars){
+
+  string str = "";
+
+  for(char & c : chars)
+    str += c;
+
+  return str;
+
+}
+
+Coordinate pick_out_by_key(vector<pair<string, Coordinate>> & portal_coords, string key){
+
+  for(int i=0; i<portal_coords.size(); i++){
+    if(portal_coords[i].first == key){
+
+      Coordinate coord = portal_coords[i].second;
+
+      portal_coords.erase(portal_coords.begin() + i);
+
+      return coord;
+
+    }
+  }
+
+  return {infinity, infinity};
+
+}
+
+void read_grid(string in_file_name, vector<vector<char>> & grid, vector<pair<string, Coordinate>> & portal_coords, Coordinate & source, Coordinate & goal){
   
   ifstream in_file(in_file_name);
 
@@ -246,35 +280,63 @@ void read_grid(string in_file_name, vector<vector<char>> & grid, map<string, Coo
     
   }
 
-  for(int y=0; y<grid.size(); y++){
-    for(int x=0; x<grid[y].size(); x++){
+  for(int y=0; y<grid.size(); y++)
+    for(int x=1; x<grid[y].size(); x++)
+      if(isupper(grid[y][x]) && isupper(grid[y][x-1]))
+        if(x < grid[y].size() - 1 && grid[y][x+1] == '.')
+          portal_coords.push_back({join({grid[y][x-1], grid[y][x]}), {y, x+1}});
+        else
+          portal_coords.push_back({join({grid[y][x-1], grid[y][x]}), {y, x-2}});
 
-      if(isupper(grid[y][x])) gate_coords[grid[y][x]] = {y, x}; 
-      if(islower(grid[y][x])) key_coords[grid[y][x]] = {y, x}; 
+  for(int x=0; x<grid[0].size(); x++)
+    for(int y=1; y<grid.size(); y++)
+      if(isupper(grid[y][x]) && isupper(grid[y-1][x]))
+        if(y < grid.size() - 1 && grid[y+1][x] == '.')
+          portal_coords.push_back({join({grid[y-1][x], grid[y][x]}), {y+1, x}});
+        else
+          portal_coords.push_back({join({grid[y-1][x], grid[y][x]}), {y-2, x}});
 
-    }
-  }
+  source = pick_out_by_key(portal_coords, "AA");
+  goal = pick_out_by_key(portal_coords, "ZZ");
 
 }
 
 template <typename T>
-void make_graph(vector<vector<char>> & grid, Coordinate> & portal_coords, Graph<T> & graph, map<string){
+void make_graph(vector<vector<char>> & grid, vector<pair<string, Coordinate>> portal_coords, Graph<T> & graph){
 
   for(int y=0; y<grid.size(); y++)
     for(int x=0; x<grid[y].size(); x++)
-      if(grid[y][x] != '#')
+      if(grid[y][x] == '.')
         for(Coordinate & neighbour : get_neighbours({y, x}, grid))
-          if(grid[neighbour.first][neighbour.second] != '#')
+          if(grid[neighbour.first][neighbour.second] == '.')
             graph.add_edge({y, x}, neighbour, 1);
+
+  while(portal_coords.size() > 0){
+    for(int i=1; i<portal_coords.size(); i++){
+      if(portal_coords[0].first == portal_coords[i].first){
+
+        graph.add_edge(portal_coords[0].second, portal_coords[i].second, 1);
+
+        portal_coords.erase(portal_coords.begin() + i);
+        portal_coords.erase(portal_coords.begin());
+
+        break;
+
+      }
+    }
+  }
 
 }
 
 int main(){
 
   vector<vector<char>> grid;
-  map<string, Coordinate> portal_coords;
+  vector<pair<string, Coordinate>> portal_coords;
 
-  read_grid("example.txt", grid, portal_coords);
+  Coordinate source;
+  Coordinate goal;
+
+  read_grid("example.txt", grid, portal_coords, source, goal);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
@@ -282,14 +344,10 @@ int main(){
 
   make_graph(grid, portal_coords, graph);
 
-  graph.calc_maps(grid);
-
-  int min_dist = infinity;
-  
-  map<string, int> min_dists_memoized;
-
-  recursive_find(graph, min_dist, min_dists_memoized, 0, '@', "");
-
-  cout<<min_dist<<endl;
+//  graph.calc_maps();
+//
+//  int min_dist = graph.run_dijkstra(portal_coords["AA"], portal_coords["ZZ"]);
+//
+//  cout<<min_dist<<endl;
 
 }
