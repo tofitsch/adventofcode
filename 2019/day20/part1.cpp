@@ -344,7 +344,7 @@ int main(){
 
   make_graph(grid, portal_coords, graph);
 
-//  graph.calc_maps();
+  graph.calc_maps();
 //
 //  int min_dist = graph.run_dijkstra(portal_coords["AA"], portal_coords["ZZ"]);
 //
