@@ -41,21 +41,18 @@ class Graph{
     map<T*, int> idx_of;
     map<int, int> dist_to_node;
 
-    map<string, map<char, int>> dijkstra_memoized;
-
     vector<int> get_connections(T*, string);
 
   public:
     
-    string chars = "";
-    string keys = "";
-
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
     
     void add_edge(T, T, int);
     void add_edge_or_update_weight(T*, T*, int);
-    void calc_maps(vector<vector<char>> &);
+
+    void calc_maps();
+
     void run_dijkstra(T, string);
 
 };
@@ -208,7 +205,7 @@ vector<int> Graph<T>::get_connections(T* node, string type){
 }
 
 template <typename T>
-void Graph<T>::calc_maps(vector<vector<char>> & grid){
+void Graph<T>::calc_maps(){
   
  neighbours_of.clear();
  weights_of.clear();
@@ -217,12 +214,6 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
    idx_of[nodes[n]] = n;
 
  for(int & n : non_empty_nodes){
-
-   char tile = grid[nodes[n].first][nodes[n].second];
-
-   chars += tile;
-
-   if(islower(tile)) keys += tile;
 
    neighbours_of[n] = {};
 
@@ -237,13 +228,10 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
 
  }
 
- sort(chars.begin(), chars.end());
- sort(keys.begin(), keys.end());
-
 }
 
 template <typename T>
-void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords){
+void read_grid(string in_file_name, vector<vector<char>> & grid, map<string, Coordinate> & portal_coords){
   
   ifstream in_file(in_file_name);
 
@@ -270,7 +258,7 @@ void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coord
 }
 
 template <typename T>
-void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
+void make_graph(vector<vector<char>> & grid, Coordinate> & portal_coords, Graph<T> & graph, map<string){
 
   for(int y=0; y<grid.size(); y++)
     for(int x=0; x<grid[y].size(); x++)
@@ -284,18 +272,15 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
 int main(){
 
   vector<vector<char>> grid;
-  map<char, Coordinate> gate_coords;
-  map<char, Coordinate> key_coords;
+  map<string, Coordinate> portal_coords;
 
-  read_grid("input.txt", grid, gate_coords, key_coords);
+  read_grid("example.txt", grid, portal_coords);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
   Graph<Coordinate> graph(n_coordinates);
 
-  make_graph(grid, graph);
-
-  graph.prune(grid);
+  make_graph(grid, portal_coords, graph);
 
   graph.calc_maps(grid);
 
