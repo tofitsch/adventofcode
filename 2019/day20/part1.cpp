@@ -38,7 +38,7 @@ class Graph{
     map<int, vector<int>> neighbours_of;
     map<int, vector<int>> weights_of;
 
-    map<T*, int> idx_of;
+    map<T, int> idx_of;
     map<int, int> dist_to_node;
 
     vector<int> get_connections(T*, string);
@@ -336,7 +336,7 @@ int main(){
   Coordinate source;
   Coordinate goal;
 
-  read_grid("example.txt", grid, portal_coords, source, goal);
+  read_grid("input.txt", grid, portal_coords, source, goal);
 
   int n_coordinates = grid.at(0).size() * grid.size();
 
@@ -345,9 +345,9 @@ int main(){
   make_graph(grid, portal_coords, graph);
 
   graph.calc_maps();
-//
-//  int min_dist = graph.run_dijkstra(portal_coords["AA"], portal_coords["ZZ"]);
-//
-//  cout<<min_dist<<endl;
+
+  int min_dist = graph.run_dijkstra(source, goal);
+
+  cout<<min_dist<<endl;
 
 }
