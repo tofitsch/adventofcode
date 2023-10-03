@@ -4,8 +4,6 @@
 #include<vector>
 #include<algorithm>
 
-#define ASCII_UPPER_LOWER_CASE_DIFF 32
-
 using namespace std;
 
 typedef pair<int, int> Coordinate;
@@ -40,10 +38,7 @@ class Graph{
     map<int, vector<int>> neighbours_of;
     map<int, vector<int>> weights_of;
 
-    map<T*, int> idx_of_node;
-    map<char, int> idx_of_char;
-    map<int, char> char_of_idx;
-
+    map<T*, int> idx_of;
     map<int, int> dist_to_node;
 
     map<string, map<char, int>> dijkstra_memoized;
@@ -54,46 +49,26 @@ class Graph{
     
     string chars = "";
     string keys = "";
-    map<char, int> dist_to_key;
 
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
     
     void add_edge(T, T, int);
     void add_edge_or_update_weight(T*, T*, int);
-    void prune(vector<vector<char>> &);
     void calc_maps(vector<vector<char>> &);
-    void run_dijkstra(int, string);
-    void run_dijkstra(char, string);
+    void run_dijkstra(T, string);
 
 };
 
 template <typename T>
-void Graph<T>::run_dijkstra(char source, string keys){
+void Graph<T>::run_dijkstra(T source, string keys){
   
-  run_dijkstra(idx_of_char[source], keys);
-
-}
-
-template <typename T>
-void Graph<T>::run_dijkstra(int idx_source, string keys){
+  int idx_source = idx_of[source];
   
-  string state = keys + "_" + char_of_idx[idx_source];
-
-  if(dijkstra_memoized.find(state) != dijkstra_memoized.end()){
-    
-    dist_to_key = dijkstra_memoized[state];
-
-    return;
-
-  }
-
   queue.clear();
   dist_to_node.clear();
 
   for(int & n : non_empty_nodes){
-    
-    char tile = char_of_idx[n];
 
     dist_to_node[n] = (n == idx_source) ? 0 : infinity;
 
@@ -132,23 +107,6 @@ void Graph<T>::run_dijkstra(int idx_source, string keys){
     }
 
   }
-
-  dist_to_key.clear();
-
-  for(pair<int, int> key : dist_to_node){
-
-    char tile = char_of_idx[key.first];
-    int dist = key.second;
-
-    if(islower(tile) &&
-       dist < infinity &&
-       find(keys.begin(), keys.end(), tile) == keys.end()
-      )
-      dist_to_key[tile] = dist;
-
-  }
-
-  dijkstra_memoized[state] = dist_to_key;
 
 }
 
@@ -252,13 +210,11 @@ vector<int> Graph<T>::get_connections(T* node, string type){
 template <typename T>
 void Graph<T>::calc_maps(vector<vector<char>> & grid){
   
- idx_of_char.clear();
- char_of_idx.clear();
  neighbours_of.clear();
  weights_of.clear();
 
  for(int & n : non_empty_nodes)
-   idx_of_node[&nodes[n]] = n;
+   idx_of[nodes[n]] = n;
 
  for(int & n : non_empty_nodes){
 
@@ -268,16 +224,13 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
 
    if(islower(tile)) keys += tile;
 
-   idx_of_char[tile] = n;
-   char_of_idx[n] = tile;
-
    neighbours_of[n] = {};
 
    vector<int> edges_in = get_connections(&nodes[n], "in");
    vector<int> edges_out = get_connections(&nodes[n], "out");
 
-   for(int & i : edges_in) neighbours_of[n].push_back(idx_of_node[edges[i].out]);
-   for(int & i : edges_out) neighbours_of[n].push_back(idx_of_node[edges[i].in]);
+   for(int & i : edges_in) neighbours_of[n].push_back(idx_of[*edges[i].out]);
+   for(int & i : edges_out) neighbours_of[n].push_back(idx_of[*edges[i].in]);
 
    for(int & i : edges_in) weights_of[n].push_back(edges[i].weight);
    for(int & i : edges_out) weights_of[n].push_back(edges[i].weight);
@@ -290,51 +243,6 @@ void Graph<T>::calc_maps(vector<vector<char>> & grid){
 }
 
 template <typename T>
-void Graph<T>::prune(vector<vector<char>> & grid){
-  
-  bool done = false;
-  
-  while(!done){
- 
-    done = true;
-
-    for(int & n : non_empty_nodes){
-      
-      char tile = grid[nodes[n].first][nodes[n].second];
-      
-      if(isalpha(tile) || tile == '@') continue;
-      
-      vector<int> edges_in  = get_connections(&nodes[n], "in");
-      vector<int> edges_out = get_connections(&nodes[n], "out");
-      vector<int> edges_all = get_connections(&nodes[n], "all");
-
-      for(int & i : edges_in)
-        for(int & j : edges_in)
-          add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
-
-      for(int & i : edges_out)
-        for(int & j : edges_out)
-          add_edge_or_update_weight(edges.at(i).in, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
-
-      for(int & i : edges_in)
-        for(int & j : edges_out)
-          add_edge_or_update_weight(edges.at(i).out, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
-
-      for(int & e : edges_all)
-        edges.erase(edges.begin() + e);
-
-      non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
-
-      done = false;
-
-      break;
-
-    }
-
-  }
-
-}
-
 void read_grid(string in_file_name, vector<vector<char>> & grid, map<char, Coordinate> & gate_coords, map<char, Coordinate> & key_coords){
   
   ifstream in_file(in_file_name);
@@ -370,40 +278,6 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph){
         for(Coordinate & neighbour : get_neighbours({y, x}, grid))
           if(grid[neighbour.first][neighbour.second] != '#')
             graph.add_edge({y, x}, neighbour, 1);
-
-}
-
-template <typename T>
-void recursive_find(Graph<T> & graph, int & min_dist, map<string, int> & min_dists_memoized, int dist, char source, string keys){
-  
-  if(dist >= min_dist) return;
-
-  string state = keys + "_" + source;
-
-  if(min_dists_memoized.find(state) == min_dists_memoized.end() ||
-     min_dists_memoized[state] > dist
-    )
-    min_dists_memoized[state] = dist;
-  else
-    return;
-  
-  if(keys.size() == graph.keys.size() && dist < min_dist)
-    min_dist = dist;
-  
-  graph.run_dijkstra(source, keys);
-
-  map<char, int> dist_to_key = graph.dist_to_key;
-
-  for(pair<char, int> key : dist_to_key){
-    
-    int new_dist = dist + key.second;
-    string new_keys = keys + key.first;
-
-    sort(new_keys.begin(), new_keys.end());
-
-    recursive_find(graph, min_dist, min_dists_memoized, new_dist, key.first, new_keys);
-
-  }
 
 }
 
