@@ -33,7 +33,7 @@ class Graph{
     T* nodes;
     vector<Edge<T>> edges;
 
-    vector<int> non_empty_nodes;
+    int n_nodes = 0;
 
     vector<int> queue;
 
@@ -46,14 +46,16 @@ class Graph{
     vector<int> get_connections(T*, string);
 
   public:
-
-    int n_nodes = 0;
     
+    vector<int> non_empty_nodes;
+
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
     
     void add_edge(T, T, int);
     void add_edge_or_update_weight(T*, T*, int);
+
+    void prune(map<string, Coordinate> &, map<string, Coordinate> &);
 
     void calc_maps();
 
@@ -252,6 +254,60 @@ string join(vector<char> chars){
 
 }
 
+template <typename T>
+void Graph<T>::prune(map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer){
+  
+  vector<Coordinate> portal_coords;
+
+  for(auto & key : portal_coords_inner)
+    portal_coords.push_back(key.second);
+
+  for(auto & key : portal_coords_outer)
+    portal_coords.push_back(key.second);
+
+  bool done = false;
+
+  while(!done){
+
+    done = true;
+
+    for(int & n : non_empty_nodes){
+
+      if(find(portal_coords.begin(), portal_coords.end(), nodes[n]) != portal_coords.end())
+        continue;
+
+      vector<int> edges_in  = get_connections(&nodes[n], "in");
+      vector<int> edges_out = get_connections(&nodes[n], "out");
+      vector<int> edges_all = get_connections(&nodes[n], "all");
+
+      for(int & i : edges_in)
+        for(int & j : edges_in)
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).out, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & i : edges_out)
+        for(int & j : edges_out)
+          add_edge_or_update_weight(edges.at(i).in, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & i : edges_in)
+        for(int & j : edges_out)
+          add_edge_or_update_weight(edges.at(i).out, edges.at(j).in, edges.at(i).weight + edges.at(j).weight);
+
+      for(int & e : edges_all)
+        edges.erase(edges.begin() + e);
+
+      non_empty_nodes.erase(remove(non_empty_nodes.begin(), non_empty_nodes.end(), n), non_empty_nodes.end());
+
+      done = false;
+
+      break;
+
+    }
+
+  }
+
+}
+
+
 Coordinate pick_out_by_key(vector<pair<string, Coordinate>> & portal_coords, string key){
 
   for(int i=0; i<portal_coords.size(); i++){
@@ -332,7 +388,21 @@ int read_grid(string in_file_name, vector<vector<char>> & grid, map<string, Coor
 }
 
 template <typename T>
-void make_graph(vector<vector<char>> & grid, Graph<T> & graph, map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer, int n_levels){
+void make_graph_2d(vector<vector<char>> & grid, Graph<T> & graph){
+  
+  for(int y=0; y<grid.size(); y++)
+    for(int x=0; x<grid[y].size(); x++)
+      if(grid[y][x] == '.')
+        for(Coordinate & neighbour : get_neighbours({y, x}, grid))
+          if(grid[neighbour.first][neighbour.second] == '.')
+            graph.add_edge({y, x}, neighbour, 1);
+
+}
+
+template <typename T>
+void make_graph_3d(vector<vector<char>> & grid, Graph<T> & graph, map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer, int n_levels){
+  
+  //TODO
   
   cout<<"TEST"<<endl;
 
@@ -380,21 +450,29 @@ int main(){
 
   int n_tiles = read_grid("input.txt", grid, portal_coords_inner, portal_coords_outer, source, goal);
 
-  int n_coordinates = n_tiles * N_LEVELS;
+  int n_coordinates = n_tiles;
 
-  Graph<Coordinate3d> graph(n_coordinates);
+  Graph<Coordinate> graph_2d(n_coordinates);
 
-  make_graph(grid, graph, portal_coords_inner, portal_coords_outer, N_LEVELS);
+  make_graph_2d(grid, graph_2d);
 
-  graph.calc_maps();
+  cout<<graph_2d.non_empty_nodes.size()<<endl;
 
-  Coordinate3d source3d = {source.first, source.second, 0};
-  Coordinate3d goal3d = {goal.first, goal.second, 0};
+  graph_2d.prune(portal_coords_inner, portal_coords_outer);
 
-  cout<<"go"<<endl;
+  cout<<graph_2d.non_empty_nodes.size()<<endl;
 
-  int min_dist = graph.run_dijkstra(source3d, goal3d);
+  graph_2d.calc_maps();
 
-  cout<<min_dist<<endl;
+//  make_graph(grid, graph, portal_coords_inner, portal_coords_outer, N_LEVELS);
+//
+//  Coordinate3d source3d = {source.first, source.second, 0};
+//  Coordinate3d goal3d = {goal.first, goal.second, 0};
+//
+//  cout<<"go"<<endl;
+//
+//  int min_dist = graph.run_dijkstra(source3d, goal3d);
+//
+//  cout<<min_dist<<endl;
 
 }
