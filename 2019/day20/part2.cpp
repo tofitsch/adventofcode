@@ -81,8 +81,11 @@ void Graph<T>::print(map<string, Coordinate> & portal_coords_inner, map<string, 
 
   for(auto & edge : edges)
 //    cout<<"("<<get<0>(*edge.in)<<", "<<get<1>(*edge.in)<<") -> ("<<get<0>(*edge.out)<<", "<<get<1>(*edge.out)<<")"<<endl;
-    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<get<2>(*edge.in)<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<get<2>(*edge.out)<<endl;
-//    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<endl;
+//    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<get<2>(*edge.in)<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<get<2>(*edge.out)<<" | "<<edge.weight<<endl;
+    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<" | "<<edge.weight<<endl;
+ 
+// for(int & n : non_empty_nodes)
+//   cout<<portal_names[{get<0>(nodes[n]), get<1>(nodes[n])}]<<" "<<get<2>(nodes[n])<<" | "<<dist_to_node[n]<<endl;
 
 }
 
@@ -288,6 +291,9 @@ void Graph<T>::prune(map<string, Coordinate> & portal_coords_inner, map<string, 
   for(auto & key : portal_coords_outer)
     portal_coords.push_back(key.second);
 
+  portal_coords.push_back(source);
+  portal_coords.push_back(goal);
+
   bool done = false;
 
   while(!done){
@@ -297,9 +303,6 @@ void Graph<T>::prune(map<string, Coordinate> & portal_coords_inner, map<string, 
     for(int & n : non_empty_nodes){
 
       if(find(portal_coords.begin(), portal_coords.end(), nodes[n]) != portal_coords.end())
-        continue;
-
-      if(nodes[n] == source || nodes[n] == goal)
         continue;
 
       vector<int> edges_in  = get_connections(&nodes[n], "in");
@@ -430,18 +433,14 @@ void make_graph_3d(Graph<T> & graph_3d, Graph<U> & graph_2d, map<string, Coordin
 
   for(int l=0; l<n_levels; l++)
     for(auto & edge : graph_2d.edges)
-      graph_3d.add_edge({edge.in->first, edge.in->second, l}, {edge.out->first, edge.out->second, l}, 1);
+      graph_3d.add_edge({edge.in->first, edge.in->second, l}, {edge.out->first, edge.out->second, l}, edge.weight);
 
   vector<string> portal_names;
-
-  cout<<"TEST: "<<graph_3d.edges.size()<<endl;
 
   for(auto & key : portal_coords_inner)
     portal_names.push_back(key.first);
 
   for(int l=1; l<n_levels; l++){
-
-    cout<<l<<" TEST: "<<graph_3d.edges.size()<<endl;
 
     for(string & portal_name : portal_names){
 
@@ -464,9 +463,7 @@ int main(){
   Coordinate source;
   Coordinate goal;
 
-  int n_tiles = read_grid("example.txt", grid, portal_coords_inner, portal_coords_outer, source, goal);
-
-  cout<<source.first<<" "<<source.second<<endl;
+  int n_tiles = read_grid("input.txt", grid, portal_coords_inner, portal_coords_outer, source, goal);
 
   int n_coordinates = n_tiles;
 
@@ -474,13 +471,9 @@ int main(){
 
   make_graph_2d(grid, graph_2d);
 
-  cout<<graph_2d.non_empty_nodes.size()<<endl;
-
-//  graph_2d.prune(portal_coords_inner, portal_coords_outer, source, goal);
+  graph_2d.prune(portal_coords_inner, portal_coords_outer, source, goal);
 
 //  graph_2d.print(portal_coords_inner, portal_coords_outer, source, goal);
-
-  cout<<graph_2d.non_empty_nodes.size()<<endl;
 
   graph_2d.calc_maps();
 
@@ -490,15 +483,12 @@ int main(){
 
   graph_3d.calc_maps();
 
-//  graph_3d.print(portal_coords_inner, portal_coords_outer, source, goal);
-//  exit(0);
-
   Coordinate3d source3d = {source.first, source.second, 0};
   Coordinate3d goal3d = {goal.first, goal.second, 0};
 
-  cout<<"go"<<endl;
-
   int min_dist = graph_3d.run_dijkstra(source3d, goal3d);
+
+//  graph_3d.print(portal_coords_inner, portal_coords_outer, source, goal);
 
   cout<<min_dist<<endl;
 
