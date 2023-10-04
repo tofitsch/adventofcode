@@ -61,33 +61,7 @@ class Graph{
 
     int run_dijkstra(T, T);
 
-    void print(map<string, Coordinate> &, map<string, Coordinate> &, Coordinate &, Coordinate &); //XXX
-
 };
-
-template <typename T>//XXX
-void Graph<T>::print(map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer, Coordinate & source, Coordinate & goal){
-  
-  map<Coordinate, string> portal_names;
-
-  for(auto & key : portal_coords_inner)
-    portal_names[key.second] = key.first; 
-
-  for(auto & key : portal_coords_outer)
-    portal_names[key.second] = key.first; 
-
-  portal_names[source] = "AA";
-  portal_names[goal] = "ZZ";
-
-  for(auto & edge : edges)
-//    cout<<"("<<get<0>(*edge.in)<<", "<<get<1>(*edge.in)<<") -> ("<<get<0>(*edge.out)<<", "<<get<1>(*edge.out)<<")"<<endl;
-//    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<get<2>(*edge.in)<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<get<2>(*edge.out)<<" | "<<edge.weight<<endl;
-    cout<<portal_names[{get<0>(*edge.in), get<1>(*edge.in)}]<<" -> "<<portal_names[{get<0>(*edge.out), get<1>(*edge.out)}]<<" | "<<edge.weight<<endl;
- 
-// for(int & n : non_empty_nodes)
-//   cout<<portal_names[{get<0>(nodes[n]), get<1>(nodes[n])}]<<" "<<get<2>(nodes[n])<<" | "<<dist_to_node[n]<<endl;
-
-}
 
 template <typename T>
 int Graph<T>::run_dijkstra(T source, T goal){
@@ -473,8 +447,6 @@ int main(){
 
   graph_2d.prune(portal_coords_inner, portal_coords_outer, source, goal);
 
-//  graph_2d.print(portal_coords_inner, portal_coords_outer, source, goal);
-
   graph_2d.calc_maps();
 
   Graph<Coordinate3d> graph_3d(graph_2d.non_empty_nodes.size() * (N_LEVELS + 1));
@@ -487,8 +459,6 @@ int main(){
   Coordinate3d goal3d = {goal.first, goal.second, 0};
 
   int min_dist = graph_3d.run_dijkstra(source3d, goal3d);
-
-//  graph_3d.print(portal_coords_inner, portal_coords_outer, source, goal);
 
   cout<<min_dist<<endl;
 
