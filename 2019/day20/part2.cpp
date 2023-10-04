@@ -4,7 +4,7 @@
 #include<vector>
 #include<algorithm>
 
-#define N_LEVELS 10 
+#define N_LEVELS 400
 
 using namespace std;
 
@@ -31,7 +31,6 @@ class Graph{
   private:
 
     T* nodes;
-    vector<Edge<T>> edges;
 
     int n_nodes = 0;
 
@@ -47,6 +46,7 @@ class Graph{
 
   public:
     
+    vector<Edge<T>> edges;
     vector<int> non_empty_nodes;
 
     Graph(int size) : nodes(new T[size]) {}
@@ -399,40 +399,30 @@ void make_graph_2d(vector<vector<char>> & grid, Graph<T> & graph){
 
 }
 
-template <typename T>
-void make_graph_3d(vector<vector<char>> & grid, Graph<T> & graph, map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer, int n_levels){
-  
-  //TODO
-  
-  cout<<"TEST"<<endl;
-
-  vector<pair<Coordinate, Coordinate>> edges;
-
-  for(int y=0; y<grid.size(); y++)
-    for(int x=0; x<grid[y].size(); x++)
-      if(grid[y][x] == '.')
-        for(Coordinate & neighbour : get_neighbours({y, x}, grid))
-          if(grid[neighbour.first][neighbour.second] == '.')
-            edges.push_back({{y, x}, neighbour});
+template <typename T, typename U>
+void make_graph_3d(Graph<T> & graph_3d, Graph<U> & graph_2d, map<string, Coordinate> & portal_coords_inner, map<string, Coordinate> & portal_coords_outer, int n_levels){
 
   for(int l=0; l<n_levels; l++)
-    for(auto & edge : edges)
-      graph.add_edge({edge.first.first, edge.first.second, l}, {edge.second.first, edge.second.second, l}, 1);
-
-  cout<<graph.n_nodes<<endl;
+    for(auto & edge : graph_2d.edges)
+      graph_3d.add_edge({edge.in->first, edge.in->second, l}, {edge.out->first, edge.out->second, l}, 1);
 
   vector<string> portal_names;
+
+  cout<<"TEST: "<<graph_3d.edges.size()<<endl;
 
   for(auto & key : portal_coords_inner)
     portal_names.push_back(key.first);
 
-  for(int l=0; l<n_levels; l++){
+  for(int l=1; l<n_levels; l++){
+
+    cout<<l<<" TEST: "<<graph_3d.edges.size()<<endl;
+
     for(string & portal_name : portal_names){
 
-      Coordinate3d a = {portal_coords_inner[portal_name].first, portal_coords_inner[portal_name].second, l};
-      Coordinate3d b = {portal_coords_outer[portal_name].first, portal_coords_outer[portal_name].second, l - 1};
+      Coordinate3d a = {portal_coords_outer[portal_name].first, portal_coords_outer[portal_name].second, l};
+      Coordinate3d b = {portal_coords_inner[portal_name].first, portal_coords_inner[portal_name].second, l - 1};
 
-      graph.add_edge(a, b, 1);
+      graph_3d.add_edge(a, b, 1);
 
     }
   }
@@ -464,15 +454,19 @@ int main(){
 
   graph_2d.calc_maps();
 
-//  make_graph(grid, graph, portal_coords_inner, portal_coords_outer, N_LEVELS);
-//
-//  Coordinate3d source3d = {source.first, source.second, 0};
-//  Coordinate3d goal3d = {goal.first, goal.second, 0};
-//
-//  cout<<"go"<<endl;
-//
-//  int min_dist = graph.run_dijkstra(source3d, goal3d);
-//
-//  cout<<min_dist<<endl;
+  Graph<Coordinate3d> graph_3d(graph_2d.non_empty_nodes.size() * (N_LEVELS + 1));
+
+  make_graph_3d(graph_3d, graph_2d, portal_coords_inner, portal_coords_outer, N_LEVELS);
+
+  graph_3d.calc_maps();
+
+  Coordinate3d source3d = {source.first, source.second, 0};
+  Coordinate3d goal3d = {goal.first, goal.second, 0};
+
+  cout<<"go"<<endl;
+
+  int min_dist = graph_3d.run_dijkstra(source3d, goal3d);
+
+  cout<<min_dist<<endl;
 
 }
