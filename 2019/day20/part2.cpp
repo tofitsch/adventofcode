@@ -19,7 +19,9 @@ struct Edge{
   T* in;
   T* out;
 
-  Edge(T* a, T* b) : in(a), out(b) {}
+  int weight;
+
+  Edge(T* a, T* b, int w) : in(a), out(b), weight(w) {}
 
 };
 
@@ -36,6 +38,7 @@ class Graph{
     vector<int> queue;
 
     map<int, vector<int>> neighbours_of;
+    map<int, vector<int>> weights_of;
 
     map<T, int> idx_of;
     map<int, int> dist_to_node;
@@ -49,7 +52,8 @@ class Graph{
     Graph(int size) : nodes(new T[size]) {}
     ~Graph(){delete[] nodes;}
     
-    void add_edge(T, T);
+    void add_edge(T, T, int);
+    void add_edge_or_update_weight(T*, T*, int);
 
     void calc_maps();
 
@@ -97,9 +101,10 @@ int Graph<T>::run_dijkstra(T source, T goal){
       if(find(queue.begin(), queue.end(), neighbours_of[node_idx][i]) == queue.end()) continue;
       
       int neighbour_idx = neighbours_of[node_idx][i];
+      int neighbour_weight = weights_of[node_idx][i];
 
-      if(dist_to_node[node_idx] + 1 < dist_to_node[neighbour_idx])
-        dist_to_node[neighbour_idx] = dist_to_node[node_idx] + 1;
+      if(dist_to_node[node_idx] + neighbour_weight < dist_to_node[neighbour_idx])
+        dist_to_node[neighbour_idx] = dist_to_node[node_idx] + neighbour_weight;
 
       if(neighbour_idx == idx_goal && dist_to_node[idx_goal] != infinity)
         return dist_to_node[idx_goal];
@@ -113,7 +118,30 @@ int Graph<T>::run_dijkstra(T source, T goal){
 }
 
 template <typename T>
-void Graph<T>::add_edge(T a, T b){
+void Graph<T>::add_edge_or_update_weight(T* ptr_a, T* ptr_b, int weight){
+
+  if(ptr_a == ptr_b) return;
+
+  for(Edge<T> & edge : edges){
+
+    if((edge.in == ptr_a && edge.out == ptr_b) ||
+       (edge.in == ptr_b && edge.out == ptr_a)
+    ){
+
+      if(edge.weight > weight) edge.weight = weight;
+
+      return;
+
+    }
+
+  }
+
+  edges.push_back(Edge<T>(ptr_a, ptr_b, weight));
+
+}
+
+template <typename T>
+void Graph<T>::add_edge(T a, T b, int weight){
   
   T* ptr_a = nullptr;
   T* ptr_b = nullptr;
@@ -143,15 +171,7 @@ void Graph<T>::add_edge(T a, T b){
 
   }
 
-  if(ptr_a == ptr_b) return;
-
-  for(Edge<T> & edge : edges)
-    if((edge.in == ptr_a && edge.out == ptr_b) ||
-       (edge.in == ptr_b && edge.out == ptr_a)
-    )
-      return;
-
-  edges.push_back(Edge<T>(ptr_a, ptr_b));
+  add_edge_or_update_weight(ptr_a, ptr_b, weight);
 
 }
 
@@ -198,6 +218,7 @@ template <typename T>
 void Graph<T>::calc_maps(){
   
  neighbours_of.clear();
+ weights_of.clear();
 
  for(int & n : non_empty_nodes)
    idx_of[nodes[n]] = n;
@@ -211,6 +232,10 @@ void Graph<T>::calc_maps(){
 
    for(int & i : edges_in) neighbours_of[n].push_back(idx_of[*edges[i].out]);
    for(int & i : edges_out) neighbours_of[n].push_back(idx_of[*edges[i].in]);
+
+   for(int & i : edges_in) weights_of[n].push_back(edges[i].weight);
+   for(int & i : edges_out) weights_of[n].push_back(edges[i].weight);
+
 
  }
 
@@ -322,7 +347,7 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph, map<string, Coord
 
   for(int l=0; l<n_levels; l++)
     for(auto & edge : edges)
-      graph.add_edge({edge.first.first, edge.first.second, l}, {edge.second.first, edge.second.second, l});
+      graph.add_edge({edge.first.first, edge.first.second, l}, {edge.second.first, edge.second.second, l}, 1);
 
   cout<<graph.n_nodes<<endl;
 
@@ -337,7 +362,7 @@ void make_graph(vector<vector<char>> & grid, Graph<T> & graph, map<string, Coord
       Coordinate3d a = {portal_coords_inner[portal_name].first, portal_coords_inner[portal_name].second, l};
       Coordinate3d b = {portal_coords_outer[portal_name].first, portal_coords_outer[portal_name].second, l - 1};
 
-      graph.add_edge(a, b);
+      graph.add_edge(a, b, 1);
 
     }
   }
