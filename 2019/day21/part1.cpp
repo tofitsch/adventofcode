@@ -183,7 +183,13 @@ int main(){
   computer.init();
 
   string program =
-    "NOT A J\n"
+    "NOT A T\n"
+    "OR T J\n"
+    "NOT B T\n"
+    "OR T J\n"
+    "NOT C T\n"
+    "OR T J\n"
+    "AND D J\n"
     "WALK\n";
 
   computer.input = parse(program);
@@ -192,6 +198,6 @@ int main(){
   while(!computer.halted)
     cout<<(char)computer.run();
 
-  cout<<endl;
+  cout<<endl<<computer.output<<endl;
 
 }
