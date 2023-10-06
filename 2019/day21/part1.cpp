@@ -192,10 +192,9 @@ int main(){
 
   computer.input = parse(program);
 
-  //while((char)computer.output != ':')
   while(!computer.halted)
-    cout<<(char)computer.run();
+    computer.run();
 
-  cout<<endl<<computer.output<<endl;
+  cout<<computer.output<<endl;
 
 }
