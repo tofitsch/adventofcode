@@ -176,8 +176,6 @@ queue<long> parse(string str){
 
 int main(){
   
-  int sum = 0;
-
   Intcode_computer computer;
 
   computer.init();
