@@ -176,58 +176,28 @@ queue<long> parse(string str){
 
 int main(){
   
-  vector<string> possible_commands;
-  for(string a : {"AND", "OR", "NOT"})
-    for(string b : {"E", "F", "G", "H", "I", "J", "T"})
-      for(string c : {"J", "T"})
-        possible_commands.push_back(a + " " + b + " " + c + "\n");
+  Intcode_computer computer;
 
-  possible_commands.push_back("");
+  computer.init();
 
-  int n_commands;
+  string program =
+    "NOT A T\n"
+    "OR T J\n"
+    "NOT B T\n"
+    "OR T J\n"
+    "NOT C T\n"
+    "OR T J\n"
+    "AND D J\n"
+    "AND E T\n"
+    "OR H T\n"
+    "AND T J\n"
+    "RUN\n";
 
-  vector<string> possible_programs;
-  for(string & a : possible_commands)
-    for(string & b : possible_commands)
-      for(string & c : possible_commands)
-        possible_programs.push_back(a + b + c + "RUN\n");
+  computer.input = parse(program);
 
-  int max_output = 0;
+  while(!computer.halted)
+    computer.run();
 
-  Intcode_computer init_computer;
-
-  init_computer.init();
-
-  for(string & add_commands : possible_programs){
-
-    Intcode_computer computer(init_computer);
-
-    string program =
-      "NOT A T\n"
-      "OR T J\n"
-      "NOT B T\n"
-      "OR T J\n"
-      "NOT C T\n"
-      "OR T J\n"
-      "AND D J\n";
-
-    program += add_commands;
-
-    computer.input = parse(program);
-
-    //while((char)computer.output != ':')
-    while(!computer.halted)
-//      cout<<(char)computer.run();
-      computer.run();
-
-    if(computer.output > max_output) max_output = computer.output;
-    cout<<endl<<program;
-    cout<<computer.output<<endl;
-
-    if(computer.output > 10) break;
-
-  }
-
-  cout<<endl<<"max: "<<max_output<<endl;
+  cout<<computer.output<<endl;
 
 }
