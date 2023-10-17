@@ -5,7 +5,7 @@
 
 using namespace std;
 
-#define END_POS 2019
+#define GOAL_CARD 2019
 #define N_CARDS 10007
 //#define N_CARDS 10
 
@@ -79,7 +79,7 @@ int main(){
 
   vector<pair<string, int>> instructions;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   while(getline(in_file, line)){
     
@@ -108,12 +108,18 @@ int main(){
     else if(instruction.first == "dealwithincrement") deal_with_increment(stack, instruction.second);
     else if(instruction.first == "cut") cut(stack, instruction.second);
 
+    for(int i=0; i<N_CARDS; i++)
+      cout<<stack[i]<<" ";
+    cout<<endl;
+
   }
 
-  for(int i=0; i<N_CARDS; i++)
-    cout<<stack[i]<<" ";
-  cout<<endl;
+  int i;
 
-  cout<<stack[END_POS]<<endl;
+  for(i=0; i<N_CARDS; i++)
+    if(stack[i] == GOAL_CARD)
+      break;
+    
+  cout<<i<<endl;
 
 }
