@@ -5,7 +5,14 @@
 using namespace std;
 
 vector<string> digits = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
-vector<string> rdigits = {"orez", "eno", "owt", "eerht", "ruof", "evif", "xis", "neves", "thgie", "enin"};
+
+string reverse(string str){
+  
+  string r_string(str.rbegin(), str.rend());
+  
+  return r_string;
+
+}
 
 int main(){
 
@@ -17,14 +24,15 @@ int main(){
   regex_str.pop_back();
 
   regex rex(regex_str);
-
-  string rregex_str(regex_str.rbegin(), regex_str.rend());
-  regex rrex(rregex_str);
+  regex rrex(reverse(regex_str));
 
   map<string, string> regex_map;
+
   for(int i = 0; i < digits.size(); ++i){
+
     regex_map.insert(make_pair(digits[i], to_string(i)));
-    regex_map.insert(make_pair(rdigits[i], to_string(i)));
+    regex_map.insert(make_pair(reverse(digits[i]), to_string(i)));
+
   }
 
   int sum = 0;
@@ -37,7 +45,7 @@ int main(){
     
     smatch match;
 
-    string rline(line.rbegin(), line.rend());
+    string rline = reverse(line);
 
     if(regex_search(line, match, rex))
       line = regex_replace(line, rex, regex_map[match.str()], regex_constants::format_first_only);
