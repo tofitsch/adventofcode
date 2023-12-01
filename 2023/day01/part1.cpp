@@ -12,7 +12,7 @@ int main(){
   ifstream in_file("input.txt");
 
   while(getline(in_file, line)){
-    
+
     char first_c = ' ';
     char last_c = ' ';
     

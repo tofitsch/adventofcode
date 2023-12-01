@@ -35,9 +35,6 @@ int main(){
 
   while(getline(in_file, line)){
     
-//    if(line == "fivegfslvcvtvs4")
-//      break;
-    
     smatch match;
 
     string rline(line.rbegin(), line.rend());
@@ -64,11 +61,7 @@ int main(){
     string num(1, first_c);
     num += last_c;
 
-//    cout<<" "<<first_c<<last_c<<endl;
-
     sum += stoi(num);
-
-//    cout<<num<<endl;
 
   }
 
