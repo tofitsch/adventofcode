@@ -15,8 +15,6 @@ struct Number {
 
   string num_str = "";
 
-  void print(){cout<<beg.first<<", "<<beg.second<<" ; "<<end.first<<","<<end.second<<" : "<<num_str<<endl;}
-
   vector<pair<int, int>> neighbours(int & x_max, int & y_max){
     
     vector<pair<int, int>> vec;
