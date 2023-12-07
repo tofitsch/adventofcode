@@ -6,6 +6,15 @@
 
 using namespace std;
 
+vector<string> hand_types = {
+  "(.)\\1{4}",                             // 5 of a kind
+  ".*(.)\\1{3}.*",                         // 4 of a kind
+  "(.)\\1{2}(.)\\2{1}|(.)\\3{1}(.)\\4{2}", // full house
+  ".*(.)\\1{2}.*",                         // 3 of a kind
+  ".*(.)\\1.*{2}(.)\\2",                   // 2 pair
+  ".*(.)\\1.*",                            // 1 pair
+};
+
 string rename_card_values_alphabetically(string & line){
   
   for(char & c : line){
@@ -22,15 +31,6 @@ string rename_card_values_alphabetically(string & line){
   return line;
 
 }
-
-vector<string> hand_types = {
-  "(.)\\1{4}",                             // 5 of a kind
-  ".*(.)\\1{3}.*",                         // 4 of a kind
-  "(.)\\1{2}(.)\\2{1}|(.)\\3{1}(.)\\4{2}", // full house
-  ".*(.)\\1{2}.*",                         // 3 of a kind
-  ".*(.)\\1.*{2}(.)\\2",                   // 2 pair
-  ".*(.)\\1.*",                            // 1 pair
-};
 
 string format_for_scoring(string & line){
   
