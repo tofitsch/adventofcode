@@ -89,8 +89,6 @@ int main(){
 
   for(long i=0; i<lines.size(); ++i){
     
-    cout << i + 1 << " " << lines[i] << endl;
-
     stringstream line_stream(lines[i]);
 
     getline(line_stream, field, ' ');
