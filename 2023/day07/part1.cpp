@@ -11,7 +11,7 @@ vector<string> hand_types = {
   ".*(.)\\1{3}.*",                         // 4 of a kind
   "(.)\\1{2}(.)\\2{1}|(.)\\3{1}(.)\\4{2}", // full house
   ".*(.)\\1{2}.*",                         // 3 of a kind
-  ".*(.)\\1.*{2}(.)\\2",                   // 2 pair
+  ".*(.)\\1.*(.)\\2",                      // 2 pair
   ".*(.)\\1.*",                            // 1 pair
 };
 
@@ -59,7 +59,7 @@ int main(){
   
   string line, field;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   vector<string> lines;
 
