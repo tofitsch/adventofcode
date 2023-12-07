@@ -11,7 +11,7 @@ vector<string> hand_types = {
   ".*(.)\\1{3}.*",                         // 4 of a kind
   "(.)\\1{2}(.)\\2{1}|(.)\\3{1}(.)\\4{2}", // full house
   ".*(.)\\1{2}.*",                         // 3 of a kind
-  ".*(.)\\1.*(.)\\2",                      // 2 pair
+  ".*(.)\\1.*(.)\\2.*",                    // 2 pair
   ".*(.)\\1.*",                            // 1 pair
 };
 
@@ -68,9 +68,9 @@ int main(){
 
   sort(lines.begin(), lines.end());
 
-  int sum = 0;
+  long sum = 0;
 
-  for(int i=0; i<lines.size(); ++i){
+  for(long i=0; i<lines.size(); ++i){
     
     cout << i + 1 << " " << lines[i] << endl;
 
@@ -79,7 +79,7 @@ int main(){
     getline(line_stream, field, ' ');
     getline(line_stream, field, ' ');
 
-    sum += (i + 1) * stoi(field);
+    sum += (i + 1) * stol(field);
 
   }
 
