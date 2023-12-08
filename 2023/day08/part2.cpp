@@ -7,10 +7,10 @@
 
 using namespace std;
 
-bool finished(vector<int> & z_offset){
+bool finished(vector<long> & period_length){
 
-  for(int & z : z_offset)
-    if(z == 0)
+  for(long & p : period_length)
+    if(p == 0)
       return false;
 
   return true;
@@ -37,44 +37,26 @@ int main(){
     if(key.first[2] == 'A')
       pos.push_back(key.first);
 
+  vector<long> period_offset(pos.size(), 0);
   vector<long> period_length(pos.size(), 0);
-  vector<int> period_offset(pos.size(), 0);
-  vector<int> z_offset(pos.size(), 0);
-
-  map<string, int> empty_map;
-  vector<map<string, int>> steps_for_node(pos.size(), empty_map);
 
   int step = 0;
 
-  while(!finished(z_offset)){
+  while(!finished(period_length)){
     
-    int i_instruction = step % instructions.length();
-
-    if(instructions[i_instruction] == 'L')
+    if(instructions[step % instructions.length()] == 'L')
       for(string & i_pos : pos)
         i_pos = graph[i_pos].first;
     else
       for(string & i_pos : pos)
         i_pos = graph[i_pos].second;
 
-    cout<<"> "<<step<<endl;
     for(int i=0; i<pos.size(); i++)
-      cout<<pos[i]<<" "<<i_instruction<<" "<<period_offset[i]<<" "<<period_length[i]<<" "<<z_offset[i]<<endl;
-    cout<<endl;
-
-    for(int i=0; i<pos.size(); i++){
-
-      if(period_offset[i] == 0 && steps_for_node[i][pos[i] + to_string(i_instruction)] > 0){
-        period_offset[i] = steps_for_node[i][pos[i] + to_string(i_instruction)];
-        period_length[i] = step - period_offset[i];
-      }
-      else
-        steps_for_node[i][pos[i] + to_string(i_instruction)] = step;
-
-      if(period_offset[i] > 0 && z_offset[i] == 0 && pos[i][2] == 'Z')
-        z_offset[i] = step / 2;
-
-    }
+      if(pos[i][2] == 'Z')
+        if(period_offset[i] == 0)
+          period_offset[i] = step;
+        else
+          period_length[i] = step - period_offset[i];
 
     step++;
 
@@ -82,12 +64,9 @@ int main(){
 
   long result = 1;
 
-  for(int i=0; i<pos.size(); i++)
-    cout<<period_offset[i]<<" "<<period_length[i]<<" "<<z_offset[i]<<endl;
-
   for(long & p : period_length)
     result = lcm(result, p);
 
-  cout << result << endl;
+  cout << result / 2 << endl;
 
 }
