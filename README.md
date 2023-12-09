@@ -13,10 +13,16 @@ The scripts return just the solution, no other printout.
 They are written in a different language for each year.
 Here is how to run them:
 
-## 2022: AWK
+## 2019: C++
 
 ```shell
-awk -f part1.awk input.txt
+g++ -std=c++20 -o x part1.cpp && ./x
+```
+
+## 2020: vim keystrokes
+
+```shell
+vim -c "norm `<part1.vim`" input.txt 2>/dev/null
 ```
 
 ## 2021: vimscript
@@ -31,14 +37,24 @@ or from within vim:
 :so %
 ```
 
-## 2020: vim keystrokes
+## 2022: AWK
 
 ```shell
-vim -c "norm `<part1.vim`" input.txt 2>/dev/null
+awk -f part1.awk input.txt
 ```
 
-## 2019: C++
+## 2019: C++, bonus: vim keystrokes
+
+`part1.cpp`: First, each problem is solved in C++ to confirm that my strategy works:
 
 ```shell
-g++ -o x part1.cpp && ./x
+g++ -std=c++20 -o x part1.cpp && ./x
 ```
+
+`part1.vim`: Then, as a bonus, I tried so solve some of them entirely in vim. This time I added comments (after TABs) to make them understandable (I'll go back to 2021 at some point to do that there too). To remove the comments and run the vim commands use the following script:
+
+```shell
+. ../../run_vim_macro.sh part1.vim input.txt
+```
+
+This will make a file `part1.vimc` of the macro without the comments and run it.
