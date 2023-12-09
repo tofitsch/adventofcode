@@ -23,7 +23,7 @@ struct Row{
 
   void iterate(){
 
-    history.push_back(state.back());
+    history.push_back(state[0]);
    
     for(int i = 0; i < state.size() - 1; ++i)
       state[i] = state[i + 1] - state[i];
@@ -44,12 +44,12 @@ struct Row{
 
   int result(){
     
-    int sum = 0;
+    int x = 0;
 
-    for(int & h : history)
-      sum += h;
+    for(int i = history.size() - 1; i >= 0; --i)
+      x = history[i] - x;
 
-    return sum;
+    return x;
 
   }
 
