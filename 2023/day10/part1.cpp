@@ -1,11 +1,10 @@
 #include<iostream>
 #include<fstream>
-#include<sstream>
-#include<set>
+#include<vector>
 
 using namespace std;
 
-bool is_one_of(char & c, string str){
+bool is_one_of(char c, string str){
 
   for(char & s : str)
     if(c == s)
@@ -15,157 +14,187 @@ bool is_one_of(char & c, string str){
 
 }
 
-struct Node{
- 
-  char value = ' ';
-  set<Node*> links;
-
-  bool visited = false; //XXX
-
-  void connect(Node *node){
-    
-    links.insert(node);
-    node->links.insert(this);
-
-  }
-
-  Node *next(Node *prev){
-
-    for(Node *n : links)
-      if(n != prev)
-        return n;
-
-    return this;
-
-  }
-
-};
-
-struct Graph{
-
-  size_t n_rows, n_cols;
-
-  int y = 0;
+struct Grid{
   
-  Node *start = nullptr;
+  vector<string> lines;
 
-  Node **grid;
+  int n_x, n_y, x, y, start_x = 0, start_y = 0, facing = 0;
 
-  Graph(size_t n_rows, size_t n_cols) : n_rows(n_rows), n_cols(n_cols){
-
-   grid = new Node *[n_rows];
-
-   for(size_t i=0; i<n_rows; ++i)
-     grid[i] = new Node[n_cols];
-
-  }
-
-  ~Graph(){
-
-    for(size_t i=0; i<n_rows; ++i)
-      delete[] grid[i];
-
-    delete[] grid;
-
-  }
-
-  void add_line(string & line){
+  void turn_right(){
     
-    for(int x=0; x<line.length(); x++){
+    facing++;
 
-      grid[y][x].value = line[x];
+    if(facing == 4)
+      facing = 0;
 
-      Node *new_node = & grid[y][x];
-      Node *above = y == 0 ? nullptr : & grid[y - 1][x];
-      Node *left = x == 0 ? nullptr : & grid[y][x - 1];
+  }
 
-      if(line[x] == 'S')
-        start = new_node;
+  void turn_left(){
+    
+    facing--;
 
-      if(is_one_of(line[x], "|LJS") && above && is_one_of(above->value, "|7FS"))
-        above->connect(& grid[y][x]);
-      if(is_one_of(line[x], "-7JS") && left && is_one_of(left->value, "-LFS"))
-        left->connect(& grid[y][x]);
+    if(facing == -1)
+      facing = 3;
+
+  }
+
+  bool facing_valid(){
+    
+    switch(facing){
+      case 0: return is_one_of(facing_at(), "7F|S");
+      case 1: return is_one_of(facing_at(), "7J-S");
+      case 2: return is_one_of(facing_at(), "LJ|S");
+      case 3: return is_one_of(facing_at(), "LF-S");
+      default: return false;
+    }
+   
+  }
+
+  bool step(){
+
+    switch(facing){
+      case 0: y--; break;
+      case 1: x++; break;
+      case 2: y++; break;
+      case 3: x--; break;
+    }
+
+    switch(at(x, y)){
+
+      case '7':
+        if(facing == 0)
+	  turn_left();
+	else
+          turn_right();
+	break;
+
+      case 'L':
+        if(facing == 3)
+          turn_right();
+	else
+          turn_left();
+	break;
+
+      case 'J':
+        if(facing == 2)
+	  turn_right();
+	else
+          turn_left();
+	break;
+
+      case 'F':
+        if(facing == 3)
+          turn_left();
+	else
+          turn_right();
+	break;
+
+      case 'S':
+        start();
+        return false;
 
     }
 
-    y++;
+    return true;
+
+  }
+
+  char facing_at(){
+    
+    switch(facing){
+      case 0: return at(x, y - 1);
+      case 1: return at(x + 1, y);
+      case 2: return at(x, y + 1);
+      case 3: return at(x - 1, y);
+      default: return ' ';
+    }
+
+
+  }
+
+  char at(int x, int y){
+
+    if(x >= n_x || y >= n_y || x < 0 || y < 0)
+      return ' ';
+
+    return lines[y][x];
+
+  }
+
+  void start(){
+    
+    x = start_x;
+    y = start_y;
+
+    while(!facing_valid())
+      turn_right();
+
+  }
+
+  Grid(string in_file_name){
+
+    string line;
+
+    ifstream in_file(in_file_name);
+
+    while(getline(in_file, line)){
+      
+      if(start_x == 0){
+
+        size_t pos = line.find('S');
+        
+        if(pos != string::npos){
+          
+          start_x = (int) pos;
+          start_y = lines.size();
+
+        }
+
+      }
+
+      lines.push_back(line);
+
+    }
+
+    n_x = lines.back().length();
+    n_y = lines.size();
+
+    in_file.close();
 
   }
 
   void print(){
-    for(int y=0; y<n_rows; ++y){
-      for(int x=0; x<n_cols; ++x)
-        if(grid[y][x].visited)
-          cout << grid[y][x].value;
-	else
-	  cout << ' ';
-      cout<<endl;
-    }
-    cout<<endl;
-  }
+    
+    const char* cout_highlight = "\033[1;31m";
+    const char* cout_reset = "\033[0m";
 
-  void print_links(){
-    for(int y=0; y<n_rows; ++y){
-      for(int x=0; x<n_cols; ++x)
-        if(grid[y][x].links.size() == 0 || !(*grid[y][x].links.begin())->visited)
-          cout<<' ';
-        else
-//          cout << (*grid[y][x].links.begin())->value;
-          cout << grid[y][x].links.size();
+    cout << x << " " << y << " " << facing << endl;
+
+    for(int Y=0; Y<n_y; Y++){
+      for(int X=0; X<n_x; X++)
+        if(x == X && y == Y)
+	  cout << cout_highlight << lines[Y][X] << cout_reset;
+	else
+	  cout << lines[Y][X];
       cout<<endl;
     }
     cout<<endl;
+
   }
 
 };
 
 int main(){
-  
-  string line;
 
-  ifstream in_file("input.txt");
-  
-  getline(in_file, line);
+  Grid grid("input.txt");
 
-  int n_cols =  line.length();
-  int n_rows = 1;
+  grid.start();
 
-  while(getline(in_file, line))
-    n_rows++;
+  int n_steps = 1;
 
-  Graph graph(n_cols, n_rows);
-
-  in_file.clear();
-  in_file.seekg(0, ios::beg);
-
-  while(getline(in_file, line))
-    graph.add_line(line);
-  
-  int n_steps = 0;
-
-  Node *pos = graph.start;
-  Node *prev = nullptr;
-
-  do{
-    
-    pos->visited = true;
-    
-    cout << pos->value;
-
-    Node *new_prev = pos;
-
-    pos = pos->next(prev);
-
-    prev = new_prev;
-
+  while(grid.step())
     n_steps++;
 
-  }while(pos != graph.start);
-
-//  graph.print();
-  graph.print_links();
-
-  cout << endl << n_steps / 2 << endl;
+  cout << n_steps / 2 << endl;
 
 }
