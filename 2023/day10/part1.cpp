@@ -163,25 +163,6 @@ struct Grid{
 
   }
 
-  void print(){
-    
-    const char* cout_highlight = "\033[1;31m";
-    const char* cout_reset = "\033[0m";
-
-    cout << x << " " << y << " " << facing << endl;
-
-    for(int Y=0; Y<n_y; Y++){
-      for(int X=0; X<n_x; X++)
-        if(x == X && y == Y)
-	  cout << cout_highlight << lines[Y][X] << cout_reset;
-	else
-	  cout << lines[Y][X];
-      cout<<endl;
-    }
-    cout<<endl;
-
-  }
-
 };
 
 int main(){
