@@ -22,6 +22,33 @@ struct Grid{
 
   int n_x, n_y, x, y, start_x = 0, start_y = 0, facing = 0;
 
+  char type_inner(){
+
+    for(int Y=0; Y<n_y; Y++)
+      for(int X=0; X<n_x; X++)
+        if(X == n_x - 1 || Y == n_y - 1|| X == 0 || Y == 0)
+          if(tile_types[Y][X] == 'R')
+	    return 'L';
+          else if(tile_types[Y][X] == 'L')
+	    return 'R';
+
+    return ' ';
+    
+  }
+
+  int count_type(char c){
+    
+    int ctr = 0;
+
+    for(int Y=0; Y<n_y; Y++)
+      for(int X=0; X<n_x; X++)
+        if(tile_types[Y][X] == c)
+	  ctr++;
+
+    return ctr;
+
+  }
+
   void label_remaining_tiles(){
 
     vector<pair<int, int>> remaining_tiles;
@@ -70,9 +97,6 @@ struct Grid{
 
     }
 
-    for(auto & coord :remaining_tiles)
-      tile_types[coord.first][coord.second] = ' ';
-
   }
 
   void turn_right(){
@@ -105,9 +129,7 @@ struct Grid{
    
   }
 
-  bool step(){
-    
-    tile_types[y][x] = '.';
+  void label_left_and_right(){
 
     char *tile_left = tile_neighbor(x, y, facing + 3);
     char *tile_right = tile_neighbor(x, y, facing + 1);
@@ -118,12 +140,22 @@ struct Grid{
     if(tile_right && *tile_right == ' ')
       *tile_right = 'R';
 
+  }
+
+  bool step(){
+    
+    tile_types[y][x] = '.';
+
+    label_left_and_right();
+
     switch(facing){
       case 0: y--; break;
       case 1: x++; break;
       case 2: y++; break;
       case 3: x--; break;
     }
+
+    label_left_and_right();
 
     switch(at(x, y)){
 
@@ -248,15 +280,12 @@ struct Grid{
 
   void print(){
     
-    const char* cout_highlight = "\033[1;31m";
-    const char* cout_reset = "\033[0m";
-
     cout << x << " " << y << " " << facing << endl;
 
     for(int Y=0; Y<n_y; Y++){
       for(int X=0; X<n_x; X++)
-        if(x == X && y == Y)
-	  cout << cout_highlight << tile_types[Y][X] << cout_reset;
+        if(tile_types[Y][X] == '.')
+	  cout << lines[Y][X];
 	else
 	  cout << tile_types[Y][X];
       cout<<endl;
@@ -273,15 +302,11 @@ int main(){
 
   grid.start();
 
-  int n_steps = 1;
-
   while(grid.step())
-    n_steps++;
+    continue;
 
   grid.label_remaining_tiles();
 
-  grid.print();
-
-  cout << n_steps / 2 << endl;
+  cout << grid.count_type(grid.type_inner()) << endl;
 
 }
