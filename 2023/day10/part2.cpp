@@ -1,6 +1,7 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<algorithm>
 
 using namespace std;
 
@@ -20,6 +21,59 @@ struct Grid{
   vector<string> tile_types;
 
   int n_x, n_y, x, y, start_x = 0, start_y = 0, facing = 0;
+
+  void label_remaining_tiles(){
+
+    vector<pair<int, int>> remaining_tiles;
+
+    for(int Y=0; Y<n_y; Y++)
+      for(int X=0; X<n_x; X++)
+        if(tile_types[Y][X] == ' ')
+	  remaining_tiles.push_back({Y, X});
+    
+    int ctr = 0;
+
+    while(remaining_tiles.size() > 0){
+
+     if(ctr == 100)
+       break;
+     ctr++;
+      
+      vector<int> tiles_that_got_labeled;
+
+      for(int t=0; t<remaining_tiles.size(); t++){
+
+        for(int n=0; n<4; n++){
+	  
+	  pair<int, int> coord = remaining_tiles[t];
+
+	  char *neighbor_type = tile_neighbor(coord.second, coord.first, n);
+
+          if(neighbor_type && is_one_of(*neighbor_type, "RL")){
+	    
+	    tile_types[coord.first][coord.second] = *neighbor_type;
+
+	    tiles_that_got_labeled.push_back(t);
+
+	    break;
+	    
+	  }
+
+	}
+
+      }
+
+     sort(tiles_that_got_labeled.rbegin(), tiles_that_got_labeled.rend());
+
+     for(int i : tiles_that_got_labeled)
+       remaining_tiles.erase(remaining_tiles.begin() + i);
+
+    }
+
+    for(auto & coord :remaining_tiles)
+      tile_types[coord.first][coord.second] = ' ';
+
+  }
 
   void turn_right(){
     
@@ -55,13 +109,13 @@ struct Grid{
     
     tile_types[y][x] = '.';
 
-    char *tile_left = tile_on_side(-1);
-    char *tile_right = tile_on_side(1);
+    char *tile_left = tile_neighbor(x, y, facing + 3);
+    char *tile_right = tile_neighbor(x, y, facing + 1);
 
-    if(tile_left && *tile_left != '.')
+    if(tile_left && *tile_left == ' ')
       *tile_left = 'L';
 
-    if(tile_right && *tile_right != '.')
+    if(tile_right && *tile_right == ' ')
       *tile_right = 'R';
 
     switch(facing){
@@ -111,20 +165,9 @@ struct Grid{
 
   }
 
-  char *tile_on_side(int side){
-
-    int at_facing = facing + side;
-
-    if(at_facing == 4)
-      at_facing = 0;
-
-    if(at_facing == -1)
-      at_facing = 3;
-
-    int X = x;
-    int Y = y;
-
-    switch(at_facing){
+  char *tile_neighbor(int X, int Y, int side){
+   
+    switch(side % 4){
       case 0: Y--; break;
       case 1: X++; break;
       case 2: Y++; break;
@@ -234,6 +277,8 @@ int main(){
 
   while(grid.step())
     n_steps++;
+
+  grid.label_remaining_tiles();
 
   grid.print();
 
