@@ -88,33 +88,9 @@ struct Row{
 
   }
 
-  bool vectors_equal(vector<int> & a, vector<int> & b){
+  int get_n_valid(){
     
-    if(a.size() != b.size())
-      return false;
-    
-    for(int i=0; i<a.size(); i++)
-      if(a[i] != b[i])
-        return false;
-
-    return true;
-
-  }
-
-  void print(){
-    
-    cout << str << " ";
-
-    for(int & num : nums)
-      cout << num << " ";
-
-    cout << endl;
-    cout << "n_broken: " << n_broken << endl;
-    cout << "n_broken_visible: " << n_broken_visible << endl;
-    cout << "n_hidden: " << n_hidden << endl;
-    cout << "n_broken_hidden: " << n_broken_hidden << endl;
-    cout << "n_intact_hidden: " << n_intact_hidden << endl;
-    cout << "hidden_str: " << hidden_str << endl;
+    int n_valid = 0;
 
     do{
 
@@ -122,19 +98,12 @@ struct Row{
 
       vector<int> grouping = get_groupings(s);
 
-      cout << s << " ";
-
-      for(int & g : grouping)
-        cout << g << " ";
-
-      if(vectors_equal(grouping, nums))
-        cout << "X";
-
-      cout << endl;
+      if(grouping == nums)
+        n_valid++;
 
     }while(next_permutation(hidden_str.begin(), hidden_str.end()));
     
-    cout << endl;
+    return n_valid;
 
   }
   
@@ -144,16 +113,18 @@ int main(){
 
   string line;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
+
+  int sum = 0;
 
   while(getline(in_file, line)){
 
     Row row(line);
 
-    row.print();
-
-    exit(0);
+    sum += row.get_n_valid();
 
   }
+
+  cout << sum << endl;
 
 }
