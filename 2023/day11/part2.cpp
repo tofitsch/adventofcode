@@ -10,7 +10,7 @@ vector<string> transpose(vector<string> & grid, int & n_x, int & n_y){
 
   for(int x=0; x<n_x; x++)
     for(int y=0; y<n_y; y++)
-      grid_t[y] += grid[x][y];
+      grid_t[x] += grid[y][x];
 
   return grid_t;
 
