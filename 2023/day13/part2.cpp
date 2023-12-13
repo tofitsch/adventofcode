@@ -22,15 +22,15 @@ vector<string> transpose(vector<string> & grid){
 
 bool more_than_one_char_diff(string & a, string & b){
   
-  int n_differences = 0;
+  bool found_diff = false;
   
   for(int i=0; i<a.length(); i++){
     if(a[i] != b[i]){
       
-      n_differences++;
-
-      if(n_differences > 1)
+      if(found_diff)
         return true;
+
+      found_diff = true;
 
     }
   }
@@ -45,37 +45,27 @@ int get_mirror_pos(vector<string> & grid){
 
     bool is_axis = true;
 
-    int n_differences = 0;
+    bool found_diff = false;
 
     for(int j=1; j<=max(i, (int) grid.size() - i); j++){
       
      
       if((i + j - 1 < grid.size() && i - j >= 0 ) && grid[i + j - 1] != grid[i - j]){
         
-	if(more_than_one_char_diff(grid[i + j - 1], grid[i - j])){
+	if(found_diff || more_than_one_char_diff(grid[i + j - 1], grid[i - j])){
 	  
 	  is_axis = false;
 	  break;
 
 	}
-	else{
-
-	  n_differences++;
-
-	  if(n_differences > 1){
-	    
-	    is_axis = false;
-	    break;
-
-	  }
-
-	}
+	else
+	  found_diff = true;
 
       }
 
     }
 
-    if(is_axis && n_differences == 1)
+    if(is_axis && found_diff)
       return i;
 
   }
