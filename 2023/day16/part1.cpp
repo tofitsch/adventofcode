@@ -42,105 +42,109 @@ struct Grid{
     n_x = grid[0].size();
     n_y = grid.size();
 
-    beam_fronts.push_back(Beam(0, 0, 1));
+    beam_fronts.push_back(Beam(0, -1, 1));
     has_beam_horizontal[0][0] = true;
 
   }
 
-  void propagate_beam_fronts(){
+  vector<Beam> propagate_beam_front(Beam & beam){
 
-    for(auto it = beam_fronts.begin(); it != beam_fronts.end();){
-      
-      Beam * new_beam = nullptr;
+    vector<Beam> new_beams;
 
-      switch(it->direction){
-        case 0: it->y--; break;
-        case 1: it->x++; break;
-        case 2: it->y++; break;
-        case 3: it->x--; break;
-      }
+    switch(beam.direction){
+      case 0: beam.y--; break;
+      case 1: beam.x++; break;
+      case 2: beam.y++; break;
+      case 3: beam.x--; break;
+    }
 
-      switch(grid[it->y][it->x]){
+    if(beam.x < 0 || beam.y < 0 || beam.x >= n_x || beam.y >= n_y)
+      return {};
 
-        case '/' :
-          switch(it->direction){
-	    case 0: it->direction = 1; break;
-	    case 1: it->direction = 0; break;
-	    case 2: it->direction = 3; break;
-	    case 3: it->direction = 2; break;
-	  }
-	  break;
+    bool remove_beam = false;
 
-        case '\\':
-          switch(it->direction){
-	    case 0: it->direction = 3; break;
-	    case 1: it->direction = 2; break;
-	    case 2: it->direction = 1; break;
-	    case 3: it->direction = 0; break;
-	  }
-	  break;
+    switch(grid[beam.y][beam.x]){
 
-        case '-' :
-          switch(it->direction){
-	    case 1: break;
-	    case 3: break;
-	    default: it->direction = 1; new_beam = new Beam(it->x, it->y, 3); break;
-	  }
-	  break;
-
-        case '|' :
-          switch(it->direction){
-	    case 0: break;
-	    case 2: break;
-	    default: it->direction = 0; new_beam = new Beam(it->x, it->y, 2); break;
-	  }
-	  break;
-
-      }
-
-      bool occupied = false;
-
-      switch(it->direction){
-        case 0: if(has_beam_horizontal[it->y][it->x]) occupied = true; break;
-        case 1: if(has_beam_vertical[it->y][it->x])   occupied = true; break;
-        case 2: if(has_beam_horizontal[it->y][it->x]) occupied = true; break;
-        case 3: if(has_beam_vertical[it->y][it->x])   occupied = true; break;
-      }
-
-      if(new_beam){
-        switch(new_beam->direction){
-          case 0: if(has_beam_horizontal[it->y][it->x]) delete new_beam; new_beam = nullptr; break;
-          case 1: if(has_beam_vertical[it->y][it->x])   delete new_beam; new_beam = nullptr; break;
-          case 2: if(has_beam_horizontal[it->y][it->x]) delete new_beam; new_beam = nullptr; break;
-          case 3: if(has_beam_vertical[it->y][it->x])   delete new_beam; new_beam = nullptr; break;
+      case '/' :
+        switch(beam.direction){
+          case 0: beam.direction = 1; break;
+          case 1: beam.direction = 0; break;
+          case 2: beam.direction = 3; break;
+          case 3: beam.direction = 2; break;
         }
-      }
+        break;
 
-      if(it->x < 0 || it->y < 0 || it->x >= n_x || it->y >= n_y){
+      case '\\':
+        switch(beam.direction){
+          case 0: beam.direction = 3; break;
+          case 1: beam.direction = 2; break;
+          case 2: beam.direction = 1; break;
+          case 3: beam.direction = 0; break;
+        }
+        break;
 
-        beam_fronts.erase(it++);
-        
-	if(new_beam){
+      case '-' :
+        switch(beam.direction){
+          case 1: break;
+          case 3: break;
+          default: new_beams = {Beam(beam.y, beam.x, 1), Beam(beam.y, beam.x, 3)}; remove_beam = true; break;
+        }
+        break;
 
-	  delete new_beam;
-	  new_beam = nullptr;
-
-	}
-
-      }
-      else {
-        
-	if(new_beam)
-          beam_fronts.insert(it, *new_beam);
-        
-	if(occupied)
-          beam_fronts.erase(it++);
-	else
-          ++it;
-
-      }
+      case '|' :
+        switch(beam.direction){
+          case 0: break;
+          case 2: break;
+          default: new_beams = {Beam(beam.y, beam.x, 0), Beam(beam.y, beam.x, 2)}; remove_beam = true; break;
+        }
+        break;
 
     }
+
+    switch(beam.direction){
+      case 0: if(grid[beam.y][beam.x] == '.' && has_beam_vertical[beam.y][beam.x])   remove_beam = true; break;
+      case 1: if(grid[beam.y][beam.x] == '.' && has_beam_horizontal[beam.y][beam.x]) remove_beam = true; break;
+      case 2: if(grid[beam.y][beam.x] == '.' && has_beam_vertical[beam.y][beam.x])   remove_beam = true; break;
+      case 3: if(grid[beam.y][beam.x] == '.' && has_beam_horizontal[beam.y][beam.x]) remove_beam = true; break;
+    }
+
+    for(Beam & new_beam : new_beams){
+      switch(new_beam.direction){
+        case 0: if(has_beam_vertical[beam.y][beam.x]) new_beam.direction = -1; break;
+        case 1: if(has_beam_horizontal[beam.y][beam.x])   new_beam.direction = -1; break;
+        case 2: if(has_beam_vertical[beam.y][beam.x]) new_beam.direction = -1; break;
+        case 3: if(has_beam_horizontal[beam.y][beam.x])   new_beam.direction = -1; break;
+      }
+    }
+
+    vector<Beam> out_beams;
+
+    if(!remove_beam)
+      out_beams.push_back(beam);
+
+    for(Beam & new_beam : new_beams)
+      if(new_beam.direction >= 0)
+        out_beams.push_back(new_beam);
+
+    for(Beam & b : out_beams)
+      if(b.direction == 0 || b.direction == 2)
+        has_beam_vertical[beam.y][beam.x] = true;
+      else
+        has_beam_horizontal[beam.y][beam.x] = true;
+    
+    return out_beams;
+
+  }
+
+  void propagate(){
+    
+    vector<Beam> new_beam_fronts;
+
+    for(Beam & beam : beam_fronts)
+      for(Beam new_beam : propagate_beam_front(beam))
+        new_beam_fronts.push_back(new_beam);
+    
+    beam_fronts = new_beam_fronts;
 
   }
 
@@ -157,13 +161,46 @@ struct Grid{
 
   }
 
+  void print(){
+    
+    for(int y=0; y<n_y; y++){
+      for(int x=0; x<n_x; x++){
+
+        char c = ' ';
+
+	if(has_beam_horizontal[y][x]){
+          if(has_beam_vertical[y][x])
+	    c = 'X';
+	  else
+	    c = '-';
+	}
+        else if(has_beam_vertical[y][x])
+	 c = '|';
+        
+	for(Beam & beam : beam_fronts)
+	  if(beam.x == x && beam.y == y)
+	    c = 'O';
+
+        cout << c; 
+	
+      }
+
+      cout << endl;
+
+    }
+
+  }
+
 };
 
 int main(){
 
-  Grid grid("example.txt");
+  Grid grid("input.txt");
   
-  grid.propagate_beam_fronts();
+  while(grid.beam_fronts.size() > 0)
+    grid.propagate();
+
+  grid.print();
 
   cout << grid.count_occupied_tiles() << endl;
   
