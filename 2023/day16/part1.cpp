@@ -19,7 +19,7 @@ struct Grid{
 
   vector<string> grid;
 
-  vector<Beam> beams;
+  vector<Beam> beam_fronts;
 
   vector<vector<bool>> has_beam_horizontal;
   vector<vector<bool>> has_beam_vertical;
@@ -42,14 +42,14 @@ struct Grid{
     n_x = grid[0].size();
     n_y = grid.size();
 
-    beams.push_back(Beam(0, 0, 1));
+    beam_fronts.push_back(Beam(0, 0, 1));
     has_beam_horizontal[0][0] = true;
 
   }
 
-  void propagate_beams(){
+  void propagate_beam_fronts(){
 
-    for(auto it = beams.begin(); it != beams.end();){
+    for(auto it = beam_fronts.begin(); it != beam_fronts.end();){
       
       Beam * new_beam = nullptr;
 
@@ -109,27 +109,32 @@ struct Grid{
 
       if(new_beam){
         switch(new_beam->direction){
-          case 0: if(has_beam_horizontal[it->y][it->x]) new_beam = nullptr; break;
-          case 1: if(has_beam_vertical[it->y][it->x])   new_beam = nullptr; break;
-          case 2: if(has_beam_horizontal[it->y][it->x]) new_beam = nullptr; break;
-          case 3: if(has_beam_vertical[it->y][it->x])   new_beam = nullptr; break;
+          case 0: if(has_beam_horizontal[it->y][it->x]) delete new_beam; new_beam = nullptr; break;
+          case 1: if(has_beam_vertical[it->y][it->x])   delete new_beam; new_beam = nullptr; break;
+          case 2: if(has_beam_horizontal[it->y][it->x]) delete new_beam; new_beam = nullptr; break;
+          case 3: if(has_beam_vertical[it->y][it->x])   delete new_beam; new_beam = nullptr; break;
         }
       }
 
       if(it->x < 0 || it->y < 0 || it->x >= n_x || it->y >= n_y){
 
-        beams.erase(it++);
+        beam_fronts.erase(it++);
+        
+	if(new_beam){
 
-	new_beam = nullptr;
+	  delete new_beam;
+	  new_beam = nullptr;
+
+	}
 
       }
       else {
         
 	if(new_beam)
-          beams.insert(it, *new_beam);
+          beam_fronts.insert(it, *new_beam);
         
 	if(occupied)
-          beams.erase(it++);
+          beam_fronts.erase(it++);
 	else
           ++it;
 
@@ -139,6 +144,18 @@ struct Grid{
 
   }
 
+  int count_occupied_tiles(){
+    
+    int ctr = 0;
+    
+    for(int y=0; y<n_y; y++)
+      for(int x=0; x<n_x; x++)
+        if(has_beam_vertical[y][x] || has_beam_horizontal[y][x])
+	  ctr++;
+    
+    return ctr;
+
+  }
 
 };
 
@@ -146,6 +163,8 @@ int main(){
 
   Grid grid("example.txt");
   
-  grid.propagate_beams();
+  grid.propagate_beam_fronts();
+
+  cout << grid.count_occupied_tiles() << endl;
   
 }
