@@ -160,36 +160,6 @@ struct Grid{
 
   }
 
-  void print(){
-    
-    for(int y=0; y<n_y; y++){
-      for(int x=0; x<n_x; x++){
-
-        char c = ' ';
-
-	if(has_beam_horizontal[y][x]){
-          if(has_beam_vertical[y][x])
-	    c = 'X';
-	  else
-	    c = '-';
-	}
-        else if(has_beam_vertical[y][x])
-	 c = '|';
-        
-	for(Beam & beam : beam_fronts)
-	  if(beam.x == x && beam.y == y)
-	    c = 'O';
-
-        cout << c; 
-	
-      }
-
-      cout << endl;
-
-    }
-
-  }
-
 };
 
 int main(){
@@ -198,8 +168,6 @@ int main(){
   
   while(grid.beam_fronts.size() > 0)
     grid.propagate();
-
-  grid.print();
 
   cout << grid.count_occupied_tiles() << endl;
   
