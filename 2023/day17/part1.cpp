@@ -55,6 +55,8 @@ struct Graph::Node{
   bool on_path = false;
 
   void link(Node *);
+  bool horizontal_to(Node *);
+  int straight_path_length(Node *);
 
   Node(int x, int y, int v) : x(x), y(y), value(v) {}
   
@@ -65,6 +67,32 @@ void Graph::Node::link(Node * node){
   node->neighbours.push_back(this);
 
   neighbours.push_back(node);
+
+}
+
+bool Graph::Node::horizontal_to(Node * node){
+  
+  if(abs(x - node->x) > 0)
+    return true;
+
+  return false;
+
+}
+
+int Graph::Node::straight_path_length(Node * node){
+  
+  int length = 1;
+   
+  bool direction = horizontal_to(node);
+
+  while(node->previous && node->horizontal_to(node->previous) == direction){
+
+    node = node->previous;
+    length++;
+
+  }
+
+  return length;
 
 }
 
@@ -139,8 +167,10 @@ void Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
     queue.pop_back();
 
+    int ctr = 0;
+
     for(Node * neighbour : node->neighbours){
-      if(! neighbour->visited){
+      if(! neighbour->visited && neighbour->straight_path_length(node) < 4){
         
 	int distance_update = node->distance + neighbour->value;
 	  
