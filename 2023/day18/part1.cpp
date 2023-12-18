@@ -59,7 +59,7 @@ int shoe_lace_formula(vector<Coordinate> vertices){
 
   vertices.pop_back();
 
-  return sum / 2;
+  return abs(sum / 2);
 
 }
 
