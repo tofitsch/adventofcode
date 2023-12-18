@@ -20,6 +20,8 @@ class Graph{
 
   private:
     
+    struct Edge;
+
     struct Node;
 
     struct Grid{
@@ -50,9 +52,18 @@ Graph::Graph(string in_file_name) : in_file_name(in_file_name) {
 
 }
 
+struct Graph::Edge{
+
+  Node * node;
+  int weight;
+
+  Edge(Node * n, int w) : node(n), weight(w) {}
+
+};
+
 struct Graph::Node{
   
-  vector<Node *> neighbours;
+  vector<Edge> edges;
 
   int x, y, value;
 
@@ -61,19 +72,18 @@ struct Graph::Node{
   bool visited = false;
   bool on_path = false;
 
-  void link(Node *);
+  void link(Node *, int);
   bool horizontal_to(Node *);
-  int straight_path_length(Node *);
 
   Node(int x, int y, int v) : x(x), y(y), value(v) {}
   
 };
 
-void Graph::Node::link(Node * node){
+void Graph::Node::link(Node * node, int weight){
   
-  node->neighbours.push_back(this);
+  node->edges.push_back(Edge(this, weight));
 
-  neighbours.push_back(node);
+  edges.push_back(Edge(node, weight));
 
 }
 
@@ -83,23 +93,6 @@ bool Graph::Node::horizontal_to(Node * node){
     return true;
 
   return false;
-
-}
-
-int Graph::Node::straight_path_length(Node * node){
-  
-  int length = 1;
-   
-  bool direction = horizontal_to(node);
-
-  while(node->previous && node->horizontal_to(node->previous) == direction){
-
-    node = node->previous;
-    length++;
-
-  }
-
-  return length;
 
 }
 
@@ -133,28 +126,26 @@ void Graph::add_nodes(){
 }
 
 void Graph::link_nodes(){
-  
+
   for(int y=0; y<n_y; y++){
     for(int x=0; x<n_x; x++){
+      
+      int weight_h = 0;
+      int weight_v = 0;
 
-      for(pair<int, int> neighbour : vector<pair<int, int>> { {y + 1, x}, {y - 1, x} }){
-        if(neighbour.first >= 0 && neighbour.first < n_y){
+      for(int i=1; i<4; i++){
 
-	  grid.nodes_v[y][x].link(& grid.nodes_h[neighbour.first][neighbour.second]);
-	  grid.nodes_v[y][x].link(& grid.nodes_v[neighbour.first][neighbour.second]);
-
+	if(y - i >= 0){
+	  weight_h += grid.nodes_v[y - i][x].value;
+          grid.nodes_v[y][x].link(& grid.nodes_h[y - i][x], weight_h);
 	}
-      }
 
-      for(pair<int, int> neighbour : vector<pair<int, int>> { {y, x + 1}, {y, x - 1} }){
-        if(neighbour.second >= 0 && neighbour.second < n_y){
-
-	  grid.nodes_h[y][x].link(& grid.nodes_h[neighbour.first][neighbour.second]);
-	  grid.nodes_h[y][x].link(& grid.nodes_v[neighbour.first][neighbour.second]);
-
+	if(x - i >= 0){
+	  weight_v += grid.nodes_v[y][x - i].value;
+          grid.nodes_h[y][x].link(& grid.nodes_v[y][x - i], weight_v);
 	}
-      }
 
+      }
     }
   }
 
@@ -168,10 +159,14 @@ bool Graph::distance_decreasing(const Node * a, const Node * b){
 
 int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
   
-  Node * start_node = & grid.nodes_v[start_y][start_x];
-  Node * end_node_h = & grid.nodes_h[end_y][end_x];
-  Node * end_node_v = & grid.nodes_h[end_y][end_x];
-  Node * end_node = nullptr;
+  Node * start_node = new Node(start_y, start_x, 0);
+  Node * end_node = new Node(end_y, end_x, 0);
+
+  start_node->link(& grid.nodes_v[start_y][start_x], 0);
+  start_node->link(& grid.nodes_h[start_y][start_x], 0);
+
+  end_node->link(& grid.nodes_v[end_y][end_x], 0);
+  end_node->link(& grid.nodes_h[end_y][end_x], 0);
 
   vector<Node *> queue;
 
@@ -191,36 +186,41 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
   }
 
   start_node->distance = 0;
+  start_node->previous = nullptr;
+  start_node->visited = false;
+  start_node->on_path = false;
+  queue.push_back(start_node);
+
+  end_node->distance = infinity;
+  end_node->previous = nullptr;
+  end_node->visited = false;
+  end_node->on_path = false;
+  queue.push_back(end_node);
 
   while(queue.size() > 0){
-   
+    
     sort(queue.begin(), queue.end(), distance_decreasing);
 
     Node * node = queue.back();
 
     node->visited = true;
 
-    if(node == end_node_h || node == end_node_v){
-      
-      end_node = node;
-
+    if(node == end_node)
       break;
-
-    }
 
     queue.pop_back();
 
     int ctr = 0;
 
-    for(Node * neighbour : node->neighbours){
-      if(! neighbour->visited && neighbour->straight_path_length(node) < 4){
+    for(Edge & edge : node->edges){
+      if(! edge.node->visited){
         
-	int distance_update = node->distance + neighbour->value;
+	int distance_update = node->distance + edge.weight;
 	  
-	if(distance_update < neighbour->distance){
+	if(distance_update < edge.node->distance){
 
-	  neighbour->distance = distance_update;
-	  neighbour->previous = node;
+	  edge.node->distance = distance_update;
+	  edge.node->previous = node;
 
 	}
 
@@ -233,19 +233,15 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
   Node * path_node = end_node;
 
-  int sum = 0;
-
   while(path_node != start_node){
     
     path_node->on_path = true;
-
-    sum += path_node->value;
 
     path_node = path_node->previous;
 
   }
 
-  return sum;
+  return end_node->distance;
 
 }
 
