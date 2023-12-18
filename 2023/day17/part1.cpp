@@ -273,7 +273,7 @@ void Graph::print(){
 
 int main(){
   
-  Graph graph("example.txt");
+  Graph graph("input.txt");
 
   cout << graph.run_dijkstra(0, 0, graph.n_y - 1, graph.n_x - 1) << endl;
 
