@@ -72,12 +72,24 @@ struct Graph::Node{
   bool visited = false;
   bool on_path = false;
 
+  Node * reset();
   void link(Node *, int);
   bool horizontal_to(Node *);
 
   Node(int x, int y, int v) : x(x), y(y), value(v) {}
   
 };
+
+Graph::Node * Graph::Node::reset(){
+
+  distance = infinity;
+  previous = nullptr;
+  visited = false;
+  on_path = false;
+
+  return this;
+
+}
 
 void Graph::Node::link(Node * node, int weight){
   
@@ -170,31 +182,17 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
   vector<Node *> queue;
 
-  for(int y=0; y<n_y; y++){
-    for(int x=0; x<n_x; x++){
-      for(Node * n : {& grid.nodes_v[y][x], & grid.nodes_h[y][x]}){
-      
-        n->distance = infinity;
-        n->previous = nullptr;
-        n->visited = false;
-        n->on_path = false;
+  for(int y=0; y<n_y; y++)
+    for(int x=0; x<n_x; x++)
+      for(Node * n : {& grid.nodes_v[y][x], & grid.nodes_h[y][x]})
+        queue.push_back(n->reset());
 
-        queue.push_back(n);
-
-      }
-    }
-  }
+  start_node->reset();
+  end_node->reset();
 
   start_node->distance = 0;
-  start_node->previous = nullptr;
-  start_node->visited = false;
-  start_node->on_path = false;
-  queue.push_back(start_node);
 
-  end_node->distance = infinity;
-  end_node->previous = nullptr;
-  end_node->visited = false;
-  end_node->on_path = false;
+  queue.push_back(start_node);
   queue.push_back(end_node);
 
   while(queue.size() > 0){
