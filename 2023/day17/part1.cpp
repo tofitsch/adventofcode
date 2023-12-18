@@ -74,7 +74,6 @@ struct Graph::Node{
 
   Node * reset();
   void link(Node *, int);
-  bool horizontal_to(Node *);
 
   Node(int x, int y, int v) : x(x), y(y), value(v) {}
   
@@ -93,18 +92,7 @@ Graph::Node * Graph::Node::reset(){
 
 void Graph::Node::link(Node * node, int weight){
   
-  node->edges.push_back(Edge(this, weight));
-
   edges.push_back(Edge(node, weight));
-
-}
-
-bool Graph::Node::horizontal_to(Node * node){
-  
-  if(abs(x - node->x) > 0)
-    return true;
-
-  return false;
 
 }
 
@@ -142,19 +130,31 @@ void Graph::link_nodes(){
   for(int y=0; y<n_y; y++){
     for(int x=0; x<n_x; x++){
       
-      int weight_h = 0;
-      int weight_v = 0;
+      int weight_u = 0;
+      int weight_r = 0;
+      int weight_d = 0;
+      int weight_l = 0;
 
       for(int i=1; i<4; i++){
 
 	if(y - i >= 0){
-	  weight_h += grid.nodes_v[y - i][x].value;
-          grid.nodes_v[y][x].link(& grid.nodes_h[y - i][x], weight_h);
+	  weight_u += grid.nodes_v[y - i][x].value;
+          grid.nodes_v[y][x].link(& grid.nodes_h[y - i][x], weight_u);
 	}
 
 	if(x - i >= 0){
-	  weight_v += grid.nodes_v[y][x - i].value;
-          grid.nodes_h[y][x].link(& grid.nodes_v[y][x - i], weight_v);
+	  weight_l += grid.nodes_v[y][x - i].value;
+          grid.nodes_h[y][x].link(& grid.nodes_v[y][x - i], weight_l);
+	}
+
+	if(y + i < n_y){
+	  weight_d += grid.nodes_v[y + i][x].value;
+          grid.nodes_v[y][x].link(& grid.nodes_h[y + i][x], weight_d);
+	}
+
+	if(x + i < n_x){
+	  weight_r += grid.nodes_v[y][x + i].value;
+          grid.nodes_h[y][x].link(& grid.nodes_v[y][x + i], weight_r);
 	}
 
       }
@@ -177,8 +177,8 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
   start_node->link(& grid.nodes_v[start_y][start_x], 0);
   start_node->link(& grid.nodes_h[start_y][start_x], 0);
 
-  end_node->link(& grid.nodes_v[end_y][end_x], 0);
-  end_node->link(& grid.nodes_h[end_y][end_x], 0);
+  (& grid.nodes_v[end_y][end_x])->link(end_node, 0);
+  (& grid.nodes_h[end_y][end_x])->link(end_node, 0);
 
   vector<Node *> queue;
 
@@ -196,6 +196,8 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
   queue.push_back(end_node);
 
   while(queue.size() > 0){
+    
+    cout << queue.size() << endl;
     
     sort(queue.begin(), queue.end(), distance_decreasing);
 
@@ -231,7 +233,7 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
   Node * path_node = end_node;
 
-  while(path_node != start_node){
+  while(path_node && path_node != start_node){
     
     path_node->on_path = true;
 
@@ -239,7 +241,12 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
   }
 
-  return end_node->distance;
+  int result = end_node->distance;
+
+  delete start_node;
+  delete end_node;
+
+  return result;
 
 }
 
