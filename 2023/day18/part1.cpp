@@ -47,19 +47,6 @@ struct Coordinate{
   Coordinate(int y, int x) : y(y), x(x) {}
   Coordinate(int y, int x, int n_y, int n_x) : y(y), x(x), n_y(n_y), n_x(n_x) {}
 
-  vector<Coordinate> get_neighbours(){
-
-    vector<Coordinate> neighbours;
-
-    if(y > 0) neighbours.push_back(Coordinate(y - 1, x, n_y, n_x));
-    if(x > 0) neighbours.push_back(Coordinate(y, x - 1, n_y, n_x));
-    if(y < n_y) neighbours.push_back(Coordinate(y + 1, x, n_y, n_x));
-    if(x < n_x) neighbours.push_back(Coordinate(y, x + 1, n_y, n_x));
-
-    return neighbours;
-
-  }
-
   void apply(Instruction & instruction){
     
     switch(instruction.direction){
@@ -122,15 +109,23 @@ struct Coordinate{
 
 };
 
-void flood_fill(vector<string> & grid, Coordinate coord){
+void flood_fill(vector<string> & grid, int & sum, Coordinate coord){
   
   if(grid[coord.y][coord.x] != '.')
     return;
 
   grid[coord.y][coord.x] = 'x';
 
-  for(Coordinate neighbour : coord.get_neighbours())
-    flood_fill(grid, neighbour);
+  sum++;
+
+  if(coord.y > 0)
+    flood_fill(grid, sum, Coordinate(coord.y - 1, coord.x, coord.n_y, coord.n_x));
+  if(coord.x > 0)
+    flood_fill(grid, sum, Coordinate(coord.y, coord.x - 1, coord.n_y, coord.n_x));
+  if(coord.y < coord.n_y + 1)
+    flood_fill(grid, sum, Coordinate(coord.y + 1, coord.x, coord.n_y, coord.n_x));
+  if(coord.x < coord.n_x + 1)
+    flood_fill(grid, sum, Coordinate(coord.y, coord.x + 1, coord.n_y, coord.n_x));
   
 }
 
@@ -152,19 +147,18 @@ int main(){
   
   coord.normalise();
 
-  vector<string> grid(coord.n_y + 2, string(coord.n_x + 2, '.')); //XXX
+  vector<string> grid(coord.n_y + 2, string(coord.n_x + 2, '.'));
 
   for(Instruction & instruction : instructions)
     coord.update_grid(instruction, grid);
 
-//  cout << integral(grid) << endl;
-
   coord.x = 0;
   coord.y = 0;
 
-  flood_fill(grid, coord);
+  int sum = 0;
 
-  for(int y=0; y<coord.n_y + 2; y++)
-    cout << grid[y] << endl;
+  flood_fill(grid, sum, coord);
+
+  cout << (coord.n_y + 2) * (coord.n_x + 2) - sum << endl;
 
 }
