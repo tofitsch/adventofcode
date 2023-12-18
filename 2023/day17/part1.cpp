@@ -12,7 +12,7 @@ class Graph{
     
     int n_y, n_x;
 
-    void run_dijkstra(int, int, int, int);
+    int run_dijkstra(int, int, int, int);
 
     void print();
 
@@ -22,7 +22,14 @@ class Graph{
     
     struct Node;
 
-    vector<vector<Node>> grid;
+    struct Grid{
+      
+      vector<vector<Node>> nodes_h;
+      vector<vector<Node>> nodes_v;
+    
+    };
+
+    Grid grid;
 
     string in_file_name;
 
@@ -102,27 +109,54 @@ void Graph::add_nodes(){
 
   ifstream in_file(in_file_name);
 
-  while(getline(in_file, line)){
-    
-    grid.push_back({});
+  vector<string> lines;
 
-    for(char & c : line)
-      grid.back().push_back(Node(grid.size() - 1, grid.back().size(), c - '0'));
+  while(getline(in_file, line))
+    lines.push_back(line);
+
+  for(vector<vector<Node>> * nodes : {& grid.nodes_v, & grid.nodes_h}){
+
+    for(string & l : lines){
+      
+      nodes->push_back({});
+
+      for(char & c : l)
+        nodes->back().push_back(Node(nodes->size() - 1, nodes->back().size(), c - '0'));
+
+    }
 
   }
 
-  n_x = grid[0].size();
-  n_y = grid.size();
+  n_x = grid.nodes_v[0].size();
+  n_y = grid.nodes_v.size();
 
 }
 
 void Graph::link_nodes(){
   
-  for(int y=0; y<n_y; y++)
-    for(int x=0; x<n_x; x++)
-      for(pair<int, int> neighbour : vector<pair<int, int>> { {y, x + 1}, {y, x - 1}, {y + 1, x}, {y - 1, x} })
-        if(neighbour.first >= 0 && neighbour.first < n_y  && neighbour.second >= 0 && neighbour.second < n_y)
-	  grid[y][x].link(& grid[neighbour.first][neighbour.second]);
+  for(int y=0; y<n_y; y++){
+    for(int x=0; x<n_x; x++){
+
+      for(pair<int, int> neighbour : vector<pair<int, int>> { {y + 1, x}, {y - 1, x} }){
+        if(neighbour.first >= 0 && neighbour.first < n_y){
+
+	  grid.nodes_v[y][x].link(& grid.nodes_h[neighbour.first][neighbour.second]);
+	  grid.nodes_v[y][x].link(& grid.nodes_v[neighbour.first][neighbour.second]);
+
+	}
+      }
+
+      for(pair<int, int> neighbour : vector<pair<int, int>> { {y, x + 1}, {y, x - 1} }){
+        if(neighbour.second >= 0 && neighbour.second < n_y){
+
+	  grid.nodes_h[y][x].link(& grid.nodes_h[neighbour.first][neighbour.second]);
+	  grid.nodes_h[y][x].link(& grid.nodes_v[neighbour.first][neighbour.second]);
+
+	}
+      }
+
+    }
+  }
 
 }
 
@@ -132,23 +166,27 @@ bool Graph::distance_decreasing(const Node * a, const Node * b){
 
 }
 
-void Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
+int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
   
-  Node * end_node = & grid[end_y][end_x];
-  Node * start_node = & grid[start_y][start_x];
+  Node * start_node = & grid.nodes_v[start_y][start_x];
+  Node * end_node_h = & grid.nodes_h[end_y][end_x];
+  Node * end_node_v = & grid.nodes_h[end_y][end_x];
+  Node * end_node = nullptr;
 
   vector<Node *> queue;
 
   for(int y=0; y<n_y; y++){
     for(int x=0; x<n_x; x++){
+      for(Node * n : {& grid.nodes_v[y][x], & grid.nodes_h[y][x]}){
       
-      grid[y][x].distance = infinity;
-      grid[y][x].previous = nullptr;
-      grid[y][x].visited = false;
-      grid[y][x].on_path = false;
+        n->distance = infinity;
+        n->previous = nullptr;
+        n->visited = false;
+        n->on_path = false;
 
-      queue.push_back(& grid[y][x]);
+        queue.push_back(n);
 
+      }
     }
   }
 
@@ -162,8 +200,13 @@ void Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
     node->visited = true;
 
-    if(node == end_node)
+    if(node == end_node_h || node == end_node_v){
+      
+      end_node = node;
+
       break;
+
+    }
 
     queue.pop_back();
 
@@ -190,13 +233,19 @@ void Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
 
   Node * path_node = end_node;
 
+  int sum = 0;
+
   while(path_node != start_node){
     
     path_node->on_path = true;
 
+    sum += path_node->value;
+
     path_node = path_node->previous;
 
   }
+
+  return sum;
 
 }
 
@@ -206,10 +255,12 @@ void Graph::print(){
 
     for(int x=0; x<n_x; x++){
 
-      if(grid[y][x].on_path)
-        cout << "\033[1;31m" << grid[y][x].value << "\033[0m";
+      if(grid.nodes_v[y][x].on_path)
+        cout << "\033[1;31m" << grid.nodes_v[y][x].value << "\033[0m";
+      else if(grid.nodes_h[y][x].on_path)
+        cout << "\033[1;32m" << grid.nodes_v[y][x].value << "\033[0m";
       else
-        cout << grid[y][x].value;
+        cout << grid.nodes_v[y][x].value;
 
     }
 
@@ -223,7 +274,7 @@ int main(){
   
   Graph graph("example.txt");
 
-  graph.run_dijkstra(0, 0, graph.n_y - 1, graph.n_x - 1);
+  cout << graph.run_dijkstra(0, 0, graph.n_y - 1, graph.n_x - 1) << endl;
 
   graph.print();
 
