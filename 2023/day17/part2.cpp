@@ -14,8 +14,6 @@ class Graph{
 
     int run_dijkstra(int, int, int, int);
 
-    void print();
-
     Graph(string);
 
   private:
@@ -68,7 +66,6 @@ struct Graph::Node{
   int x, y, value;
 
   int distance = infinity;
-  Node * previous = nullptr;
   bool visited = false;
   bool on_path = false;
 
@@ -82,7 +79,6 @@ struct Graph::Node{
 Graph::Node * Graph::Node::reset(){
 
   distance = infinity;
-  previous = nullptr;
   visited = false;
   on_path = false;
 
@@ -208,7 +204,7 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
     node->visited = true;
 
     if(node == end_node)
-      break;
+      return node->distance;
 
     queue.pop_back();
 
@@ -219,57 +215,15 @@ int Graph::run_dijkstra(int start_y, int start_x, int end_y, int end_x){
         
 	int distance_update = node->distance + edge.weight;
 	  
-	if(distance_update < edge.node->distance){
-
+	if(distance_update < edge.node->distance)
 	  edge.node->distance = distance_update;
-	  edge.node->previous = node;
-
-	}
 
       }
     }
 
   }
 
-  start_node->on_path = true;
-
-  Node * path_node = end_node;
-
-  while(path_node && path_node != start_node){
-    
-    path_node->on_path = true;
-
-    path_node = path_node->previous;
-
-  }
-
-  int result = end_node->distance;
-
-  delete start_node;
-  delete end_node;
-
-  return result;
-
-}
-
-void Graph::print(){
-  
-  for(int y=0; y<n_y; y++){
-
-    for(int x=0; x<n_x; x++){
-
-      if(grid.nodes_v[y][x].on_path)
-        cout << "\033[1;31m" << grid.nodes_v[y][x].value << "\033[0m";
-      else if(grid.nodes_h[y][x].on_path)
-        cout << "\033[1;32m" << grid.nodes_v[y][x].value << "\033[0m";
-      else
-        cout << grid.nodes_v[y][x].value;
-
-    }
-
-    cout << endl;
-
-  }
+  return 0;
 
 }
 
@@ -278,7 +232,5 @@ int main(){
   Graph graph("input.txt");
 
   cout << graph.run_dijkstra(0, 0, graph.n_y - 1, graph.n_x - 1) << endl;
-
-  graph.print();
 
 }
