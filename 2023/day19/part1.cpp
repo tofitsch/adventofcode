@@ -10,7 +10,8 @@ map<char, int> property_map = { {'x', 0}, {'m', 1}, {'a', 2}, {'s', 3} };
 
 struct Item{
   
-  short property[4];
+  int property[4];
+  int score = 0;
 
   Item(string line){
     
@@ -25,6 +26,8 @@ struct Item{
       string property_str = field.substr(2, field.length() - 2);
 
       property[ctr] = stoi(property_str);
+
+      score += property[ctr];
       
       ctr++;
 
@@ -47,14 +50,26 @@ struct Item{
 
 struct Rule{
   
-  short property;
+  short property_id;
   bool greater;
   int value;
   string target;
 
+  string apply_to(Item & item){
+   
+    if(greater && item.property[property_id] > value)
+      return target;
+
+    if(! greater && item.property[property_id] < value)
+      return target;
+
+    return "";
+
+  }
+
   Rule(string str){
     
-    property = property_map[str[0]];
+    property_id = property_map[str[0]];
 
     greater = (str[1] == '>');
 
@@ -70,7 +85,7 @@ struct Rule{
 
   void print(){
 
-    cout << property << (greater ? '>' : '<') << value << ':' << target << endl;
+    cout << property_id << (greater ? '>' : '<') << value << ':' << target << endl;
 
   }
 
@@ -84,6 +99,27 @@ struct RuleSet{
   string target;
 
   RuleSet() {}
+
+  string apply_to(Item & item){
+    
+    string result = "";
+
+    int ctr = 0;
+
+    while(result == "" && ctr < rules.size()){
+      
+      result = rules[ctr].apply_to(item);
+
+      ctr++;
+
+    }
+
+    if(result == "")
+      return target;
+
+    return result;
+    
+  }
 
   RuleSet(string line){
     
@@ -131,7 +167,7 @@ int main(){
   
   string line;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   vector<Item> items;
   map<string, RuleSet> rule_sets;
@@ -158,5 +194,21 @@ int main(){
       items.push_back(Item(line));
 
   }
+
+  int sum = 0;
+
+  for(Item & item : items){
+
+    string label = "in";
+
+    while(label != "A" && label != "R")
+      label = rule_sets[label].apply_to(item);
+
+    if(label == "A")
+      sum += item.score;
+
+  }
+
+  cout << sum << endl;
 
 }
