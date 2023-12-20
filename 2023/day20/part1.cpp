@@ -41,8 +41,10 @@ struct Graph::Node{
   string label;
 
   queue<bool> signals_received;
+  map<Node *, bool> last_signal_from;
   vector<string> output_labels;
   vector<Node *> outputs;
+  vector<Node *> inputs;
 
   Node() {}
   Node(string);
@@ -121,6 +123,9 @@ struct Graph::FlipFlop : Graph::Node{
 
       output->signals_received.push(state);
 
+      if(output->type == T_Conjunction)
+        output->last_signal_from[this] = state;
+
       q.push(output);
 
       cout << label << (state ? " -high-> " : " -low-> ") << output->label << endl;
@@ -144,20 +149,27 @@ struct Graph::FlipFlop : Graph::Node{
 
 struct Graph::Conjunction : Graph::Node{
   
-  Conjunction(string line) : Node(line) {}
+  Conjunction(string line) : Node(line) {
+    
+    for(Node * input : inputs)
+      last_signal_from[input] = false;
+
+  }
 
   void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
 
-    bool signal = false;
+    if(signals_received.empty())
+      return;
 
-    while(! signals_received.empty()){
+    signals_received.pop();
 
-      if(! signals_received.front())
-        signal = true;
+    int n_high_inputs = 0;
 
-      signals_received.pop();
+    for(auto [input, is_high] : last_signal_from)
+      if(is_high)
+        n_high_inputs++;
 
-    }
+    bool signal = ! (n_high_inputs == inputs.size());
    
     for(Node * output : outputs){
 
@@ -167,6 +179,9 @@ struct Graph::Conjunction : Graph::Node{
         n_fired_low++;
 
       output->signals_received.push(signal);
+
+      if(output->type == T_Conjunction)
+        output->last_signal_from[this] = signal;
 
       q.push(output);
 
@@ -200,6 +215,9 @@ struct Graph::Broadcaster : Graph::Node{
       n_fired_low++;
 
       output->signals_received.push(false);
+
+      if(output->type == T_Conjunction)
+        output->last_signal_from[this] = false;
 
       q.push(output);
 
@@ -249,6 +267,7 @@ Graph::Graph(string in_file_name){
       nodes[output]->label = output;
 
       node->outputs.push_back(nodes[output]);
+      nodes[output]->inputs.push_back(node);
 
     }
   }
@@ -282,9 +301,9 @@ void Graph::print(){
 
 int main(){
  
-  Graph graph("example.txt");
+  Graph graph("input.txt");
 
-//  for(int i=0; i<1000; i++)
+  for(int i=0; i<1000; i++)
     graph.broadcast();
 
   cout << endl;
@@ -292,5 +311,6 @@ int main(){
   graph.print();
 
   cout << graph.n_fired_low << " " << graph.n_fired_high << endl;
+  cout << graph.n_fired_low * graph.n_fired_high << endl;
 
 }
