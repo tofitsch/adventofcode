@@ -88,12 +88,7 @@ Graph::Node::Node(string line){
 
 void Graph::Node::print(){
   
-  cout << type << " " << label << " ;";
-
-  for(string & output : output_labels)
-    cout << output << ";";
-
-  cout << endl;
+  cout << "Node" << endl;
 
 }
 
@@ -117,8 +112,6 @@ struct Graph::FlipFlop : Graph::Node{
 
     state = ! state;
 
-    cout << "FlipFlop " << label << (state ? " high" : " low") << endl;
-
     for(Node * output : outputs){
 
       if(state)
@@ -130,18 +123,20 @@ struct Graph::FlipFlop : Graph::Node{
 
       q.push(output);
 
+      cout << label << (state ? " -high-> " : " -low-> ") << output->label << endl;
+
     }
 
   }
 
   void print() override{
     
-    cout << type << " " << label << " ;";
+    cout << "FlipFlop" << (state ? ":hi " : ":lo ") << label << " ;";
 
     for(string & output : output_labels)
       cout << output << ";";
 
-    cout << (state ? " | high" : " | low") << endl;
+    cout << endl;
 
   }
 
@@ -164,10 +159,8 @@ struct Graph::Conjunction : Graph::Node{
 
     }
    
-    cout << "Conjunction " << label << (signal ? " high" : " low") << endl;
-
     for(Node * output : outputs){
-      
+
       if(signal)
         n_fired_high++;
       else
@@ -177,7 +170,20 @@ struct Graph::Conjunction : Graph::Node{
 
       q.push(output);
 
+      cout << label << (signal ? " -high-> " : " -low-> ") << output->label << endl;
+
     }
+
+  }
+
+  void print() override{
+    
+    cout << "Conjunction" << " " << label << " ;";
+
+    for(string & output : output_labels)
+      cout << output << ";";
+
+    cout << endl;
 
   }
   
@@ -189,8 +195,6 @@ struct Graph::Broadcaster : Graph::Node{
   
   void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
     
-    cout << "Broadcaster " << label << " low" << endl;
-    
     for(Node * output : outputs){
       
       n_fired_low++;
@@ -199,7 +203,20 @@ struct Graph::Broadcaster : Graph::Node{
 
       q.push(output);
 
+      cout << label << " -low-> " << output->label << endl;
+
     }
+
+  }
+
+  void print() override{
+    
+    cout << "Broadcaster" << " " << label << " ;";
+
+    for(string & output : output_labels)
+      cout << output << ";";
+
+    cout << endl;
 
   }
   
@@ -265,7 +282,7 @@ int main(){
  
   Graph graph("example.txt");
 
-  for(int i=0; i<1000; i++)
+//  for(int i=0; i<1000; i++)
     graph.broadcast();
 
   cout << endl;
