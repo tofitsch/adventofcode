@@ -223,10 +223,16 @@ Graph::Graph(string in_file_name){
       
   }
 
-  for(auto & [key, node] : nodes)
-    for(string & output : node->output_labels)
-      if(nodes.find(output) != nodes.end())
-        node->outputs.push_back(nodes[output]);
+  for(auto & [key, node] : nodes){
+    for(string & output : node->output_labels){
+
+      if(nodes.find(output) == nodes.end())
+        nodes[output] = new Node();
+
+      node->outputs.push_back(nodes[output]);
+
+    }
+  }
 
 }
 
