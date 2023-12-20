@@ -14,8 +14,11 @@ class Graph{
 
     Graph(string);
 
+    void print();
+
   private:
     
+    static int const n_limits = 4;
     static int const limit_min = 0;
     static int const limit_max = 4001;
   
@@ -28,7 +31,6 @@ class Graph{
 
     map<string, Node> nodes;
     vector<Edge> edges;
-
 };
 
 struct Graph::Rule{
@@ -69,21 +71,42 @@ struct Graph::Node{
 };
   
 struct Graph::Limit{
+  
+  int from, to;
 
-  int greater, smaller;
+  Limit() : from(limit_min), to(limit_max) {}
+  Limit(int f, int t) : from(f), to(t) {}
 
-  Limit() : greater(limit_min), smaller(limit_max) {}
-  Limit(int g, int l) : greater(g), smaller(l) {}
+  pair<Limit, Limit> invert(){
+    
+    return make_pair(Limit(limit_min, from), Limit(to, limit_max));
+
+  }
 
 };
 
 struct Graph::LimitSet{
 
-  vector<vector<Limit>> limits{4, vector<Limit>()};
+  vector<vector<Limit>> limits{n_limits, vector<Limit>()};
 
-  void add(int id, Limit limit){
+  void add(int i, Limit limit){
     
-    limits[id].push_back(limit);
+    limits[i].push_back(limit);
+
+  }
+
+  void print(){
+    
+    for(int i=0; i<n_limits; i++){
+      
+      cout << i << ": ";
+
+      for(Limit & limit : limits[i])
+        cout << limit.from << "-" << limit.to << " ";
+
+      cout << endl;
+
+    }
 
   }
 
@@ -99,23 +122,15 @@ struct Graph::Edge{
 
   Edge(Node * in, Node * out, LimitSet l) : in(in), out(out), limit_set(l) {}
 
-/*TODO
-  void restrict(vector<Edge *> restrictions){
+  void print(){
     
-    for(Edge * restriction : restrictions){
+    cout << in->label << "->" << out->label << endl;
 
-      for(int i=0; i<4; i++){
+    limit_set.print();
 
-          if(greater[i] > restriction.greater[i]);
-            greater[i] = restriction.greater[i];
+    cout << endl;
 
-          if(smaller[i] > restriction.smaller[i]);
-            smaller[i] = restriction.smaller[i];
-        
-      }
-
-    }
- */
+  }
 
 };
 
@@ -167,35 +182,53 @@ Graph::Graph(string in_file_name){
 
     fields.pop_back();
 
+    LimitSet target_limits;
+
     for(string & str : fields){
       
       Rule rule(str);
       
-      LimitSet limits;
+      LimitSet rule_limits;
+
+      Limit rule_limit;
 
       if(rule.greater)
-        limits.add(rule.property_id, Limit(rule.value, limit_max));
+        rule_limit = Limit(rule.value, limit_max);
       else
-        limits.add(rule.property_id, Limit(limit_min, rule.value));
+        rule_limit = Limit(limit_min, rule.value);
 
-      edges.push_back(Edge(& nodes[label], & nodes[rule.target], limits));
+      pair<Limit, Limit> target_limit = rule_limit.invert();
+
+      rule_limits.add(rule.property_id, rule_limit);
+
+      target_limits.add(rule.property_id, target_limit.first);
+      target_limits.add(rule.property_id, target_limit.second);
+
+      edges.push_back(Edge(& nodes[label], & nodes[rule.target], rule_limits));
+
+      nodes[label].edges.push_back(& edges.back());
 
     }
 
-    LimitSet limits;
+    edges.push_back(Edge(& nodes[label], & nodes[target], target_limits));
+    nodes[label].edges.push_back(& edges.back());
     
-    for(int i=0; i<4; i++)
-      limits.add(i, Limit(limit_min, limit_max));
-
-    edges.push_back(Edge(& nodes[label], & nodes[target], limits));
-
   }
+
+}
+
+void Graph::print(){
+
+  for(Edge & edge : edges)
+    edge.print();
 
 }
 
 int main(){
   
   Graph graph("example.txt");
+
+  graph.print();
 
 }
 
