@@ -77,10 +77,13 @@ struct Graph::Limit{
   Limit() : from(limit_min), to(limit_max) {}
   Limit(int f, int t) : from(f), to(t) {}
 
-  pair<Limit, Limit> invert(){
+  Limit invert(){
     
-    return make_pair(Limit(limit_min, from), Limit(to, limit_max));
+    if(from == limit_min)
+      return Limit(to, limit_max);
 
+    return Limit(limit_min, to);
+    
   }
 
 };
@@ -197,12 +200,11 @@ Graph::Graph(string in_file_name){
       else
         rule_limit = Limit(limit_min, rule.value);
 
-      pair<Limit, Limit> target_limit = rule_limit.invert();
+      Limit target_limit = rule_limit.invert();
 
       rule_limits.add(rule.property_id, rule_limit);
 
-      target_limits.add(rule.property_id, target_limit.first);
-      target_limits.add(rule.property_id, target_limit.second);
+      target_limits.add(rule.property_id, target_limit);
 
       edges.push_back(Edge(& nodes[label], & nodes[rule.target], rule_limits));
 
