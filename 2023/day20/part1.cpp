@@ -46,7 +46,7 @@ struct Graph::Node{
 
   virtual void fire(queue<Node *> &) {};
 
-  void print();
+  virtual void print();
 
 };
 
@@ -123,6 +123,17 @@ struct Graph::FlipFlop : Graph::Node{
       q.push(output);
 
     }
+
+  }
+
+  void print() override{
+    
+    cout << type << " " << label << " ;";
+
+    for(string & output : output_labels)
+      cout << output << ";";
+
+    cout << (state ? " | high" : " | low") << endl;
 
   }
 
@@ -206,7 +217,17 @@ Graph::Graph(string in_file_name){
 
 void Graph::broadcast(){
   
-  nodes["broadcaster"]->fire(q);
+  q.push(nodes["broadcaster"]);
+
+  while(! q.empty()){
+
+    Node * node = q.front();
+    
+    q.pop();
+
+    node->fire(q);
+
+  }
   
 }
 
@@ -221,8 +242,10 @@ int main(){
  
   Graph graph("example.txt");
 
-  graph.print();
-
   graph.broadcast();
+
+  cout << endl;
+
+  graph.print();
 
 }
