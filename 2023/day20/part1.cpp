@@ -24,6 +24,9 @@ class Graph{
 
   public:
 
+    int n_fired_low = 0;
+    int n_fired_high = 0;
+
     Graph(string);
 
     void broadcast();
@@ -44,7 +47,7 @@ struct Graph::Node{
   Node() {}
   Node(string);
 
-  virtual void fire(queue<Node *> &) {};
+  virtual void fire(queue<Node *> &, int &, int &) {};
 
   virtual void print();
 
@@ -100,7 +103,7 @@ struct Graph::FlipFlop : Graph::Node{
 
   FlipFlop(string line) : Node(line) {}
 
-  void fire(queue<Node *> & q) override{
+  void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
     
     if(signals_received.empty())
       return;
@@ -117,6 +120,11 @@ struct Graph::FlipFlop : Graph::Node{
     cout << "FlipFlop " << label << (state ? " high" : " low") << endl;
 
     for(Node * output : outputs){
+
+      if(state)
+        n_fired_high++;
+      else
+        n_fired_low++;
 
       output->signals_received.push(state);
 
@@ -143,7 +151,7 @@ struct Graph::Conjunction : Graph::Node{
   
   Conjunction(string line) : Node(line) {}
 
-  void fire(queue<Node *> & q) override{
+  void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
 
     bool signal = false;
 
@@ -159,6 +167,11 @@ struct Graph::Conjunction : Graph::Node{
     cout << "Conjunction " << label << (signal ? " high" : " low") << endl;
 
     for(Node * output : outputs){
+      
+      if(signal)
+        n_fired_high++;
+      else
+        n_fired_low++;
 
       output->signals_received.push(signal);
 
@@ -174,11 +187,13 @@ struct Graph::Broadcaster : Graph::Node{
   
   Broadcaster(string line) : Node(line) {}
   
-  void fire(queue<Node *> & q) override{
+  void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
     
     cout << "Broadcaster " << label << " low" << endl;
     
     for(Node * output : outputs){
+      
+      n_fired_low++;
 
       output->signals_received.push(false);
 
@@ -219,13 +234,15 @@ void Graph::broadcast(){
   
   q.push(nodes["broadcaster"]);
 
+  n_fired_low++;
+
   while(! q.empty()){
 
     Node * node = q.front();
     
     q.pop();
 
-    node->fire(q);
+    node->fire(q, n_fired_low, n_fired_high);
 
   }
   
@@ -242,10 +259,13 @@ int main(){
  
   Graph graph("example.txt");
 
-  graph.broadcast();
+  for(int i=0; i<1000; i++)
+    graph.broadcast();
 
   cout << endl;
 
   graph.print();
+
+  cout << graph.n_fired_low << " " << graph.n_fired_high << endl;
 
 }
