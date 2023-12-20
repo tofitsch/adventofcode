@@ -88,7 +88,7 @@ Graph::Node::Node(string line){
 
 void Graph::Node::print(){
   
-  cout << "Node" << endl;
+  cout << "Node " << label << endl;
 
 }
 
@@ -245,6 +245,8 @@ Graph::Graph(string in_file_name){
 
       if(nodes.find(output) == nodes.end())
         nodes[output] = new Node();
+
+      nodes[output]->label = output;
 
       node->outputs.push_back(nodes[output]);
 
