@@ -43,6 +43,8 @@ struct Graph::Node{
   
   NodeType type;
   string label;
+ 
+  bool fired = false;
 
   queue<bool> signals_received;
   map<Node *, bool> last_signal_from;
@@ -119,6 +121,8 @@ struct Graph::FlipFlop : Graph::Node{
     state = ! state;
 
     for(Node * output : outputs){
+      
+      fired = true;
 
       if(state)
         n_fired_high++;
@@ -176,6 +180,8 @@ struct Graph::Conjunction : Graph::Node{
     bool signal = ! (n_high_inputs == inputs.size());
    
     for(Node * output : outputs){
+      
+      fired = true;
 
       if(signal)
         n_fired_high++;
@@ -215,6 +221,8 @@ struct Graph::Broadcaster : Graph::Node{
   void fire(queue<Node *> & q, int & n_fired_low, int & n_fired_high) override{
     
     for(Node * output : outputs){
+      
+      fired = true;
       
       n_fired_low++;
 
@@ -256,11 +264,13 @@ struct Graph::SubGraphMonitor{
     int ctr = 0;
   
     for(vector<bool *> & sub_graph_state : sub_graph_states){
+      
+      cout << ctr << " ";
   
       for(bool * b : sub_graph_state)
         cout << *b;
 
-      cout << " " << periodicity[ctr] << endl;
+      cout << "  " << periodicity[ctr] << endl;
 
       ctr++;
   
@@ -342,6 +352,9 @@ Graph::Graph(string in_file_name){
 }
 
 void Graph::broadcast(){
+
+  for(auto [key, node] : nodes)
+    node->fired = false;
   
   q.push(nodes["broadcaster"]);
 
@@ -400,6 +413,8 @@ Graph::SubGraphMonitor Graph::get_subgraph_monitor(string label_out){
     for(Node * n : sub_graph)
       if(n->type == T_FlipFlop)
         monitor.sub_graph_states.back().push_back(& (((FlipFlop*) n)->state));
+
+    monitor.sub_graph_states.back().push_back(& (((Conjunction *) end_node)->fired));
 
   }
 
