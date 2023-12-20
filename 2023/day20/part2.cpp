@@ -4,6 +4,7 @@
 #include<vector>
 #include<queue>
 #include<map>
+#include<numeric>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ class Graph{
 
   public:
 
-    struct SubGraphMonitor;
+    struct StateMonitor;
 
     int n_fired_low = 0;
     int n_fired_high = 0;
@@ -33,7 +34,7 @@ class Graph{
 
     void broadcast();
 
-    SubGraphMonitor get_subgraph_monitor(string);
+    StateMonitor get_monitor(string);
 
     void print();
   
@@ -181,7 +182,8 @@ struct Graph::Conjunction : Graph::Node{
    
     for(Node * output : outputs){
       
-      fired = true;
+      if(signal)
+        fired = true;
 
       if(signal)
         n_fired_high++;
@@ -252,58 +254,25 @@ struct Graph::Broadcaster : Graph::Node{
   
 };
 
-struct Graph::SubGraphMonitor{
+struct Graph::StateMonitor{
   
-  vector<vector<bool *>> sub_graph_states;
+  vector<bool *> states;
   vector<long> periodicity;
 
   long step = 0;
 
   void print(){
-    
-    int ctr = 0;
-  
-    for(vector<bool *> & sub_graph_state : sub_graph_states){
-      
-      cout << ctr << " ";
-  
-      for(bool * b : sub_graph_state)
-        cout << *b;
 
-      cout << "  " << periodicity[ctr] << endl;
-
-      ctr++;
-  
-    }
+    for(int i=0; i<states.size(); i++)
+      cout << * states[i] << " " << periodicity[i] << endl;
   
   }
 
   bool find_periodicity(){
     
-    int ctr = 0;
-    
-    for(vector<bool *> & sub_graph_state : sub_graph_states){
-      
-      if(periodicity[ctr] > 0)
-        continue;
-      
-      bool all_on = true;
-
-      for(bool * b : sub_graph_state){
-
-        if(! (*b)){
-          all_on = false;
-          break;
-        }
-
-      }
-
-      if(all_on)
-        periodicity[ctr] = step;
-
-      ctr++;
-
-    }
+    for(int i=0; i<states.size(); i++)
+      if(* states[i])
+        periodicity[i] = step;
 
     step++;
 
@@ -312,6 +281,17 @@ struct Graph::SubGraphMonitor{
         return false;
 
     return true;
+
+  }
+
+  long get_lcm(){
+    
+    long l = 1;
+
+    for(long & p : periodicity)
+      l = lcm(l, p);
+
+    return l;
 
   }
 
@@ -379,46 +359,16 @@ void Graph::print(){
 
 }
 
-Graph::SubGraphMonitor Graph::get_subgraph_monitor(string label_out){
+Graph::StateMonitor Graph::get_monitor(string label_out){
   
-  SubGraphMonitor monitor;
+  StateMonitor monitor;
   
-  Node * start_node = nodes["broadcaster"];
   Node * end_node = nodes[label_out]->inputs[0];
   
-  for(Node * input : end_node->inputs){
-    
-    monitor.sub_graph_states.push_back({});
+  for(Node * input : end_node->inputs)
+    monitor.states.push_back(& input->fired);
 
-    vector<Node *> sub_graph;
-
-    q.push(input);
-
-    while(! q.empty()){
-     
-      for(Node * n : q.front()->inputs){
-        if(find(sub_graph.begin(), sub_graph.end(), n) == sub_graph.end()){
-
-          q.push(n);
-
-          sub_graph.push_back(n);
-
-        }
-      }
-
-      q.pop();
-
-    }
-
-    for(Node * n : sub_graph)
-      if(n->type == T_FlipFlop)
-        monitor.sub_graph_states.back().push_back(& (((FlipFlop*) n)->state));
-
-    monitor.sub_graph_states.back().push_back(& (((Conjunction *) end_node)->fired));
-
-  }
-
-  monitor.periodicity = vector<long>(monitor.sub_graph_states.size(), 0);
+  monitor.periodicity = vector<long>(monitor.states.size(), 0);
 
   return monitor;
 
@@ -428,7 +378,7 @@ int main(){
  
   Graph graph("input.txt");
 
-  Graph::SubGraphMonitor monitor = graph.get_subgraph_monitor("rx");
+  Graph::StateMonitor monitor = graph.get_monitor("rx");
 
   while(! monitor.find_periodicity()){
 
@@ -440,6 +390,6 @@ int main(){
 
   }
 
-//  graph.print();
+  cout << monitor.get_lcm() << endl;
 
 }
