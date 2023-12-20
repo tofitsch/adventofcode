@@ -31,8 +31,6 @@ class Graph{
 
     void broadcast();
 
-    void print();
-  
 };
 
 struct Graph::Node{
@@ -50,8 +48,6 @@ struct Graph::Node{
   Node(string);
 
   virtual void fire(queue<Node *> &, int &, int &) {};
-
-  virtual void print();
 
 };
 
@@ -85,12 +81,6 @@ Graph::Node::Node(string line){
     output_labels.push_back(fields[i]);
 
   }
-
-}
-
-void Graph::Node::print(){
-  
-  cout << "Node " << label << endl;
 
 }
 
@@ -128,20 +118,7 @@ struct Graph::FlipFlop : Graph::Node{
 
       q.push(output);
 
-      cout << label << (state ? " -high-> " : " -low-> ") << output->label << endl;
-
     }
-
-  }
-
-  void print() override{
-    
-    cout << "FlipFlop" << (state ? ":hi " : ":lo ") << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
 
   }
 
@@ -185,23 +162,10 @@ struct Graph::Conjunction : Graph::Node{
 
       q.push(output);
 
-      cout << label << (signal ? " -high-> " : " -low-> ") << output->label << endl;
-
     }
 
   }
 
-  void print() override{
-    
-    cout << "Conjunction" << " " << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
-
-  }
-  
 };
 
 struct Graph::Broadcaster : Graph::Node{
@@ -221,23 +185,10 @@ struct Graph::Broadcaster : Graph::Node{
 
       q.push(output);
 
-      cout << label << " -low-> " << output->label << endl;
-
     }
 
   }
 
-  void print() override{
-    
-    cout << "Broadcaster" << " " << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
-
-  }
-  
 };
 
 Graph::Graph(string in_file_name){
@@ -292,13 +243,6 @@ void Graph::broadcast(){
   
 }
 
-void Graph::print(){
-  
-  for(auto & [key, node] : nodes)
-    node->print();
-
-}
-
 int main(){
  
   Graph graph("input.txt");
@@ -306,11 +250,6 @@ int main(){
   for(int i=0; i<1000; i++)
     graph.broadcast();
 
-  cout << endl;
-
-  graph.print();
-
-  cout << graph.n_fired_low << " " << graph.n_fired_high << endl;
   cout << graph.n_fired_low * graph.n_fired_high << endl;
 
 }

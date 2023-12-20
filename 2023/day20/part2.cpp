@@ -36,8 +36,6 @@ class Graph{
 
     StateMonitor get_monitor(string);
 
-    void print();
-  
 };
 
 struct Graph::Node{
@@ -57,8 +55,6 @@ struct Graph::Node{
   Node(string);
 
   virtual void fire(queue<Node *> &, int &, int &) {};
-
-  virtual void print();
 
 };
 
@@ -92,12 +88,6 @@ Graph::Node::Node(string line){
     output_labels.push_back(fields[i]);
 
   }
-
-}
-
-void Graph::Node::print(){
-  
-  cout << "Node " << label << endl;
 
 }
 
@@ -137,20 +127,7 @@ struct Graph::FlipFlop : Graph::Node{
 
       q.push(output);
 
-//      cout << label << (state ? " -high-> " : " -low-> ") << output->label << endl;
-
     }
-
-  }
-
-  void print() override{
-    
-    cout << "FlipFlop" << (state ? ":hi " : ":lo ") << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
 
   }
 
@@ -197,23 +174,10 @@ struct Graph::Conjunction : Graph::Node{
 
       q.push(output);
 
-//      cout << label << (signal ? " -high-> " : " -low-> ") << output->label << endl;
-
     }
 
   }
 
-  void print() override{
-    
-    cout << "Conjunction" << " " << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
-
-  }
-  
 };
 
 struct Graph::Broadcaster : Graph::Node{
@@ -235,20 +199,7 @@ struct Graph::Broadcaster : Graph::Node{
 
       q.push(output);
 
-//      cout << label << " -low-> " << output->label << endl;
-
     }
-
-  }
-
-  void print() override{
-    
-    cout << "Broadcaster" << " " << label << " ;";
-
-    for(string & output : output_labels)
-      cout << output << ";";
-
-    cout << endl;
 
   }
   
@@ -260,13 +211,6 @@ struct Graph::StateMonitor{
   vector<long> periodicity;
 
   long step = 0;
-
-  void print(){
-
-    for(int i=0; i<states.size(); i++)
-      cout << * states[i] << " " << periodicity[i] << endl;
-  
-  }
 
   bool find_periodicity(){
     
@@ -352,13 +296,6 @@ void Graph::broadcast(){
   
 }
 
-void Graph::print(){
-  
-  for(auto & [key, node] : nodes)
-    node->print();
-
-}
-
 Graph::StateMonitor Graph::get_monitor(string label_out){
   
   StateMonitor monitor;
@@ -380,15 +317,8 @@ int main(){
 
   Graph::StateMonitor monitor = graph.get_monitor("rx");
 
-  while(! monitor.find_periodicity()){
-
-    monitor.print();
-
+  while(! monitor.find_periodicity())
     graph.broadcast();
-
-    cout << endl;
-
-  }
 
   cout << monitor.get_lcm() << endl;
 
