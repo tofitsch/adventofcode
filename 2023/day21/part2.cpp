@@ -69,12 +69,20 @@ struct Graph::Edge{
   Edge(Node * n) : node(n) {}
   Edge(Node * n, int y, int x) : node(n), grid_y(y), grid_x(x) {}
 
-  bool operator<(const Edge & e) const {
-    
-    return (grid_y < e.grid_y || grid_x < e.grid_x || node->y < e.node->y || node->x < e.node->x);
+  bool operator < (const Edge & e) const {
+
+    if (grid_y != e.grid_y)
+      return grid_y < e.grid_y;
+
+    else if(grid_x != e.grid_x)
+      return grid_x < e.grid_x;
+
+    else if(node->y != e.node->y)
+      return node->y < e.node->y;
+
+    return node->x < e.node->x;
     
   }
-
 
 };
 
@@ -167,8 +175,10 @@ int Graph::count_active_edges(){
 
 void Graph::print(){
   
-  for(Edge edge : active_edges)
+  for(Edge edge : active_edges){
     edge.node->active = true;
+//    cout << edge.node->y << " " << edge.node->x << " " << edge.grid_y << " " << edge.grid_x << " " << edge.node << endl;
+  }
 
   for(int y=0; y<n_y; y++){
 
@@ -191,11 +201,15 @@ int main(){
   
   Graph graph("example.txt");
 
-  for(int i=0; i<6; i++)
+  for(int i=0; i<500; i++){
+
     graph.step();
 
-  cout << graph.count_active_edges() << endl;
+    cout << graph.count_active_edges() << endl;
 
-  graph.print();
+  }
+
+
+//  graph.print();
 
 }
