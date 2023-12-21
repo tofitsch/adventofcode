@@ -62,7 +62,9 @@ struct Graph::Node{
   
   bool active = true;
   
-  vector<Edge *> edges;
+  vector<Edge *> in_edges;
+  vector<Edge *> out_edges;
+
   string label;
 
   Node() {}
@@ -208,14 +210,17 @@ Graph::Graph(string in_file_name){
 
       edges.push_back(Edge(& nodes[label], & nodes[rule.target], rule_limits));
 
-      nodes[label].edges.push_back(& edges.back());
+      nodes[rule.target].in_edges.push_back(& edges.back());
 
     }
 
     edges.push_back(Edge(& nodes[label], & nodes[target], target_limits));
-    nodes[label].edges.push_back(& edges.back());
+    nodes[target].in_edges.push_back(& edges.back());
     
   }
+
+  for(Edge & edge : edges)
+    edge.in->out_edges.push_back(& edge);
 
 }
 
@@ -233,4 +238,3 @@ int main(){
   graph.print();
 
 }
-
