@@ -2,7 +2,7 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
-#include<limits>
+#include<set>
 
 using namespace std;
   
@@ -12,30 +12,24 @@ class Graph{
     
     int n_y, n_x;
 
-    void run_dijkstra();
-    int count_reachable(int);
-
-    void print();
+    void step();
+    int count_active_nodes();
 
     Graph(string);
 
   private:
     
-    struct Edge;
     struct Node;
 
     vector<vector<Node>> grid;
+    set<Node *> active_nodes;
 
     Node * start_node = nullptr;
 
     string in_file_name;
 
-    int static const infinity = numeric_limits<int>::max();
-
     void add_nodes();
     void link_nodes();
-
-    bool static distance_decreasing(const Node *, const Node *);
 
 };
 
@@ -47,56 +41,19 @@ Graph::Graph(string in_file_name) : in_file_name(in_file_name) {
 
 }
 
-struct Graph::Edge{
-
-  Node * node;
-  int weight;
-
-  Edge(Node * n) : node(n), weight(1) {}
-  Edge(Node * n, int w) : node(n), weight(w) {}
-
-};
-
 struct Graph::Node{
   
-  vector<Edge> edges;
+  vector<Node *> links;
 
   int x, y;
+
   char value;
 
-  int distance = infinity;
-  bool visited = false;
-  bool on_path = false;
-
-  Node * reset();
-  void link(Node *, int);
-  void link(Node *);
+  bool active = false;
 
   Node(int x, int y, char c) : x(x), y(y), value(c) {}
   
 };
-
-Graph::Node * Graph::Node::reset(){
-
-  distance = infinity;
-  visited = false;
-  on_path = false;
-
-  return this;
-
-}
-
-void Graph::Node::link(Node * node, int weight){
-  
-  edges.push_back(Edge(node, weight));
-
-}
-
-void Graph::Node::link(Node * node){
-
-  link(node, 1);
-
-}
 
 void Graph::add_nodes(){
   
@@ -135,109 +92,49 @@ void Graph::link_nodes(){
         start_node = & grid[y][x];
       
 	if(y - 1 >= 0 && grid[y - 1][x].value != '#')
-          grid[y][x].link(& grid[y - 1][x]);
+          grid[y][x].links.push_back(& grid[y - 1][x]);
 
 	if(x - 1 >= 0 && grid[y][x - 1].value != '#')
-          grid[y][x].link(& grid[y][x - 1]);
+          grid[y][x].links.push_back(& grid[y][x - 1]);
 
 	if(y + 1 < n_y && grid[y + 1][x].value != '#')
-          grid[y][x].link(& grid[y + 1][x]);
+          grid[y][x].links.push_back(& grid[y + 1][x]);
 
 	if(x + 1 < n_x && grid[y][x + 1].value != '#')
-          grid[y][x].link(& grid[y][x + 1]);
+          grid[y][x].links.push_back(& grid[y][x + 1]);
 
     }
   }
 
-}
-
-bool Graph::distance_decreasing(const Node * a, const Node * b){
-
-  return a->distance > b->distance;
+  active_nodes.insert(start_node);
 
 }
 
-void Graph::run_dijkstra(){
+void Graph::step(){
   
-  vector<Node *> queue;
+  set<Node *> new_active_nodes;
 
-  for(int y=0; y<n_y; y++)
-    for(int x=0; x<n_x; x++)
-      queue.push_back(grid[y][x].reset());
+  for(Node * node : active_nodes)
+    for(Node * link : node->links)
+      new_active_nodes.insert(link);
 
-  start_node->distance = 0;
-
-  while(! queue.empty()){
-    
-    sort(queue.begin(), queue.end(), distance_decreasing);
-
-    Node * node = queue.back();
-
-    node->visited = true;
-
-    queue.pop_back();
-
-    int ctr = 0;
-
-    for(Edge & edge : node->edges){
-      if(! edge.node->visited){
-        
-	int distance_update = node->distance + edge.weight;
-	  
-	if(distance_update < edge.node->distance)
-	  edge.node->distance = distance_update;
-
-      }
-    }
-
-  }
+  active_nodes = new_active_nodes;
 
 }
 
-int Graph::count_reachable(int dist){
-  
-  int ctr = 0;
+int Graph::count_active_nodes(){
 
-  for(int y=0; y<n_y; y++)
-    for(int x=0; x<n_x; x++)
-      if(grid[y][x].value != '#' && grid[y][x].distance == dist){
-
-        grid[y][x].on_path = true;
-        ctr++;
-
-      }
-
-  return ctr;
-
-}
-
-void Graph::print(){
-
-  for(int y=0; y<n_y; y++){
-
-    for(int x=0; x<n_x; x++){
-
-      if(grid[y][x].on_path)
-        cout << "\033[1;31mO\033[0m";
-      else
-        cout << grid[y][x].value;
-
-    }
-
-    cout << endl;
-
-  }
+  return active_nodes.size();
 
 }
 
 int main(){
   
-  Graph graph("example.txt");
+  Graph graph("input.txt");
 
-  graph.run_dijkstra();
+  for(int i=0; i<64; i++)
+    graph.step();
 
-  cout << graph.count_reachable(6) << endl;
-
-  graph.print();
+  cout << graph.count_active_nodes() << endl;
 
 }

@@ -13,9 +13,7 @@ class Graph{
     int n_y, n_x;
 
     void step();
-    int count_active_edges();
-
-    void print();
+    int run_for_n_more_steps(int);
 
     Graph(string);
 
@@ -167,49 +165,37 @@ void Graph::step(){
 
 }
 
-int Graph::count_active_edges(){
+int Graph::run_for_n_more_steps(int steps){
+
+  for(int i=0; i<steps; i++)
+    step();
 
   return active_edges.size();
-
-}
-
-void Graph::print(){
-  
-  for(Edge edge : active_edges){
-    edge.node->active = true;
-//    cout << edge.node->y << " " << edge.node->x << " " << edge.grid_y << " " << edge.grid_x << " " << edge.node << endl;
-  }
-
-  for(int y=0; y<n_y; y++){
-
-    for(int x=0; x<n_x; x++){
-
-      if(grid[y][x].active)
-        cout << "\033[1;31mO\033[0m";
-      else
-        cout << grid[y][x].value;
-
-    }
-
-    cout << endl;
-
-  }
-
+    
 }
 
 int main(){
-  
-  Graph graph("example.txt");
 
-  for(int i=0; i<500; i++){
+  Graph graph("input.txt");
 
-    graph.step();
+  long n_steps_goal = 26501365;
 
-    cout << graph.count_active_edges() << endl;
+  //Calculate values at 3 points of periodicity to extrapolate polynomial of 2nd degree:
+  long f0 = graph.run_for_n_more_steps(graph.n_y / 2);
+  long f1 = graph.run_for_n_more_steps(graph.n_y);
+  long f2 = graph.run_for_n_more_steps(graph.n_y);
 
-  }
+  // f(0) = a*0**2 + b*0 + c
+  // f(0) = a*1**2 + b*1 + c
+  // f(0) = a*2**2 + b*2 + c
+  // rearranging yields:
+  long a = (f2 - 2*f1 + f0) / 2;
+  long b = f1 - f0 - a;
+  long c = f0; 
 
+  // all these divisions happen to be without rest:
+  long x = (n_steps_goal - graph.n_y / 2) / graph.n_y;
 
-//  graph.print();
+  cout <<  a*x*x + b*x + c << endl;
 
 }
