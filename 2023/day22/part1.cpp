@@ -2,6 +2,7 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include<set>
 
 using namespace std;
 
@@ -13,13 +14,15 @@ constexpr short hash_pair(short a, short b){
 
 struct Brick{
   
+  int id;
+  
   int front[4], back[4];
 
   unsigned short alignment;
 
-  vector<Brick *> bricks_above, bricks_below;
+  set<Brick *> bricks_above, bricks_below;
 
-  Brick(string line){
+  Brick(string line, int id) : id(id) {
     
     string field;
     
@@ -45,6 +48,24 @@ struct Brick{
 
   }
 
+  void print(){
+    
+    cout << id;
+
+    cout << " a: "; 
+
+    for(Brick * brick : bricks_above)
+      cout << brick->id << " ";
+
+    cout << " b: "; 
+
+    for(Brick * brick : bricks_below)
+      cout << brick->id << " ";
+
+    cout << endl;
+
+  }
+
 };
 
 void get_bricks(vector<Brick> & bricks){
@@ -53,8 +74,15 @@ void get_bricks(vector<Brick> & bricks){
 
   ifstream in_file("example.txt");
 
-  while(getline(in_file, line))
-    bricks.push_back(Brick(line));
+  int id = 0;
+
+  while(getline(in_file, line)){
+
+    bricks.push_back(Brick(line, id));
+
+    id++;
+
+  }
 
 }
 
@@ -62,14 +90,14 @@ void set_overlap(Brick & a, Brick & b){
 
   if(a.front[Z] < b.front[Z]){
 
-    a.bricks_above.push_back(& b);
-    b.bricks_below.push_back(& a);
+    a.bricks_above.insert(& b);
+    b.bricks_below.insert(& a);
 
   }
   else{
 
-    a.bricks_below.push_back(& b);
-    b.bricks_above.push_back(& a);
+    a.bricks_below.insert(& b);
+    b.bricks_above.insert(& a);
 
   }
   
@@ -158,5 +186,8 @@ int main(){
   get_bricks(bricks);
 
   calc_overlaps(bricks);
+
+  for(Brick & brick : bricks)
+    brick.print();
 
 }
