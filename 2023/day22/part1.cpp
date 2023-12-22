@@ -18,6 +18,9 @@ struct Brick{
   
   int front[4], back[4];
 
+  int * z_top;
+  int * z_bot;
+
   unsigned short alignment;
 
   set<Brick *> bricks_above, bricks_below;
@@ -48,9 +51,26 @@ struct Brick{
 
   }
 
+  void calc_top_bot(){
+
+    if(front[Z] > back[Z]){
+
+      z_top = & front[Z];
+      z_bot = & back[Z];
+
+    }
+    else{
+
+      z_top = & back[Z];
+      z_bot = & front[Z];
+
+    }
+
+  }
+
   void print(){
     
-    cout << id;
+    cout << id << ": " << * z_bot << " " << * z_top << " ";
 
     cout << " a: "; 
 
@@ -68,6 +88,10 @@ struct Brick{
 
 };
 
+bool lower_z_bot(const Brick & a, const Brick & b){
+  return * a.z_bot < * b.z_bot;
+}
+
 void get_bricks(vector<Brick> & bricks){
 
   string line;
@@ -83,6 +107,9 @@ void get_bricks(vector<Brick> & bricks){
     id++;
 
   }
+
+  for(Brick & brick : bricks)
+    brick.calc_top_bot();
 
 }
 
