@@ -283,8 +283,8 @@ int main(){
 
   int ctr = 0;
 
-  for(int i=0; i<bricks.size(); i++)
-    ctr += n_bricks_depend_on(bricks, bricks[i]);
+  for(Brick * brick : bricks)
+    ctr += n_bricks_depend_on(bricks, brick);
 
   cout << ctr << endl;
 
