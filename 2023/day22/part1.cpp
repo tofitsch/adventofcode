@@ -77,8 +77,6 @@ struct Brick{
 
   void let_fall(){
     
-    cout << id << endl;
-    
     * z_top -= * z_bot - 1;
     * z_bot = 1;
 
@@ -148,7 +146,7 @@ bool is_in_range(int a, int b0, int b1){
 
 bool ranges_overlap(int a0, int a1, int b0, int b1){
   
-  return is_in_range(a0, b0, b1) || is_in_range(a1, b0, b1);
+  return is_in_range(a0, b0, b1) || is_in_range(a1, b0, b1) || is_in_range(b0, a0, a1) || is_in_range(a1, b0, b1);
   
 }
 
@@ -260,8 +258,8 @@ int main(){
   for(Brick * brick : bricks)
    brick->let_fall(); 
 
-  for(Brick * brick : bricks)
-    brick->print();
+//  for(Brick * brick : bricks)
+//    brick->print();
 
   cout << count_removobale_bricks(bricks) << endl;
 
