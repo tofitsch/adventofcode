@@ -75,6 +75,12 @@ struct Brick{
 
   }
 
+  static bool lower_z_top(const Brick * a, const Brick * b){
+
+    return * a->z_top < * b->z_top;
+
+  }
+
   void let_fall(){
     
     * z_top -= * z_bot - 1;
@@ -82,8 +88,8 @@ struct Brick{
 
     if(bricks_below.size() > 0){
 
-      sort(bricks_below.begin(), bricks_below.end(), lower_z_bot);
-
+      sort(bricks_below.begin(), bricks_below.end(), lower_z_top);
+     
       * z_top += * bricks_below.back()->z_top;
       * z_bot += * bricks_below.back()->z_top;
 
