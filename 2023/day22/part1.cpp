@@ -20,7 +20,7 @@ struct Brick{
 
   int * z_top, * z_bot;
 
-  unsigned short alignment;
+  unsigned short alignment = Z;
 
   bool removable = false;
 
@@ -69,26 +69,22 @@ struct Brick{
 
   }
 
-  static bool lower_z_bot(const Brick & a, const Brick & b){
+  static bool lower_z_bot(const Brick * a, const Brick * b){
 
-    return * a.z_bot < * b.z_bot;
-
-  }
-  
-  static bool ptr_lower_z_top(const Brick * a, const Brick * b){
-
-    return * a->z_top < * b->z_top;
+    return * a->z_bot < * b->z_bot;
 
   }
 
   void let_fall(){
+    
+    cout << id << endl;
     
     * z_top -= * z_bot - 1;
     * z_bot = 1;
 
     if(bricks_below.size() > 0){
 
-      sort(bricks_below.begin(), bricks_below.end(), ptr_lower_z_top);
+      sort(bricks_below.begin(), bricks_below.end(), lower_z_bot);
 
       * z_top += * bricks_below.back()->z_top;
       * z_bot += * bricks_below.back()->z_top;
@@ -143,7 +139,7 @@ struct Brick{
 
 };
 
-void get_bricks(vector<Brick> & bricks){
+void get_bricks(vector<Brick *> & bricks){
 
   string line;
 
@@ -153,14 +149,14 @@ void get_bricks(vector<Brick> & bricks){
 
   while(getline(in_file, line)){
 
-    bricks.push_back(Brick(line, id));
+    bricks.push_back(new Brick(line, id));
 
     id++;
 
   }
 
-  for(Brick & brick : bricks)
-    brick.calc_top_bot();
+  for(Brick * brick : bricks)
+    brick->calc_top_bot();
 
 }
 
@@ -179,60 +175,60 @@ bool ranges_overlap(int a0, int a1, int b0, int b1){
   
 }
 
-void calc_overlaps(vector<Brick> & bricks){
+void calc_overlaps(vector<Brick *> & bricks){
 
-  for(Brick & a : bricks){
-    for(Brick & b : bricks){
+  for(Brick * a : bricks){
+    for(Brick * b : bricks){
 
-      if(* a.z_bot >= * b.z_bot)
+      if(* a->z_bot >= * b->z_bot)
         continue;
 
       bool overlap = false;
 
-      switch(hash_pair(a.alignment, b.alignment)){
+      switch(hash_pair(a->alignment, b->alignment)){
 
         case hash_pair(X, X):
-          overlap = (a.front[Y] == b.front[Y]) && ranges_overlap(a.front[X], a.back[X], b.front[X], b.back[X]);
+          overlap = (a->front[Y] == b->front[Y]) && ranges_overlap(a->front[X], a->back[X], b->front[X], b->back[X]);
           break;
 
         case hash_pair(Y, Y):
-          overlap = (a.front[X] == b.front[X]) && ranges_overlap(a.front[Y], a.back[Y], b.front[Y], b.back[Y]);
+          overlap = (a->front[X] == b->front[X]) && ranges_overlap(a->front[Y], a->back[Y], b->front[Y], b->back[Y]);
           break;
 
         case hash_pair(Z, Z):
-          overlap = (a.front[X] == b.front[X] && a.front[Y] == b.front[Y]);
+          overlap = (a->front[X] == b->front[X] && a->front[Y] == b->front[Y]);
           break;
 
         case hash_pair(X, Y):
-          overlap = is_in_range(a.front[Y], b.front[Y], b.back[Y]) && is_in_range(b.front[X], a.front[X], a.back[X]);
+          overlap = is_in_range(a->front[Y], b->front[Y], b->back[Y]) && is_in_range(b->front[X], a->front[X], a->back[X]);
           break;
 
         case hash_pair(Y, X):
-          overlap = is_in_range(a.front[X], b.front[X], b.back[X]) && is_in_range(b.front[Y], a.front[Y], a.back[Y]);
+          overlap = is_in_range(a->front[X], b->front[X], b->back[X]) && is_in_range(b->front[Y], a->front[Y], a->back[Y]);
           break;
 
         case hash_pair(X, Z):
-          overlap = (b.front[Y] == a.front[Y]) && is_in_range(b.front[X], a.front[X], a.back[X]);
+          overlap = (b->front[Y] == a->front[Y]) && is_in_range(b->front[X], a->front[X], a->back[X]);
           break;
 
         case hash_pair(Y, Z):
-          overlap = (b.front[X] == a.front[X]) && is_in_range(b.front[Y], a.front[Y], a.back[Y]);
+          overlap = (b->front[X] == a->front[X]) && is_in_range(b->front[Y], a->front[Y], a->back[Y]);
           break;
 
         case hash_pair(Z, X):
-          overlap = (a.front[Y] == b.front[Y]) && is_in_range(a.front[X], b.front[X], b.back[X]);
+          overlap = (a->front[Y] == b->front[Y]) && is_in_range(a->front[X], b->front[X], b->back[X]);
           break;
 
         case hash_pair(Z, Y):
-          overlap = (a.front[X] == b.front[X]) && is_in_range(a.front[Y], b.front[Y], b.back[Y]);
+          overlap = (a->front[X] == b->front[X]) && is_in_range(a->front[Y], b->front[Y], b->back[Y]);
           break;
 
       };
 
       if(overlap){
 
-        a.bricks_above.push_back(& b);
-        b.bricks_below.push_back(& a);
+        a->bricks_above.push_back(b);
+        b->bricks_below.push_back(a);
 
       }
 
@@ -243,7 +239,7 @@ void calc_overlaps(vector<Brick> & bricks){
 
 int main(){
 
-  vector<Brick> bricks;
+  vector<Brick *> bricks;
 
   get_bricks(bricks);
 
@@ -251,17 +247,17 @@ int main(){
 
   calc_overlaps(bricks);
 
-  for(Brick & brick : bricks)
-   brick.let_fall(); 
+  for(Brick * brick : bricks)
+   brick->let_fall(); 
 
   int ctr = 0; 
 
-  for(Brick & brick : bricks)
-    if(brick.can_be_removed())
+  for(Brick * brick : bricks)
+    if(brick->can_be_removed())
       ctr++;
 
-//   for(Brick & brick : bricks)
-//     brick.print();
+   for(Brick * brick : bricks)
+     brick->print();
 
    cout << ctr << endl;
 
