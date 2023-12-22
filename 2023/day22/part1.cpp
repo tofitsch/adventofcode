@@ -159,7 +159,7 @@ void calc_overlaps(vector<Brick> & bricks){
       if(& a == & b)
         continue;
 
-      if(a.front[Z] > b.front[Z])
+      if(* a.z_bot > * b.z_bot)
         continue;
 
       bool overlap = false;
@@ -167,11 +167,11 @@ void calc_overlaps(vector<Brick> & bricks){
       switch(hash_pair(a.alignment, b.alignment)){
 
         case hash_pair(X, X):
-          overlap = ranges_overlap(a.front[X], a.back[X], b.front[X], b.back[X]);
+          overlap = (a.front[Y] == b.front[Y]) && ranges_overlap(a.front[X], a.back[X], b.front[X], b.back[X]);
           break;
 
         case hash_pair(Y, Y):
-          overlap = ranges_overlap(a.front[Y], a.back[Y], b.front[Y], b.back[Y]);
+          overlap = (a.front[X] == b.front[X]) && ranges_overlap(a.front[Y], a.back[Y], b.front[Y], b.back[Y]);
           break;
 
         case hash_pair(Z, Z):
