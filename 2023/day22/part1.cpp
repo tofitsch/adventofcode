@@ -2,7 +2,7 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
-#include<set>
+#include<algorithm>
 
 using namespace std;
 
@@ -18,12 +18,11 @@ struct Brick{
   
   int front[4], back[4];
 
-  int * z_top;
-  int * z_bot;
+  int * z_top, * z_bot;
 
   unsigned short alignment;
 
-  set<Brick *> bricks_above, bricks_below;
+  vector<Brick *> bricks_above, bricks_below;
 
   Brick(string line, int id) : id(id) {
     
@@ -68,6 +67,34 @@ struct Brick{
 
   }
 
+  static bool lower_z_bot(const Brick & a, const Brick & b){
+
+    return * a.z_bot < * b.z_bot;
+
+  }
+  
+  static bool ptr_lower_z_top(const Brick * a, const Brick * b){
+
+    return * a->z_top < * b->z_top;
+
+  }
+
+  void let_fall(){
+    
+    * z_top -= * z_bot - 1;
+    * z_bot = 1;
+
+    if(bricks_below.size() > 0){
+
+      sort(bricks_below.begin(), bricks_below.end(), ptr_lower_z_top);
+
+      * z_top += * bricks_below.back()->z_top;
+      * z_bot += * bricks_below.back()->z_top;
+
+    }
+    
+  }
+
   void print(){
     
     cout << id << ": " << * z_bot << " " << * z_top << " ";
@@ -88,10 +115,6 @@ struct Brick{
 
 };
 
-bool lower_z_bot(const Brick & a, const Brick & b){
-  return * a.z_bot < * b.z_bot;
-}
-
 void get_bricks(vector<Brick> & bricks){
 
   string line;
@@ -111,23 +134,6 @@ void get_bricks(vector<Brick> & bricks){
   for(Brick & brick : bricks)
     brick.calc_top_bot();
 
-}
-
-void set_overlap(Brick & a, Brick & b){
-
-  if(a.front[Z] < b.front[Z]){
-
-    a.bricks_above.insert(& b);
-    b.bricks_below.insert(& a);
-
-  }
-  else{
-
-    a.bricks_below.insert(& b);
-    b.bricks_above.insert(& a);
-
-  }
-  
 }
 
 bool is_in_range(int a, int b0, int b1){
@@ -151,6 +157,9 @@ void calc_overlaps(vector<Brick> & bricks){
     for(Brick & b : bricks){
       
       if(& a == & b)
+        continue;
+
+      if(a.front[Z] > b.front[Z])
         continue;
 
       bool overlap = false;
@@ -198,8 +207,12 @@ void calc_overlaps(vector<Brick> & bricks){
 
       };
 
-      if(overlap)
-        set_overlap(a, b);
+      if(overlap){
+
+        a.bricks_above.push_back(& b);
+        b.bricks_below.push_back(& a);
+
+      }
 
     }
   }
@@ -212,7 +225,17 @@ int main(){
 
   get_bricks(bricks);
 
+  sort(bricks.begin(), bricks.end(), Brick::lower_z_bot);
+
   calc_overlaps(bricks);
+
+  for(Brick & brick : bricks)
+    brick.print();
+
+  cout << endl;
+
+  for(Brick & brick : bricks)
+   brick.let_fall(); 
 
   for(Brick & brick : bricks)
     brick.print();
