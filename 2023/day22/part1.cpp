@@ -22,6 +22,8 @@ struct Brick{
 
   unsigned short alignment;
 
+  bool removable = false;
+
   vector<Brick *> bricks_above, bricks_below;
 
   Brick(string line, int id) : id(id) {
@@ -112,6 +114,8 @@ struct Brick{
       }
     }
 
+    removable = true;
+
     return true;
 
   }
@@ -130,6 +134,9 @@ struct Brick{
     for(Brick * brick : bricks_below)
       cout << brick->id << " ";
 
+    if(removable)
+      cout << "X";
+
     cout << endl;
 
   }
@@ -140,7 +147,7 @@ void get_bricks(vector<Brick> & bricks){
 
   string line;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   int id = 0;
 
@@ -176,11 +183,8 @@ void calc_overlaps(vector<Brick> & bricks){
 
   for(Brick & a : bricks){
     for(Brick & b : bricks){
-      
-      if(& a == & b)
-        continue;
 
-      if(* a.z_bot > * b.z_bot)
+      if(* a.z_bot >= * b.z_bot)
         continue;
 
       bool overlap = false;
@@ -223,9 +227,6 @@ void calc_overlaps(vector<Brick> & bricks){
           overlap = (a.front[X] == b.front[X]) && is_in_range(a.front[Y], b.front[Y], b.back[Y]);
           break;
 
-        default:
-          overlap = false;
-
       };
 
       if(overlap){
@@ -258,6 +259,9 @@ int main(){
   for(Brick & brick : bricks)
     if(brick.can_be_removed())
       ctr++;
+
+//   for(Brick & brick : bricks)
+//     brick.print();
 
    cout << ctr << endl;
 
