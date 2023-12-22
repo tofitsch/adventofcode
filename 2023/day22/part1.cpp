@@ -22,7 +22,7 @@ struct Brick{
 
   unsigned short alignment = Z;
 
-  bool removable = false;
+  bool removable = true;
 
   vector<Brick *> bricks_above, bricks_below;
 
@@ -91,29 +91,6 @@ struct Brick{
 
     }
     
-  }
-
-  bool can_be_removed(){
-    
-    for(Brick * brick_above : bricks_above){
-      if(* brick_above->z_bot == * z_top + 1){
-
-        int n_supports = 0;
-
-        for(Brick * brick_below : brick_above->bricks_below)
-         if(* brick_above->z_bot == * brick_below->z_top + 1)
-           n_supports++;
-
-        if(n_supports < 2)
-          return false;
-
-      }
-    }
-
-    removable = true;
-
-    return true;
-
   }
 
   void print(){
@@ -237,6 +214,39 @@ void calc_overlaps(vector<Brick *> & bricks){
 
 }
 
+int count_removobale_bricks(vector<Brick *> & bricks){
+
+  for(Brick * brick : bricks){
+
+    int n_supports = 0;
+
+    Brick * support = nullptr;
+
+    for(Brick * brick_below : brick->bricks_below){
+      if(* brick_below->z_top == * brick->z_bot - 1){
+
+        support = brick_below;
+
+        n_supports++;
+
+      }
+    }
+
+    if(n_supports == 1)
+      support->removable = false;
+
+  }
+
+  int n_removable = 0; 
+
+  for(Brick * brick : bricks)
+    if(brick->removable)
+      n_removable++;
+
+  return n_removable;
+
+}
+
 int main(){
 
   vector<Brick *> bricks;
@@ -250,15 +260,9 @@ int main(){
   for(Brick * brick : bricks)
    brick->let_fall(); 
 
-  int ctr = 0; 
-
   for(Brick * brick : bricks)
-    if(brick->can_be_removed())
-      ctr++;
+    brick->print();
 
-   for(Brick * brick : bricks)
-     brick->print();
-
-   cout << ctr << endl;
+  cout << count_removobale_bricks(bricks) << endl;
 
 }
