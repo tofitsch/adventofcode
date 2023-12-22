@@ -97,27 +97,6 @@ struct Brick{
     
   }
 
-  void print(){
-    
-    cout << id << ": " << * z_bot << " " << * z_top << " ";
-
-    cout << " a: "; 
-
-    for(Brick * brick : bricks_above)
-      cout << brick->id << " ";
-
-    cout << " b: "; 
-
-    for(Brick * brick : bricks_below)
-      cout << brick->id << " ";
-
-    if(removable)
-      cout << "X";
-
-    cout << endl;
-
-  }
-
 };
 
 void get_bricks(vector<Brick *> & bricks){
@@ -263,9 +242,6 @@ int main(){
 
   for(Brick * brick : bricks)
    brick->let_fall(); 
-
-//  for(Brick * brick : bricks)
-//    brick->print();
 
   cout << count_removobale_bricks(bricks) << endl;
 
