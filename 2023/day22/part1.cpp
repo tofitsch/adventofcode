@@ -95,6 +95,27 @@ struct Brick{
     
   }
 
+  bool can_be_removed(){
+    
+    for(Brick * brick_above : bricks_above){
+      if(* brick_above->z_bot == * z_top + 1){
+
+        int n_supports = 0;
+
+        for(Brick * brick_below : brick_above->bricks_below)
+         if(* brick_above->z_bot == * brick_below->z_top + 1)
+           n_supports++;
+
+        if(n_supports < 2)
+          return false;
+
+      }
+    }
+
+    return true;
+
+  }
+
   void print(){
     
     cout << id << ": " << * z_bot << " " << * z_top << " ";
@@ -230,14 +251,14 @@ int main(){
   calc_overlaps(bricks);
 
   for(Brick & brick : bricks)
-    brick.print();
-
-  cout << endl;
-
-  for(Brick & brick : bricks)
    brick.let_fall(); 
 
+  int ctr = 0; 
+
   for(Brick & brick : bricks)
-    brick.print();
+    if(brick.can_be_removed())
+      ctr++;
+
+   cout << ctr << endl;
 
 }
