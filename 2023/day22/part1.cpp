@@ -8,14 +8,14 @@ using namespace std;
 enum Coordinates : short {NONE, X, Y, Z};
 
 constexpr short hash_pair(short a, short b){
-  return a * 7 + b;
+  return a * 4 + b;
 }
 
 struct Brick{
   
   int front[4], back[4];
 
-  short alignment;
+  unsigned short alignment;
 
   vector<Brick *> bricks_above, bricks_below;
 
@@ -39,7 +39,7 @@ struct Brick{
       back[i] = stoi(field);
 
       if(front[i] != back[i])
-        alignment = (front[i] > back[i]) ? i : -i;
+        alignment = i;
 
     }
 
@@ -58,7 +58,7 @@ void get_bricks(vector<Brick> & bricks){
 
 }
 
-void set_relations(Brick & a, Brick & b){
+void set_overlap(Brick & a, Brick & b){
 
   if(a.front[Z] < b.front[Z]){
 
@@ -75,12 +75,18 @@ void set_relations(Brick & a, Brick & b){
   
 }
 
+bool is_in_range(int a, int b0, int b1){
+  
+  if(b1 > b0)
+    return a >= b0 && a <= b1;
+  else
+    return a <= b0 && a >= b1;
+
+}
+
 bool ranges_overlap(int a0, int a1, int b0, int b1){
   
-  if(a1 > a0)
-    return (b0 >= a0 && b0 <= a1) || (b1 >= a0 && b1 <= a1);
-  else
-    return (b0 <= a0 && b0 >= a1) || (b1 <= a0 && b1 >= a1);
+  return is_in_range(a0, b0, b1) || is_in_range(a1, b0, b1);
   
 }
 
@@ -100,11 +106,45 @@ void calc_overlaps(vector<Brick> & bricks){
           overlap = ranges_overlap(a.front[X], a.back[X], b.front[X], b.back[X]);
           break;
 
-        default : overlap = false;
+        case hash_pair(Y, Y):
+          overlap = ranges_overlap(a.front[Y], a.back[Y], b.front[Y], b.back[Y]);
+          break;
+
+        case hash_pair(Z, Z):
+          overlap = (a.front[X] == b.front[X] && a.front[Y] == b.front[Y]);
+          break;
+
+        case hash_pair(X, Y):
+          overlap = is_in_range(a.front[Y], b.front[Y], b.back[Y]) && is_in_range(b.front[X], a.front[X], a.back[X]);
+          break;
+
+        case hash_pair(Y, X):
+          overlap = is_in_range(a.front[X], b.front[X], b.back[X]) && is_in_range(b.front[Y], a.front[Y], a.back[Y]);
+          break;
+
+        case hash_pair(X, Z):
+          overlap = (b.front[Y] == a.front[Y]) && is_in_range(b.front[X], a.front[X], a.back[X]);
+          break;
+
+        case hash_pair(Y, Z):
+          overlap = (b.front[X] == a.front[X]) && is_in_range(b.front[Y], a.front[Y], a.back[Y]);
+          break;
+
+        case hash_pair(Z, X):
+          overlap = (a.front[Y] == b.front[Y]) && is_in_range(a.front[X], b.front[X], b.back[X]);
+          break;
+
+        case hash_pair(Z, Y):
+          overlap = (a.front[X] == b.front[X]) && is_in_range(a.front[Y], b.front[Y], b.back[Y]);
+          break;
+
+        default:
+          overlap = false;
+
       };
 
       if(overlap)
-        set_relations(a, b);
+        set_overlap(a, b);
 
     }
   }
