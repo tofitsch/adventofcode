@@ -12,7 +12,9 @@ class Graph{
     
     int n_y, n_x;
 
-    int run_dijkstra();
+    void run_dijkstra(bool);
+    void make_directional();
+    int get_path_length();
 
     void print();
 
@@ -147,7 +149,7 @@ bool Graph::distance_decreasing(const Node * a, const Node * b){
 
 }
 
-int Graph::run_dijkstra(){
+void Graph::run_dijkstra(bool invert_weights){
 
   vector<Node *> queue;
 
@@ -172,7 +174,7 @@ int Graph::run_dijkstra(){
     for(Edge & edge : node->edges){
       if(! edge.node->visited){
         
-	int distance_update = node->distance + edge.weight;
+	int distance_update = node->distance + edge.weight * (invert_weights ? -1 : 1);
 	  
 	if(distance_update < edge.node->distance){
 
@@ -199,6 +201,30 @@ int Graph::run_dijkstra(){
 
   start_node->on_path = true;
 
+}
+
+void Graph::make_directional(){
+
+  for(int y=0; y<n_y; y++){
+    for(int x=0; x<n_x; x++){
+      
+      Node * node = & nodes[y][x];
+
+      vector<Edge> forward_edges;
+
+      for(Edge & edge : node->edges)
+        if(edge.node->distance > node->distance)
+          forward_edges.push_back(edge);
+
+      node->edges = forward_edges;
+
+    }
+  }
+
+}
+
+int Graph::get_path_length(){
+  
   return end_node->distance;
 
 }
@@ -230,7 +256,13 @@ int main(){
   
   Graph graph("example.txt");
 
-  cout << graph.run_dijkstra() << endl;
+  graph.run_dijkstra(false);
+
+  graph.make_directional();
+
+  graph.run_dijkstra(true);
+
+  cout << - graph.get_path_length() << endl;
 
   graph.print();
 
