@@ -14,6 +14,8 @@ class Graph{
 
     int run_dijkstra();
 
+    void print();
+
     Graph(string);
 
   private:
@@ -64,6 +66,7 @@ struct Graph::Node{
 
   int distance = infinity;
   bool visited = false;
+  bool on_path = false;
   Node * previous = nullptr;
 
   Node * reset();
@@ -77,6 +80,7 @@ Graph::Node * Graph::Node::reset(){
 
   distance = infinity;
   visited = false;
+  on_path = false;
   previous = nullptr;
 
   return this;
@@ -183,14 +187,51 @@ int Graph::run_dijkstra(){
 
   }
 
+  Node * node = end_node;
+
+  while(node->previous != nullptr){
+    
+    node->on_path = true;
+
+    node = node->previous;
+
+  }
+
+  start_node->on_path = true;
+
   return end_node->distance;
 
 }
 
+void Graph::print(){
+
+  string const red = "\033[1;31m";
+  string const reset = "\033[0m";
+
+  for(int y=0; y<n_y; y++){
+
+    for(int x=0; x<n_x; x++){
+
+      if(nodes[y][x].on_path)
+        cout << red << nodes[y][x].c << reset;
+      else
+        cout << nodes[y][x].c;
+
+    }
+
+    cout << endl;
+
+  }
+
+}
+      
+
 int main(){
   
-  Graph graph("input.txt");
+  Graph graph("example.txt");
 
   cout << graph.run_dijkstra() << endl;
+
+  graph.print();
 
 }
