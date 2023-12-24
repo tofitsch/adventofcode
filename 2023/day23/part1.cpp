@@ -16,6 +16,8 @@ class Graph{
 
     vector<vector<Node>> nodes;
 
+    vector<int> path_lengths;
+
     Node * start_node = nullptr;
     Node * end_node = nullptr;
 
@@ -36,6 +38,8 @@ class Graph{
     void make_directional();
     void simplify();
     void simplify_node(Node *);
+    int get_longest_path_length();
+    void find_path(Node *, int);
 
     void print();
 
@@ -267,17 +271,30 @@ void Graph::simplify_node(Graph::Node * node){
 
 }
 
+int Graph::get_longest_path_length(){
+  
+  find_path(start_node, 0);
+  
+  sort(path_lengths.begin(), path_lengths.end());
+
+  return path_lengths.back();
+
+}
+
+void Graph::find_path(Node * node, int path_length){
+ 
+  if(node == end_node)
+    path_lengths.push_back(path_length);
+  
+  for(Edge & edge : node->edges)
+    find_path(edge.node, path_length + edge.weight);
+
+}
+
 void Graph::print(){
   
-  cout << endl;
-
   string const red = "\033[1;31m";
   string const reset = "\033[0m";
-
-  for(int y=0; y<n_y; y++)
-    for(int x=0; x<n_x; x++)
-     for(Edge & edge : nodes[y][x].edges)
-       cout << y << " " << x << " " << edge.node->y << " " << edge.node->x << endl;
 
   for(int y=0; y<n_y; y++){
 
@@ -301,7 +318,7 @@ void Graph::print(){
 
 int main(){
   
-  Graph graph("example.txt");
+  Graph graph("input.txt");
 
   cout << graph.run_dijkstra() << endl;
 
@@ -309,8 +326,8 @@ int main(){
 
   graph.simplify();
 
-//  cout << graph.run_dijkstra() << endl;
+  cout << graph.get_longest_path_length() << endl;
 
-  graph.print();
+//  graph.print();
 
 }
