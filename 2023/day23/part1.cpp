@@ -2,7 +2,6 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
-#include<set>
 #include<limits>
 
 using namespace std;
@@ -34,14 +33,12 @@ class Graph{
     
     int n_y, n_x;
 
-    int run_dijkstra();
+    void run_dijkstra();
     void make_directional();
     void simplify();
     void simplify_node(Node *);
     int get_longest_path_length();
     void find_path(Node *, int);
-
-    void print();
 
     Graph(string);
 
@@ -151,7 +148,7 @@ bool Graph::distance_decreasing(const Node * a, const Node * b){
 
 }
 
-int Graph::run_dijkstra(){
+void Graph::run_dijkstra(){
 
   vector<Node *> queue;
 
@@ -176,11 +173,11 @@ int Graph::run_dijkstra(){
     for(Edge & edge : node->edges){
       if(! edge.node->visited){
         
-	int distance_update = node->distance + edge.weight;
-	  
-	if(distance_update < edge.node->distance){
-
-	  edge.node->distance = distance_update;
+        int distance_update = node->distance + edge.weight;
+          
+        if(distance_update < edge.node->distance){
+        
+          edge.node->distance = distance_update;
 
           edge.node->previous = node;
 
@@ -241,8 +238,6 @@ void Graph::simplify(){
 
 void Graph::simplify_node(Graph::Node * node){
   
-//  cout << node->x << " " << node->y << endl;
-  
   if(node->simple_edges.size() > 0)
     return;
 
@@ -291,43 +286,16 @@ void Graph::find_path(Node * node, int path_length){
 
 }
 
-void Graph::print(){
-  
-  string const red = "\033[1;31m";
-  string const reset = "\033[0m";
-
-  for(int y=0; y<n_y; y++){
-
-    for(int x=0; x<n_x; x++){
-
-      if(nodes[y][x].edges.size() > 0)
-        cout << red << nodes[y][x].edges.size() << reset;
-      //if(nodes[y][x].on_path)
-      //  cout << red << nodes[y][x].c << reset;
-      else
-        cout << nodes[y][x].c;
-
-    }
-
-    cout << endl;
-
-  }
-
-}
-      
-
 int main(){
   
   Graph graph("input.txt");
 
-  cout << graph.run_dijkstra() << endl;
+  graph.run_dijkstra();
 
   graph.make_directional();
 
   graph.simplify();
 
   cout << graph.get_longest_path_length() << endl;
-
-//  graph.print();
 
 }
