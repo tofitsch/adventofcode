@@ -6,43 +6,67 @@
 
 using namespace std;
 
-map<char, int> property_map = { {'x', 0}, {'m', 1}, {'a', 2}, {'s', 3} };
+map<char, int> dimensions = { {'x', 0}, {'m', 1}, {'a', 2}, {'s', 3} };
 
-class Graph{
-
-  public:
-
-    Graph(string);
-
-    void print();
-
-  private:
-    
-    static int const n_limits = 4;
-    static int const limit_min = 0;
-    static int const limit_max = 4001;
+struct Hypercube{
+ 
+  string rule_set_label = "in";
   
-    struct Rule;
-    struct Edge;
-    struct Node;
+  vector<int> min = {0, 0, 0, 0};
+  vector<int> max = {4000, 4000, 4000, 4000};
 
-    struct Limit;
-    struct LimitSet;
+  int volume(){
+    
+    int v = 1;
 
-    map<string, Node> nodes;
-    vector<Edge> edges;
+    for(int i=0; i<4; i++)
+      v *= max[i] - min[i];
+
+    return v;
+
+  }
+
 };
 
-struct Graph::Rule{
+struct Rule{
   
-  short property_id;
+  short dim;
   bool greater;
   int value;
   string target;
 
+  pair<Hypercube, Hypercube> apply_to(Hypercube & h){
+    
+    Hypercube h_accepted = h;
+    Hypercube h_rejected = h;
+    
+    h_accepted.rule_set_label = target;
+
+    //TODO: check logic
+    if(greater){
+
+      if(h.min[dim] <= value)
+        h_accepted.min[dim] = value + 1;
+      if(h.max[dim] > value)
+        h_rejected.max[dim] = value;
+
+    }
+    else{
+
+      if(h.max[dim] >= value)
+        h_accepted.max[dim] = value - 1;
+      if(h.min[dim] < value)
+        h_rejected.min[dim] = value;
+
+    }
+
+    return {h_accepted, h_rejected};
+
+  }
+
   Rule(string str){
     
-    property_id = property_map[str[0]];
+    dim = dimensions[str[0]];
 
     greater = (str[1] == '>');
 
@@ -56,121 +80,50 @@ struct Graph::Rule{
 
   }
 
+  void print(){
+
+    cout << dim << (greater ? '>' : '<') << value << ':' << target << endl;
+
+  }
+
 };
 
-struct Graph::Node{
+struct RuleSet{
   
-  bool active = true;
-  
-  vector<Edge *> in_edges;
-  vector<Edge *> out_edges;
+  vector<Rule> rules;
 
   string label;
+  string target;
 
-  Node() {}
-  Node(string l) : label(l) {}
+  RuleSet() {}
 
-};
-  
-struct Graph::Limit{
-  
-  int from, to;
-
-  Limit() : from(limit_min), to(limit_max) {}
-  Limit(int f, int t) : from(f), to(t) {}
-
-  Limit invert(){
+  vector<Hypercube> apply_to(Hypercube h){
     
-    if(from == limit_min)
-      return Limit(to, limit_max);
-
-    return Limit(limit_min, to);
-    
-  }
-
-};
-
-struct Graph::LimitSet{
-
-  vector<vector<Limit>> limits{n_limits, vector<Limit>()};
-
-  void add(int i, Limit limit){
-    
-    limits[i].push_back(limit);
-
-  }
-
-  void print(){
-    
-    for(int i=0; i<n_limits; i++){
+    vector<Hypercube> h_vec;
+     
+    for(Rule & rule : rules){
       
-      cout << i << ": ";
+      pair<Hypercube, Hypercube> accepted_rejected = rule.apply_to(h);
 
-      for(Limit & limit : limits[i])
-        cout << limit.from << "-" << limit.to << " ";
+      h_vec.push_back(accepted_rejected.first);
 
-      cout << endl;
+      h = accepted_rejected.second;
 
     }
 
-  }
+    h.rule_set_label = target;
 
-};
+    h_vec.push_back(h);
 
-struct Graph::Edge{
-
-  bool active = true;
-
-  Node * in, * out;
-
-  LimitSet limit_set;
-
-  Edge(Node * in, Node * out, LimitSet l) : in(in), out(out), limit_set(l) {}
-
-  void print(){
-    
-    cout << in->label << "->" << out->label << endl;
-
-    limit_set.print();
-
-    cout << endl;
+    return h_vec;
 
   }
 
-};
-
-Graph::Graph(string in_file_name){
-  
-  string line;
-  
-  ifstream in_file(in_file_name);
-
-  nodes["A"] = Node("A");
-  nodes["R"] = Node("R");
-
-  vector<string> lines;
-
-  while(getline(in_file, line))
-    if(line.length() == 0)
-      break;
-    else
-      lines.push_back(line);
-
-  for(string & line : lines){
+  RuleSet(string line){
     
     size_t brace_pos = line.find('{');
 
-    string label = line.substr(0, brace_pos);
-
-    nodes[label] = Node(label);
-
-  }
-
-  for(string & line : lines){
-    
-    size_t brace_pos = line.find('{');
-
-    string label = line.substr(0, brace_pos);
+    label = line.substr(0, brace_pos);
 
     string rule_str = line.substr(brace_pos + 1, line.length() - brace_pos - 2);
 
@@ -183,58 +136,70 @@ Graph::Graph(string in_file_name){
     while(getline(rule_stream, field, ','))
       fields.push_back(field);
 
-    string target = fields.back();
+    target = fields.back();
 
     fields.pop_back();
 
-    LimitSet target_limits;
+    for(string & str : fields)
+      rules.push_back(Rule(str));
 
-    for(string & str : fields){
-      
-      Rule rule(str);
-      
-      LimitSet rule_limits;
-
-      Limit rule_limit;
-
-      if(rule.greater)
-        rule_limit = Limit(rule.value, limit_max);
-      else
-        rule_limit = Limit(limit_min, rule.value);
-
-      Limit target_limit = rule_limit.invert();
-
-      rule_limits.add(rule.property_id, rule_limit);
-
-      target_limits.add(rule.property_id, target_limit);
-
-      edges.push_back(Edge(& nodes[label], & nodes[rule.target], rule_limits));
-
-      nodes[rule.target].in_edges.push_back(& edges.back());
-
-    }
-
-    edges.push_back(Edge(& nodes[label], & nodes[target], target_limits));
-    nodes[target].in_edges.push_back(& edges.back());
+    print();
+    cout << endl;
     
   }
 
-  for(Edge & edge : edges)
-    edge.in->out_edges.push_back(& edge);
+  void print(){
+    
+    cout << label << endl;
 
-}
+    for(Rule & rule : rules)
+      rule.print();
 
-void Graph::print(){
+    cout << target << endl;
 
-  for(Edge & edge : edges)
-    edge.print();
+  }
+
+};
+
+void recursive_split(map<string, RuleSet> & rule_sets, Hypercube h){
+  
+  if(rule_sets.find(h.rule_set_label) == rule_sets.end()){
+
+    cout << h.rule_set_label << " " << h.volume() << endl;
+
+    return;
+
+  }
+  
+  vector<Hypercube> h_vec = rule_sets[h.rule_set_label].apply_to(h);
+
+  for(Hypercube & next : h_vec)
+    recursive_split(rule_sets, next);
 
 }
 
 int main(){
   
-  Graph graph("example.txt");
+  string line;
 
-  graph.print();
+  ifstream in_file("example.txt");
+
+  map<string, RuleSet> rule_sets;
+
+  while(getline(in_file, line)){
+    
+    if(line.length() == 0)
+      break;
+
+    RuleSet rule_set(line);
+
+  }
+
+  for(auto [label, rule_set] : rule_sets)
+    rule_set.print();
+
+  Hypercube h;
+
+  recursive_split(rule_sets, h);
 
 }
