@@ -12,21 +12,77 @@ struct Hypercube{
  
   string rule_set_label = "in";
   
-  vector<int> min = {0, 0, 0, 0};
+  vector<int> min = {1, 1, 1, 1};
   vector<int> max = {4000, 4000, 4000, 4000};
 
-  int volume(){
+  unsigned long volume(){
     
-    int v = 1;
+    unsigned long v = 1;
 
     for(int i=0; i<4; i++)
-      v *= max[i] - min[i];
+      v *= max[i] - min[i] + 1;
 
     return v;
 
   }
 
+  bool empty(){
+
+    for(int i=0; i<4; i++)
+      if(min[i] < 0)
+        return true;
+
+    return false;
+
+  }
+
+  void print(){
+    
+    cout << rule_set_label << " " << volume() << " | ";
+
+    for(int i=0; i<4; i++)
+      cout << min[i] << "-" << max[i] << " ";
+
+    cout << endl;
+
+  }
+
 };
+
+void split_range(int min, int max, bool greater, int value, int &min_accepted, int &max_accepted, int &min_rejected, int &max_rejected) {
+
+  if(greater){
+
+    min_accepted = value + 1;
+    max_accepted = max;
+    min_rejected = min;
+    max_rejected = value;
+
+  }
+  else{
+
+    min_accepted = min;
+    max_accepted = value - 1;
+    min_rejected = value;
+    max_rejected = max;
+
+  }
+ 
+  if(min_accepted > max_accepted){
+
+    min_accepted = -1;
+    max_accepted = -1;
+
+  }
+ 
+  if(min_rejected > max_rejected){
+
+    min_rejected = -1;
+    max_rejected = -1;
+
+  }
+
+}
 
 struct Rule{
   
@@ -42,23 +98,7 @@ struct Rule{
     
     h_accepted.rule_set_label = target;
 
-    //TODO: check logic
-    if(greater){
-
-      if(h.min[dim] <= value)
-        h_accepted.min[dim] = value + 1;
-      if(h.max[dim] > value)
-        h_rejected.max[dim] = value;
-
-    }
-    else{
-
-      if(h.max[dim] >= value)
-        h_accepted.max[dim] = value - 1;
-      if(h.min[dim] < value)
-        h_rejected.min[dim] = value;
-
-    }
+    split_range(h.min[dim], h.max[dim], greater, value, h_accepted.min[dim], h_accepted.max[dim], h_rejected.min[dim], h_rejected.max[dim]);
 
     return {h_accepted, h_rejected};
 
@@ -77,12 +117,6 @@ struct Rule{
     value = stoi(value_str);
 
     target = str.substr(colon_pos + 1);
-
-  }
-
-  void print(){
-
-    cout << dim << (greater ? '>' : '<') << value << ':' << target << endl;
 
   }
 
@@ -105,7 +139,8 @@ struct RuleSet{
       
       pair<Hypercube, Hypercube> accepted_rejected = rule.apply_to(h);
 
-      h_vec.push_back(accepted_rejected.first);
+      if(! accepted_rejected.first.empty())
+        h_vec.push_back(accepted_rejected.first);
 
       h = accepted_rejected.second;
 
@@ -113,7 +148,8 @@ struct RuleSet{
 
     h.rule_set_label = target;
 
-    h_vec.push_back(h);
+    if(! h.empty())
+      h_vec.push_back(h);
 
     return h_vec;
 
@@ -146,27 +182,16 @@ struct RuleSet{
     
   }
 
-  void print(){
-    
-    cout << label << endl;
-
-    for(Rule & rule : rules)
-      rule.print();
-
-    cout << target << endl;
-
-  }
-
 };
 
 void recursive_split(map<string, RuleSet> & rule_sets, vector<Hypercube> & accepted, Hypercube h){
 
   if(rule_sets.find(h.rule_set_label) == rule_sets.end()){
     
+    h.print();
+
     if(h.rule_set_label == "A")
       accepted.push_back(h);
-
-    cout << h.rule_set_label << " " << h.volume() << endl;
 
     return;
 
@@ -198,20 +223,27 @@ int main(){
 
   }
 
-//  for(auto [label, rule_set] : rule_sets)
-//    rule_set.print();
-
   Hypercube h;
 
   vector<Hypercube> accepted;
 
   recursive_split(rule_sets, accepted, h);
 
-  int sum = 0;
+  unsigned long sum = 0;
 
   for(Hypercube & a : accepted)
     sum += h.volume();
 
   cout << sum << endl;
+   
+//  int min = 10;
+//  int max = 20;
+//  int x = 8;
+//  int min_a, max_a, min_r, max_r;
+//
+//  split_range(min, max, true, x, min_a, max_a, min_r, max_r);
+//
+//  cout << min << " " << max << " " << x << endl;
+//  cout << min_a << " " << max_a << " " << min_r << " " << max_r << endl;
 
 }
