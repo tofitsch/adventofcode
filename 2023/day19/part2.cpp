@@ -143,8 +143,6 @@ struct RuleSet{
     for(string & str : fields)
       rules.push_back(Rule(str));
 
-    print();
-    cout << endl;
     
   }
 
@@ -161,9 +159,12 @@ struct RuleSet{
 
 };
 
-void recursive_split(map<string, RuleSet> & rule_sets, Hypercube h){
-  
+void recursive_split(map<string, RuleSet> & rule_sets, vector<Hypercube> & accepted, Hypercube h){
+
   if(rule_sets.find(h.rule_set_label) == rule_sets.end()){
+    
+    if(h.rule_set_label == "A")
+      accepted.push_back(h);
 
     cout << h.rule_set_label << " " << h.volume() << endl;
 
@@ -174,7 +175,7 @@ void recursive_split(map<string, RuleSet> & rule_sets, Hypercube h){
   vector<Hypercube> h_vec = rule_sets[h.rule_set_label].apply_to(h);
 
   for(Hypercube & next : h_vec)
-    recursive_split(rule_sets, next);
+    recursive_split(rule_sets, accepted, next);
 
 }
 
@@ -193,13 +194,24 @@ int main(){
 
     RuleSet rule_set(line);
 
+    rule_sets[rule_set.label] = rule_set;
+
   }
 
-  for(auto [label, rule_set] : rule_sets)
-    rule_set.print();
+//  for(auto [label, rule_set] : rule_sets)
+//    rule_set.print();
 
   Hypercube h;
 
-  recursive_split(rule_sets, h);
+  vector<Hypercube> accepted;
+
+  recursive_split(rule_sets, accepted, h);
+
+  int sum = 0;
+
+  for(Hypercube & a : accepted)
+    sum += h.volume();
+
+  cout << sum << endl;
 
 }
