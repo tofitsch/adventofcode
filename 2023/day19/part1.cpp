@@ -33,17 +33,6 @@ struct Item{
 
     }
 
-    print();
-    cout << endl;
-
-  }
-
-  void print(){
-
-    for(int i=0; i<4; i++)
-      cout << property[i] << " ";
-    cout << endl;
-
   }
 
 };
@@ -80,12 +69,6 @@ struct Rule{
     value = stoi(value_str);
 
     target = str.substr(colon_pos + 1);
-
-  }
-
-  void print(){
-
-    cout << property_id << (greater ? '>' : '<') << value << ':' << target << endl;
 
   }
 
@@ -144,20 +127,6 @@ struct RuleSet{
 
     for(string & str : fields)
       rules.push_back(Rule(str));
-
-    print();
-    cout << endl;
-    
-  }
-
-  void print(){
-    
-    cout << label << endl;
-
-    for(Rule & rule : rules)
-      rule.print();
-
-    cout << target << endl;
 
   }
 
