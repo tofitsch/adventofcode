@@ -15,9 +15,9 @@ struct Hypercube{
   vector<int> min = {1, 1, 1, 1};
   vector<int> max = {4000, 4000, 4000, 4000};
 
-  unsigned long volume(){
+  long volume(){
     
-    unsigned long v = 1;
+    long v = 1;
 
     for(int i=0; i<4; i++)
       v *= max[i] - min[i] + 1;
@@ -36,20 +36,9 @@ struct Hypercube{
 
   }
 
-  void print(){
-    
-    cout << rule_set_label << " " << volume() << " | ";
-
-    for(int i=0; i<4; i++)
-      cout << min[i] << "-" << max[i] << " ";
-
-    cout << endl;
-
-  }
-
 };
 
-void split_range(int min, int max, bool greater, int value, int &min_accepted, int &max_accepted, int &min_rejected, int &max_rejected) {
+void split_range(int min, int max, bool greater, int value, int & min_accepted, int & max_accepted, int & min_rejected, int & max_rejected) {
 
   if(greater){
 
@@ -184,15 +173,13 @@ struct RuleSet{
 
 };
 
-void recursive_split(map<string, RuleSet> & rule_sets, vector<Hypercube> & accepted, Hypercube h){
+void recursive_split(map<string, RuleSet> & rule_sets, long & n_accepted, Hypercube h){
 
   if(rule_sets.find(h.rule_set_label) == rule_sets.end()){
     
-    h.print();
-
     if(h.rule_set_label == "A")
-      accepted.push_back(h);
-
+      n_accepted += h.volume();
+      
     return;
 
   }
@@ -200,7 +187,7 @@ void recursive_split(map<string, RuleSet> & rule_sets, vector<Hypercube> & accep
   vector<Hypercube> h_vec = rule_sets[h.rule_set_label].apply_to(h);
 
   for(Hypercube & next : h_vec)
-    recursive_split(rule_sets, accepted, next);
+    recursive_split(rule_sets, n_accepted, next);
 
 }
 
@@ -208,7 +195,7 @@ int main(){
   
   string line;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   map<string, RuleSet> rule_sets;
 
@@ -225,25 +212,10 @@ int main(){
 
   Hypercube h;
 
-  vector<Hypercube> accepted;
+  long n_accepted = 0;
 
-  recursive_split(rule_sets, accepted, h);
+  recursive_split(rule_sets, n_accepted, h);
 
-  unsigned long sum = 0;
-
-  for(Hypercube & a : accepted)
-    sum += h.volume();
-
-  cout << sum << endl;
-   
-//  int min = 10;
-//  int max = 20;
-//  int x = 8;
-//  int min_a, max_a, min_r, max_r;
-//
-//  split_range(min, max, true, x, min_a, max_a, min_r, max_r);
-//
-//  cout << min << " " << max << " " << x << endl;
-//  cout << min_a << " " << max_a << " " << min_r << " " << max_r << endl;
+  cout << n_accepted << endl;
 
 }
