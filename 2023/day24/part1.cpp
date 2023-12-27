@@ -32,9 +32,15 @@ struct Hailstone{
 
   }
 
+  bool in_future_direction(int x , int y){
+    
+    return ( ( (x > p0[X]) == (p1[X] > p0[X]) ) && ( (y > p0[Y]) == (p1[Y] > p0[Y]) ) );
+
+  }
+
 };
 
-bool intersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, float & x, float & y){
+bool intersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int & x, int & y){
   
   int denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
@@ -44,13 +50,12 @@ bool intersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, f
   int numerator_x = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
   int numerator_y = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
 
-  x = (float) numerator_x / denominator;
-  y = (float) numerator_y / denominator;
+  x = numerator_x / denominator;
+  y = numerator_y / denominator;
 
   return true;
   
 }
-
 
 int main(){
 
@@ -63,18 +68,29 @@ int main(){
   while(getline(in_file, line))
     hailstones.push_back(Hailstone(line));
 
-  float x, y;
+  int x, y;
 
   int ctr = 0;
 
-  for(Hailstone & a : hailstones)
-    for(Hailstone & b : hailstones)
-      if(& a != & b)
+  int min = 7;
+  int max = 27;
+
+  for(int i=0; i<hailstones.size(); i++){
+
+    Hailstone & a = hailstones[i];
+
+    for(int j=i + 1; j<hailstones.size(); j++){
+
+        Hailstone & b = hailstones[j];
+
         if(intersect(a.p0[X], a.p0[Y], a.p1[X], a.p1[Y], b.p0[X], b.p0[Y], b.p1[X], b.p1[Y], x, y))
-          if(x >= 7 && x <= 27 && y >= 7 && y <= 27){
-            cout << x << " " << y << endl;
-            ctr++;
-          }
+          if(x >= min && x <= max && y >= min && y <= max)
+            if(a.in_future_direction(x, y) && b.in_future_direction(x, y))
+              ctr++;
+
+    }
+
+  }
 
   cout << ctr << endl;
 
