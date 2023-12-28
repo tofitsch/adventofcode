@@ -2,6 +2,9 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
+#include <boost/multiprecision/cpp_int.hpp>
+
+#define ll boost::multiprecision::cpp_int
 
 using namespace std;
 
@@ -9,7 +12,7 @@ enum Coordinates : short {X, Y, Z};
 
 struct Hailstone{
 
-  int p0[3], p1[3];
+  ll p0[3], p1[3];
 
   Hailstone(string line){
     
@@ -23,35 +26,42 @@ struct Hailstone{
     for(int i=0; i<3; i++){
 
       getline(stream_p, field, ',');
-      p0[i] = stoi(field);
+      p0[i] = stol(field);
 
       getline(stream_v, field, ',');
-      p1[i] = p0[i] + stoi(field);
+      p1[i] = p0[i] + stol(field);
 
     }
 
   }
 
-  bool in_future_direction(int x , int y){
+  bool in_future_direction(ll x , ll y){
     
-    return ( ( (x > p0[X]) == (p1[X] > p0[X]) ) && ( (y > p0[Y]) == (p1[Y] > p0[Y]) ) );
+    return (x > p0[X]) == (p1[X] > p0[X]);
 
   }
 
 };
 
-bool intersect(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int & x, int & y){
+bool intersect(ll x1, ll y1, ll x2, ll y2, ll x3, ll y3, ll x4, ll y4, ll & x, ll & y){
+
+  cout << x1 << " " << y1 << " Z @ " << x2 - x1 << " " << y2 - y1 << " vZ" << endl;
+  cout << x3 << " " << y3 << " Z @ " << x4 - x3 << " " << y4 - y3 << " vZ" << endl;
   
-  int denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  ll denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
-  if(denominator == 0)
+  if(denominator == 0){
+    cout << "no intersect" << endl << endl;
     return false;
+  }
 
-  int numerator_x = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
-  int numerator_y = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
+  ll numerator_x = (x1*y2 - y1*x2) * (x3 - x4) - (x1 - x2) * (x3*y4 - y3*x4);
+  ll numerator_y = (x1*y2 - y1*x2) * (y3 - y4) - (y1 - y2) * (x3*y4 - y3*x4);
 
-  x = numerator_x / denominator;
-  y = numerator_y / denominator;
+  x = (ll) numerator_x / denominator;
+  y = (ll) numerator_y / denominator;
+
+  cout << x << " " << y << endl;
 
   return true;
   
@@ -61,19 +71,21 @@ int main(){
 
   string line;
 
-  ifstream in_file("example.txt");
+//  ll min = 7;
+//  ll max = 27;
+  ll min = 200000000000000;
+  ll max = 400000000000000;
+
+  ifstream in_file("input.txt");
 
   vector<Hailstone> hailstones;
 
   while(getline(in_file, line))
     hailstones.push_back(Hailstone(line));
 
-  int x, y;
+  ll x, y;
 
   int ctr = 0;
-
-  int min = 7;
-  int max = 27;
 
   for(int i=0; i<hailstones.size(); i++){
 
@@ -83,10 +95,13 @@ int main(){
 
         Hailstone & b = hailstones[j];
 
-        if(intersect(a.p0[X], a.p0[Y], a.p1[X], a.p1[Y], b.p0[X], b.p0[Y], b.p1[X], b.p1[Y], x, y))
+        if(intersect(a.p0[X], a.p0[Y], a.p1[X], a.p1[Y], b.p0[X], b.p0[Y], b.p1[X], b.p1[Y], x, y)){
+         cout << ((a.in_future_direction(x, y) && b.in_future_direction(x, y)) ? "future" : "past") << endl;
+         cout << endl;
           if(x >= min && x <= max && y >= min && y <= max)
             if(a.in_future_direction(x, y) && b.in_future_direction(x, y))
               ctr++;
+        }
 
     }
 
