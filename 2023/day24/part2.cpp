@@ -35,12 +35,6 @@ struct Hailstone{
 
   }
 
-  bool in_future_direction(ll x , ll y){
-    
-    return (x > p0[X]) == (p1[X] > p0[X]);
-
-  }
-
 };
 
 bool intersect(ll x1, ll y1, ll x2, ll y2, ll x3, ll y3, ll x4, ll y4, ll & x, ll & y){
@@ -60,12 +54,47 @@ bool intersect(ll x1, ll y1, ll x2, ll y2, ll x3, ll y3, ll x4, ll y4, ll & x, l
   
 }
 
+bool is_solution(vector<Hailstone> & hailstones, ll & x, ll & y, ll dx, ll dy, bool y_is_z){
+
+  ll x0, y0;
+
+  Hailstone & a = hailstones[0];
+
+  for(int i=1; i<hailstones.size(); i++){
+
+      Hailstone & b = hailstones[i];
+
+      if(y_is_z){
+
+        if(! intersect(a.p0[X], a.p0[Z], a.p1[X] - dx, a.p1[Z] - dy, b.p0[X], b.p0[Z], b.p1[X] - dx, b.p1[Z] - dy, x, y))
+          continue;
+
+      }
+      else{
+
+        if(! intersect(a.p0[X], a.p0[Y], a.p1[X] - dx, a.p1[Y] - dy, b.p0[X], b.p0[Y], b.p1[X] - dx, b.p1[Y] - dy, x, y))
+          continue;
+
+      }
+
+      if(i == 1){
+
+        x0 = x;
+        y0 = y;
+
+      }
+      else if(x != x0 || y != y0)
+        return false;
+
+  }
+
+  return true;
+
+}
+
 int main(){
 
   string line;
-
-  ll min = 200000000000000;
-  ll max = 400000000000000;
 
   ifstream in_file("input.txt");
 
@@ -74,27 +103,27 @@ int main(){
   while(getline(in_file, line))
     hailstones.push_back(Hailstone(line));
 
-  ll x, y;
+  bool found = false;
 
-  int ctr = 0;
+  ll d_min = -1000;
+  ll d_max = 1000;
 
-  for(int i=0; i<hailstones.size(); i++){
+  ll x, y, z;
 
-    Hailstone & a = hailstones[i];
+  for(ll dx=d_min; dx<=d_max; dx++){
+    for(ll dy=d_min; dy<=d_max; dy++){
+      if(is_solution(hailstones, x, y, dx, dy, false)){
+        for(ll dz=d_min; dz<=d_max; dz++){
+          if(is_solution(hailstones, x, z, dx, dz, true)){
 
-    for(int j=i + 1; j<hailstones.size(); j++){
+            cout << x + y + z << endl;
 
-        Hailstone & b = hailstones[j];
+            exit(0);
 
-        if(intersect(a.p0[X], a.p0[Y], a.p1[X], a.p1[Y], b.p0[X], b.p0[Y], b.p1[X], b.p1[Y], x, y))
-          if(x >= min && x <= max && y >= min && y <= max)
-            if(a.in_future_direction(x, y) && b.in_future_direction(x, y))
-              ctr++;
-
+          }
+        }
+      }
     }
-
   }
-
-  cout << ctr << endl;
 
 }
