@@ -17,14 +17,13 @@ class Graph{
     map<string, Node> nodes;
     vector<Edge> edges;
 
-    void traverse(Edge *, int &);
+    void traverse(Edge *);
+    int count_subgraphs();
 
   public:
     
     Graph(string);
-
-    void activate_all_edges();
-    vector<int> get_subgraph_sizes();
+    int find_subgraphs();
 
 };
 
@@ -87,46 +86,66 @@ Graph::Graph(string in_file_name){
     
 }
 
-void Graph::activate_all_edges(){
-
-  for(Edge & edge : edges)
-    edge.active = true;
-
-}
-
-void Graph::traverse(Edge * edge, int & ctr){
+void Graph::traverse(Edge * edge){
   
   if(! edge->active)
     return;
 
-  ctr++;
-  
   edge->active = false;
 
   for(Edge * e : edge->in->edges)
-    traverse(e, ctr);
+    traverse(e);
 
   for(Edge * e : edge->out->edges)
-    traverse(e, ctr);
+    traverse(e);
 
 }
 
-vector<int> Graph::get_subgraph_sizes(){
+int Graph::count_subgraphs(){
   
-  vector<int> subgraph_sizes;
+  int ctr = 0;
   
   for(Edge & edge : edges){
     
-    int ctr = 0;
+    if(! edge.active)
+      continue;
 
-    traverse(& edge, subgraph_sizes.back());
+    ctr++;
     
-    if(ctr > 0)
-      subgraph_sizes.push_back(ctr);
-
+    traverse(& edge);
+    
   }
 
-  return subgraph_sizes;
+  return ctr;
+
+}
+
+int Graph::find_subgraphs(){
+  
+  for(Edge & a : edges){
+    for(Edge & b : edges){
+      for(Edge & c : edges){
+
+        for(Edge & edge : edges)
+          edge.active = true;
+
+        a.active = false;
+        b.active = false;
+        c.active = false;
+
+        if(count_subgraphs() == 2){
+          cout << a.in->label << " " << a.out->label << " ";
+          cout << b.in->label << " " << b.out->label << " ";
+          cout << c.in->label << " " << c.out->label << " ";
+          cout << endl;
+          exit(0); //TODO
+        }
+
+      }
+    }
+  }
+
+  return 0;
 
 }
 
@@ -134,11 +153,6 @@ int main(){
   
   Graph graph("example.txt");
 
-  graph.activate_all_edges();
-
-  vector<int> subgraph_sizes = graph.get_subgraph_sizes();
-
-  for(int & s : subgraph_sizes)
-    cout << s << endl;
+  cout << graph.find_subgraphs() << endl;
 
 }
