@@ -17,9 +17,14 @@ class Graph{
     map<string, Node> nodes;
     vector<Edge> edges;
 
+    void traverse(Edge *, int &);
+
   public:
     
     Graph(string);
+
+    void activate_all_edges();
+    vector<int> get_subgraph_sizes();
 
 };
 
@@ -82,8 +87,58 @@ Graph::Graph(string in_file_name){
     
 }
 
+void Graph::activate_all_edges(){
+
+  for(Edge & edge : edges)
+    edge.active = true;
+
+}
+
+void Graph::traverse(Edge * edge, int & ctr){
+  
+  if(! edge->active)
+    return;
+
+  ctr++;
+  
+  edge->active = false;
+
+  for(Edge * e : edge->in->edges)
+    traverse(e, ctr);
+
+  for(Edge * e : edge->out->edges)
+    traverse(e, ctr);
+
+}
+
+vector<int> Graph::get_subgraph_sizes(){
+  
+  vector<int> subgraph_sizes;
+  
+  for(Edge & edge : edges){
+    
+    int ctr = 0;
+
+    traverse(& edge, subgraph_sizes.back());
+    
+    if(ctr > 0)
+      subgraph_sizes.push_back(ctr);
+
+  }
+
+  return subgraph_sizes;
+
+}
+
 int main(){
   
   Graph graph("example.txt");
+
+  graph.activate_all_edges();
+
+  vector<int> subgraph_sizes = graph.get_subgraph_sizes();
+
+  for(int & s : subgraph_sizes)
+    cout << s << endl;
 
 }
