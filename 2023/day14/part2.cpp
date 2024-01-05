@@ -51,25 +51,6 @@ int get_load(vector<string> & grid){
 
 }
 
-void print(vector<string> & grid, int s){
-  
-  cout << "After " << s << " cycle:" << endl;
-
-  for(int y=0; y<grid.size(); y++){
-    for(int x=0; x<grid[y].length(); x++){
-
-      cout << grid[y][x];
-
-    }
-
-    cout << endl;
-
-  }
-
-  cout << endl;
-
-}
-
 int main(){
 
   string line;
@@ -87,10 +68,6 @@ int main(){
 
   for(long s=0; s < n_steps; s++){
     
-    cout << s << ": " << get_load(grid) << endl;
-      
-//    print(grid, s);
-      
     vector<vector<string>>::iterator same_state_it = find(states.begin(), states.end(), grid);
 
     if(same_state_it != states.end()){
@@ -99,11 +76,7 @@ int main(){
 
       long period = s - offset;
       
-      cout << "TEST " << s << " " <<  offset << " " << period << endl;
-      cout << offset + (n_steps - offset) % period << endl;
-
       grid = states[offset + (n_steps - offset) % period];
-
 
       break;
 
