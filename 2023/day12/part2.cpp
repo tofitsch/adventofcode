@@ -15,14 +15,14 @@ struct Row{
 
     int sum_group_sizes = 0;
 
-    map<string, int> cache;
+    map<string, long> cache;
 
-    int recurse(string, int, int, int);
+    long recurse(string, int, int, long);
 
   public:
 
     Row(string);
-    int get_n_solutions();
+    long get_n_solutions();
 
 };
 
@@ -44,9 +44,6 @@ Row::Row(string line){
   lava.pop_back();
   group_sizes_str.pop_back();
 
-//  lava += str_original; //XXX
-//  group_sizes_str += group_sizes_str_original; //XXX
-
   stringstream line_stream(group_sizes_str);
 
   string field;
@@ -57,11 +54,9 @@ Row::Row(string line){
   for(int i : group_sizes)
     sum_group_sizes += i;
   
-  cout << lava << group_sizes_str << endl;
-
 }
 
-int Row::recurse(string str, int n_group, int group_pos, int ctr){
+long Row::recurse(string str, int n_group, int group_pos, long ctr){
   
   if(str.length() == 0)
     return (n_group == group_sizes.size() && group_pos < 1);
@@ -111,7 +106,7 @@ int Row::recurse(string str, int n_group, int group_pos, int ctr){
     
 }
 
-int Row::get_n_solutions(){
+long Row::get_n_solutions(){
   
   return recurse(lava, 0, 0, 0);
 
@@ -121,19 +116,15 @@ int main(){
 
   string line;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
-  int sum = 0;
+  long sum = 0;
 
   while(getline(in_file, line)){
     
     Row row(line);
 
-    int n = row.get_n_solutions();
-
-    cout << n << endl;
-
-    sum += n;
+    sum += row.get_n_solutions();
 
   }
 
