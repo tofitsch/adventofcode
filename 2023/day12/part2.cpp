@@ -12,10 +12,10 @@ struct Row{
  
     string lava;
     vector<int> group_sizes;
-    int sum_group_sizes = 0;
-    int n_solutions = 0;
 
-    map<string, bool> cache;
+    int sum_group_sizes = 0;
+
+    map<string, int> cache;
 
     int recurse(string, int, int, int);
 
@@ -34,20 +34,18 @@ Row::Row(string line){
   string group_sizes_str_original = line.substr(space_pos + 1);
   string group_sizes_str = "";
 
-//  for(int i=0; i<5; i++){
-//
-//    lava += str_original + "?";
-//    group_sizes_str += group_sizes_str_original + ",";
-//
-//  }
-//
-//  lava.pop_back();
-//  group_sizes_str.pop_back();
-//
-//  lava += '.';
+  for(int i=0; i<5; i++){
 
-  lava += str_original; //XXX
-  group_sizes_str += group_sizes_str_original; //XXX
+    lava += str_original + "?";
+    group_sizes_str += group_sizes_str_original + ",";
+
+  }
+
+  lava.pop_back();
+  group_sizes_str.pop_back();
+
+//  lava += str_original; //XXX
+//  group_sizes_str += group_sizes_str_original; //XXX
 
   stringstream line_stream(group_sizes_str);
 
@@ -64,10 +62,10 @@ Row::Row(string line){
 }
 
 int Row::recurse(string str, int n_group, int group_pos, int ctr){
-
+  
   if(str.length() == 0)
     return (n_group == group_sizes.size() && group_pos < 1);
-  
+
   switch(str[0]){
 
     case '#':
@@ -83,8 +81,8 @@ int Row::recurse(string str, int n_group, int group_pos, int ctr){
         n_group++;
 
       }
-      
-      return ctr + recurse(str.substr(1, str.length() - 1), n_group, group_pos, ctr);
+
+      break;
 
     case '.':
       
@@ -94,7 +92,7 @@ int Row::recurse(string str, int n_group, int group_pos, int ctr){
       if(group_pos == -1)
         group_pos++;
       
-      return ctr + recurse(str.substr(1, str.length() - 1), n_group, group_pos, ctr);
+      break;
 
     case '?':
       
@@ -104,7 +102,12 @@ int Row::recurse(string str, int n_group, int group_pos, int ctr){
 
   }
 
-  return 0;
+  string key = str.substr(1, str.length() - 1) + '_' + to_string(n_group) + '_' + to_string(group_pos);
+
+  if(cache.find(key) == cache.end())
+    cache[key] = recurse(str.substr(1, str.length() - 1), n_group, group_pos, ctr);
+
+  return cache[key];
     
 }
 
@@ -118,7 +121,7 @@ int main(){
 
   string line;
 
-  ifstream in_file("input.txt");
+  ifstream in_file("example.txt");
 
   int sum = 0;
 
