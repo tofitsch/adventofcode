@@ -6,7 +6,7 @@
 
 using namespace std;
 
-struct Row{
+class Row{
   
   private:
  
