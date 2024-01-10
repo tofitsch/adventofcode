@@ -2,112 +2,132 @@
 #include<sstream>
 #include<fstream>
 #include<vector>
-#include<algorithm>
+#include<set>
 
 using namespace std;
 
 struct Row{
+  
+  private:
  
-  string str;
-  vector<int> nums;
-  vector<int> pos_hidden;
-  string hidden_str = "";
+    string str;
+    vector<int> group_sizes;
+    int sum_group_sizes = 0;
+    set<string> solutions;
 
-  int n_broken = 0;
-  int n_broken_visible = 0;
-  int n_hidden = 0;
-  int n_broken_hidden = 0;
-  int n_intact_hidden = 0;
+    void recurse(string, int, int, int);
 
-  string place_hidden_str_into_str(){
-   
-    string result_str = str;
+  public:
 
-    int ctr = 0;
-    
-    for(int & pos : pos_hidden){
-      
-      result_str[pos] = hidden_str[ctr];
-      
-      ctr++;
+    Row(string);
+    int get_n_solutions();
 
-    }
-
-    return result_str;
-
-  }
-
-  vector<int> get_groupings(string s){
-    
-    vector<int> grouping;
-    
-    for(int i=0; i<s.size(); i++){
-
-      if(s[i] == '#' && (i == 0 || s[i - 1] != '#'))
-        grouping.push_back(1);
-
-      if(i > 0 && s[i] == '#' && s[i - 1] == '#')
-        grouping.back()++;
-
-    }
-
-    return grouping;
-
-  }
-  
-  Row(string line){
-
-    size_t space_pos = line.find(' ');
-
-    str = line.substr(0, space_pos);
-
-    for(int i=0; i<str.length(); i++)
-      if(str[i] == '?')
-        pos_hidden.push_back(i);
-    
-    stringstream line_stream(line.substr(space_pos + 1));
-
-    string field;
-
-    while(getline(line_stream, field, ','))
-      nums.push_back(stoi(field));
-
-    for(int & num : nums)
-      n_broken += num;
-
-    n_broken_visible = count(str.begin(), str.end(), '#');
-    n_hidden = pos_hidden.size();
-    n_broken_hidden = n_broken - n_broken_visible;
-    n_intact_hidden = n_hidden - n_broken_hidden;
-
-    for(int i=0; i<n_broken_hidden; i++)
-      hidden_str += "#";
-
-    for(int i=0; i<n_intact_hidden; i++)
-      hidden_str += ".";
-
-  }
-
-  int get_n_valid(){
-    
-    int n_valid = 0;
-
-    do{
-
-      string s =  place_hidden_str_into_str();
-
-      vector<int> grouping = get_groupings(s);
-
-      if(grouping == nums)
-        n_valid++;
-
-    }while(next_permutation(hidden_str.begin(), hidden_str.end()));
-    
-    return n_valid;
-
-  }
-  
 };
+
+Row::Row(string line){
+
+  size_t space_pos = line.find(' ');
+
+  str = line.substr(0, space_pos) + '.';
+  
+  stringstream line_stream(line.substr(space_pos + 1));
+
+  string field;
+
+  while(getline(line_stream, field, ','))
+    group_sizes.push_back(stoi(field));
+
+  for(int i : group_sizes)
+    sum_group_sizes += i;
+
+}
+
+void Row::recurse(string lava, int str_pos, int n_group, int group_pos){
+  
+  if(str_pos == lava.length() - 1){
+    
+    int n_x = 0;
+    
+    for(char & c : lava){
+
+      if(c == '#' || c == '?')
+        return;
+
+      if(c == 'x')
+        n_x++;
+
+    }
+
+    if(n_x != sum_group_sizes)
+       return;
+
+    solutions.insert(lava);
+
+    return;
+
+  }
+
+  char * c = & lava[str_pos];
+  
+  switch(* c){
+
+    case '#':
+      
+      if(n_group >= group_sizes.size())
+        break;
+      
+      * c =  'x';
+
+      if(group_pos == 0 && n_group > 0 && lava[str_pos - 1] == 'x')
+        break;
+
+//      cout << lava << endl;
+
+      group_pos++;
+
+      if(group_pos == group_sizes[n_group]){
+
+        group_pos = 0;
+        n_group++;
+
+      }
+
+      recurse(lava, str_pos + 1, n_group, group_pos);
+
+      break;
+
+    case '.':
+      
+      if(group_pos != 0)
+        break;
+
+      recurse(lava, str_pos + 1, n_group, group_pos);
+
+      break;
+
+    case '?':
+      
+      * c =  '#';
+
+      recurse(lava, str_pos, n_group, group_pos);
+
+      * c =  '.';
+
+      recurse(lava, str_pos, n_group, group_pos);
+
+      break;
+
+  }
+    
+}
+
+int Row::get_n_solutions(){
+  
+  recurse(str, 0, 0, 0);
+  
+  return solutions.size();
+
+}
 
 int main(){
 
@@ -118,10 +138,10 @@ int main(){
   int sum = 0;
 
   while(getline(in_file, line)){
-
+    
     Row row(line);
 
-    sum += row.get_n_valid();
+    sum += row.get_n_solutions();
 
   }
 
