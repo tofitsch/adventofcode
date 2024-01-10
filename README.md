@@ -22,7 +22,7 @@ g++ -std=c++20 -o x part1.cpp && ./x
 ## 2020: vim keystrokes
 
 ```shell
-vim -c "norm `<part1.vim`" input.txt 2>/dev/null
+vim input.txt -s part1.vim 2>/dev/null
 ```
 
 ## 2021: vimscript

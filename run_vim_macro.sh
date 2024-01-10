@@ -3,9 +3,10 @@
 macro=""
 
 while IFS= read -r line; do
-  macro+=$(echo "$line" | cut -f1 -d$'\t') # read each line up til tab and concatenate
+  # read each line up til tab and concatenate
+  macro+=$(echo "$line" | cut -f1 -d$'\t')
 done < $1
 
 echo $macro > $1c
 
-vim -c "set cmdheight=2 | norm $macro" $2 2>/dev/null
+vim $2 -s $1c 2>/dev/null
