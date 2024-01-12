@@ -2,6 +2,8 @@
 
 [advent of code](https://adventofcode.com)
 
+![progress](progress.png)
+
 Each day has a folder containing 4 files:
 
  1. `input.txt` : the input data
