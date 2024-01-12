@@ -203,8 +203,6 @@ void Graph::run_dijkstra(){
 
   start_node->on_path = true;
 
-  return end_node->distance;
-
 }
 
 void Graph::make_directional(){
