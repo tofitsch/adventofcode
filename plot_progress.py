@@ -18,7 +18,7 @@ matrix = np.zeros((len(years), len(days)))
 
 for y, year in enumerate(years):
   for d, day in enumerate(days):
-    matrix[len(years) - y - 1][d] = count_lines(f'{year}/day{day:02}/solution.txt')
+    matrix[y][d] = count_lines(f'{year}/day{day:02}/solution.txt')
 
 fig, ax = plt.subplots()
 
