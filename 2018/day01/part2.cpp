@@ -2,26 +2,24 @@
 #include<fstream>
 #include<sstream>
 #include<vector>
-#include<algorithm>
+#include<set>
 
 using namespace std;
 
-long search(vector<long> & terms){
+int search(vector<int> & terms){
   
-  long sum = 0;
+  int sum = 0;
 
-  vector<long> sums;
+  set<int> sums;
 
   while(true){
     
-    for(long term : terms){
+    for(int term : terms){
       
       sum += term; 
 
-      if(find(sums.begin(), sums.end(), sum) != sums.end())
+      if(! sums.insert(sum).second)
         return sum;
-
-      sums.push_back(sum);
 
     }
 
@@ -35,7 +33,7 @@ int main(){
 
   ifstream in_file("input.txt");
 
-  vector<long> terms;
+  vector<int> terms;
 
   while(getline(in_file, line)){
     
