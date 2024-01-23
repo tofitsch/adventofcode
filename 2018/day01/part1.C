@@ -10,19 +10,8 @@ int main(){
 
   int sum = 0;
 
-  while(fgets(line, sizeof(line), in_file) != NULL){
-
-    char * token = strtok(line, " ");
-
-    while(token != NULL){
-
-      sum += atoi(token);
-
-      token = strtok(NULL, " ");
-
-    }
-
-  }
+  while(fgets(line, sizeof(line), in_file) != NULL)
+    sum += atoi(line);
 
   fclose(in_file);
 
