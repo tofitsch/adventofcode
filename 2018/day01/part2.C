@@ -134,6 +134,8 @@ int find_repeating_sum(FILE * in_file){
 
   }
 
+  ht_free(ht);
+
 }
 
 int main(){
