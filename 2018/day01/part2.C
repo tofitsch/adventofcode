@@ -5,13 +5,14 @@
 struct ht_Node{
   
   int key;
+
   ht_Node * next;
 
 };
 
 struct ht_HashTable{
   
-  static int const size = 10000;
+  static int const size = 2e5;
   
   ht_Node * table[size];
 
@@ -97,24 +98,39 @@ void ht_free(ht_HashTable * ht){
 
 int find_repeating_sum(FILE * in_file){
 
+  ht_HashTable * ht = ht_create();
+
+  int terms[1000];
+
   char line[8];
 
   int sum = 0;
 
-  ht_HashTable * ht = ht_create();
+  int ctr = 0;
+
+  while(fgets(line, sizeof(line), in_file) != NULL){
+
+    terms[ctr] = atoi(line);
+
+    ctr++;
+
+  }
+
+  int n_terms = ctr;
+
+  ctr = 0;
 
   while(true){
 
-    while(fgets(line, sizeof(line), in_file) != NULL){
+    sum += terms[ctr];
 
-      sum += atoi(line);
+    if(! ht_insert(ht, sum))
+      return sum;
 
-      if(! ht_insert(ht, sum))
+    ctr++;
 
-        return sum;
-    }
-
-    fseek(in_file, 0, SEEK_SET);
+    if(ctr >= n_terms)
+      ctr = 0;
 
   }
 
