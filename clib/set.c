@@ -1,3 +1,5 @@
+#include "set.h"
+
 struct set_node{
   
   int key;
@@ -8,9 +10,7 @@ struct set_node{
 
 struct set{
   
-  static int const size = 2e5;
-  
-  set_node * hash_table[size];
+  set_node ** hash_table;
 
 };
 
@@ -18,8 +18,7 @@ set * set_create(){
   
   set * s = (set *) malloc(sizeof(set));
 
-  for(int i=0; i<s->size; i++)
-    s->hash_table[i] = NULL;
+  s->hash_table = (set_node **)malloc(set_size * sizeof(set_node *));
 
   return s;
 
@@ -27,8 +26,8 @@ set * set_create(){
 
 int set_hash_func(set * s, int key){
  
-  int hash = abs(key) % (s->size / 2);
-  if(key < 0) hash += s->size / 2;
+  int hash = abs(key) % (set_size / 2);
+  if(key < 0) hash += set_size / 2;
 
   return hash; 
 
@@ -74,7 +73,7 @@ bool set_insert(set * s, int key){
 
 void set_free(set * s){
 
-  for(int i=0; i<s->size; i++){
+  for(int i=0; i<set_size; i++){
 
     set_node * node = s->hash_table[i];
 
