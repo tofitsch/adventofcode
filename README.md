@@ -2,7 +2,7 @@
 
 [advent of code](https://adventofcode.com)
 
-![progress](progress.pdf)
+![progress](progress.png)
 
 Each day has a folder containing 4 files:
 
