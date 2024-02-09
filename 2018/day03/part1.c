@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../clib/set.c"
 
 int substr_to_int(char * str, int beg, int end){
   
@@ -65,8 +64,7 @@ int main(){
 
   FILE * in_file = fopen("input.txt", "r");
 
-  set * s_grid = set_create();
-  set * s_overlap = set_create();
+  int grid[1000][1000] = {0};
 
   char line[64];
 
@@ -79,15 +77,18 @@ int main(){
     parse_line(line, & x0, & y0, & x1, & y1);
 
     for(int x=x0; x<=x1; x++)
-      for(int y=y0; y<=y1; y++)
-        if(! set_insert(s_grid, x + 1000 * y) && set_insert(s_overlap, x + 1000 * y))
+      for(int y=y0; y<=y1; y++){
+
+        grid[y][x]++;
+
+        if(grid[y][x] == 2)
           ctr++;
+
+      }
 
   }
 
   printf("%i\n", ctr);
-
-  set_free(s_grid);
 
   fclose(in_file);
 
