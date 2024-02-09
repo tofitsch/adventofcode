@@ -64,7 +64,9 @@ int main(){
 
   FILE * in_file = fopen("input.txt", "r");
 
-  int grid[1000][1000] = {0};
+  int grid[1000][1000];
+
+  memset(grid, 0, sizeof(grid));
 
   char line[64];
 
