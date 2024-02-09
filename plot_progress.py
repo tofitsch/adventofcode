@@ -3,6 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
+years = np.arange(2015, 2024)
+days = np.arange(1, 25)
+langs = {
+  2023: 'C++',
+  2022: 'AWK',
+  2021: 'vimscript',
+  2020: 'vim',
+  2019: 'C++',
+  2018: 'C',
+}
+
 def count_lines(file_path):
 
   if not os.path.exists(file_path):
@@ -11,9 +22,6 @@ def count_lines(file_path):
   with open(file_path, 'r') as file:
     return len(file.readlines())
 
-years = np.arange(2015, 2024)
-days = np.arange(1, 25)
-
 matrix = np.zeros((len(years), len(days)))
 
 for y, year in enumerate(years):
@@ -21,7 +29,6 @@ for y, year in enumerate(years):
     matrix[y][d] = count_lines(f'{year}/day{day:02}/solution.txt')
 
 fig, ax = plt.subplots()
-
 colours = [
   (0., 0., 0., 0.),
   (.6, .6, .6, 1.),
@@ -32,21 +39,27 @@ cmap = ListedColormap(colours)
 
 im = plt.pcolormesh(matrix, edgecolors='gray', linewidth=1, cmap=cmap)
 plt.clim(0, 3)
-plt.gca().set_aspect('equal')
 
-plt.yticks(np.arange(len(years)) + .5, years)
-plt.xticks(np.arange(len(days)) + .5 , days)
-plt.xticks(rotation=90)
+ax.set_yticks(np.arange(len(years)) + .5, years)
+ax.set_xticks(np.arange(len(days)) + .5 , days, rotation=90)
 
-plt.tick_params(axis='both', which='both', colors='gray')
+aspect = 'equal'
 
-ax.spines['bottom'].set_color('gray')
-ax.spines['top'].set_color('gray')
-ax.spines['right'].set_color('gray')
-ax.spines['left'].set_color('gray')
+ax_right = ax.twinx()
+ax_right.set_yticks(np.arange(len(years)) * 2., [langs[year] if year in langs else '?' for year in years]) # why * 2. ?
+plt.gca().set_aspect(aspect)
 
-plt.xlabel('day', color='gray')
-plt.ylabel('year', color='gray')
+ax.tick_params(axis='both', which='both', colors='gray')
+ax_right.tick_params(axis='both', which='both', colors='gray')
+plt.gca().set_aspect(aspect)
+
+ax_right.spines['bottom'].set_color('gray')
+ax_right.spines['top'].set_color('gray')
+ax_right.spines['right'].set_color('gray')
+ax_right.spines['left'].set_color('gray')
+
+ax.set_xlabel('day', color='gray')
+ax.set_ylabel('year', color='gray')
 
 out_file = 'progress.png'
 
