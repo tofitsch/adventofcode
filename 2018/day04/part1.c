@@ -4,6 +4,8 @@
 #include "../../clib/map.c"
 
 #define MAX_ID 5000
+#define MAX_LINES 1500
+#define MAX_LINE_LENGTH 64
 
 int str_compare(const void *a, const void *b) {
 
@@ -59,7 +61,7 @@ void parse_line(char * line, int * id, int * min, int * n_guards, int guard_ids[
       guard_slept_total[* id] += next_min - * min;
 
       for(int i= * min; i<next_min; i++)
-        guard_slept_at_min[* id][i + 60]++;
+        guard_slept_at_min[i + 60][* id]++;
 
       break;
 
@@ -74,8 +76,8 @@ int main(){
 
   FILE * in_file = fopen("input.txt", "r");
 
-  char line[64];
-  char * lines[1500];
+  char line[MAX_LINE_LENGTH];
+  char * lines[MAX_LINES];
 
   int line_ctr = 0;
 
@@ -115,7 +117,7 @@ int main(){
   min = 0;
   
   for(int i=1; i<120; i++)
-    if(guard_slept_at_min[id_max_total][i] > guard_slept_at_min[id_max_total][min])
+    if(guard_slept_at_min[i][id_max_total] > guard_slept_at_min[min][id_max_total])
       min = i;
 
   printf("%i\n", id_max_total * (min - 60));
