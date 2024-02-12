@@ -102,11 +102,11 @@ int main(){
 
   int ctr = 0;
 
-  while((node = node->next) != NULL){
+  do{
     printf("%c", node->value);
     ctr++;
-  }
+  }while((node = node->next) != NULL);
 
-  printf("\n%i\n", ctr - 1);
+  printf("\n%i\n", ctr);
 
 }
