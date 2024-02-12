@@ -107,18 +107,22 @@ int main(){
   for(int i=0; i<line_ctr; i++)
     parse_line(lines[i], & id, & min, & n_guards, guard_ids, guard_slept_total, guard_slept_at_min);
 
-  int id_max_total = guard_ids[0];
-
-  for(int i=1; i<n_guards; i++)
-    if(guard_slept_total[guard_ids[i]] > guard_slept_total[id_max_total])
-      id_max_total = guard_ids[i];
-
   int optimal_min = 0;
+  int optimal_id = guard_ids[0];
   
-  for(int i=1; i<120; i++)
-    if(guard_slept_at_min[i][id_max_total] > guard_slept_at_min[optimal_min][id_max_total])
-      optimal_min = i;
+  for(int i=0; i<120; i++){
+    for(int j=0; j<n_guards; j++){
 
-  printf("%i\n", id_max_total * (optimal_min - 60));
+      if(guard_slept_at_min[i][guard_ids[j]] > guard_slept_at_min[optimal_min][optimal_id]){
+
+        optimal_min = i;
+        optimal_id = guard_ids[j];
+
+      }
+
+    }
+  }
+
+  printf("%i\n", optimal_id * (optimal_min - 60));
 
 }
