@@ -112,29 +112,29 @@ int get_final_length(char * line){
 
 }
 
-char * remove_letter(char * full_line, char c){
+char * remove_letter(char * str_in, char c){
   
-  char * line = (char *) malloc(MAX_LINE_LENGTH * sizeof(char));
+  char * str_out = (char *) malloc(MAX_LINE_LENGTH * sizeof(char));
 
-  char * line_itr = line;
+  char * str_out_itr = str_out;
 
-  while(* full_line != '\0'){
+  while(* str_in != '\0'){
     
-    if(* full_line != c && * full_line != c + - 'a' + 'A'){
+    if(* str_in != c && * str_in != c + - 'a' + 'A'){
 
-      * line_itr = * full_line;
+      * str_out_itr = * str_in;
 
-      line_itr++;
+      str_out_itr++;
 
     }
     
-    full_line++;
+    str_in++;
 
   }
 
-  line_itr = '\0';
+  str_out_itr = '\0';
 
-  return line;
+  return str_out;
   
 }
 
@@ -148,12 +148,19 @@ int main(){
 
   fclose(in_file);
 
-  for(char c='a'; c<'z'; c++){
+  int min = -1;
 
-    char * line = remove_letter(full_line, 'a');
+  for(char c='a'; c<='z'; c++){
 
-    printf("%c %i\n", c, get_final_length(line));
+    char * line = remove_letter(full_line, c);
+
+    int length = get_final_length(line);
+
+    if(min < 0 || length < min)
+      min = length;
 
   }
+
+  printf("%i\n", min);
 
 }
