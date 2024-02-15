@@ -69,8 +69,6 @@ int main(){
     if(arr_y[n_lines] > y_max)
       y_max = arr_y[n_lines];
 
-//    printf("%i %i %s", arr_x[n_lines], arr_y[n_lines], line);
-
     n_lines++;
 
   }
@@ -88,12 +86,19 @@ int main(){
 
       for(int i=0; i<n_lines; i++){
         
-        int dist = manhattan_dist(x_min + x, y_min + y, arr_x[i], arr_y[i]);
+        int dist = manhattan_dist(x, y, arr_x[i] - x_min, arr_y[i] - y_min);
 
-        if(dist < voronoi_dist[y][x]){
+        if(dist < abs(voronoi_dist[y][x])){
           
           voronoi_dist[y][x] = dist;
           voronoi_id[y][x] = i;
+
+        }
+
+        else if(dist == voronoi_dist[y][x] && i != voronoi_id[y][x]){
+
+          voronoi_dist[y][x] *= -1;
+          voronoi_id[y][x] = -1;
 
         }
 
@@ -111,6 +116,9 @@ int main(){
   for(int x=0; x<=x_max; x++){
     for(int y=0; y<=x_max; y++){
       
+      if(voronoi_id[y][x] < 0)
+        continue;
+      
       if(x == 0 || x == x_max || y == 0 || y == y_max)
         touches_border[voronoi_id[y][x]] = true;
 
@@ -120,23 +128,10 @@ int main(){
   }
 
   int max_area = 0;
-  int max_area_id = 0; //TODO: only for debug
 
   for(int i=0; i<n_lines; i++)
-    if(! touches_border[i] && voronoi_area[i] > max_area){
+    if(! touches_border[i] && voronoi_area[i] > max_area)
       max_area = voronoi_area[i];
-      max_area_id = i;
-    }
-
-//  for(int x=0; x<=x_max; x++){
-//    for(int y=0; y<=x_max; y++){
-//      if(voronoi_id[y][x] == max_area_id)
-//        printf(".");
-//      else
-//        printf("%i", voronoi_id[y][x] % 10);
-//    }
-//    printf("\n");
-//  }
   
   printf("%i\n", max_area);
 
