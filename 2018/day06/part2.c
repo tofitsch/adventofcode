@@ -5,7 +5,7 @@
 
 #define MAX_LINES 64
 #define MAX_LINE_LENGTH 16
-#define MAX_DIST 32
+#define MAX_DIST 10000
 
 int manhattan_dist(int x0, int y0, int x1, int y1){
   
@@ -56,7 +56,7 @@ void read_line(char * line, int * x, int * y){
 
 int main(){
   
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   char line[MAX_LINE_LENGTH];
 
@@ -100,7 +100,7 @@ int main(){
       
   int x, y;
 
-  int ctr = 0;
+  int spiral_ctr = 0;
 
   int side_length = 1;
   
@@ -108,8 +108,8 @@ int main(){
 
     full_area_contained = true;
 
-    x = x_origin - ctr;
-    y = y_origin - ctr;
+    x = x_origin - spiral_ctr;
+    y = y_origin - spiral_ctr;
 
     for(int i=0; i<side_length; i++){
 
@@ -145,7 +145,7 @@ int main(){
 
     side_length += 2;
 
-    ctr++;
+    spiral_ctr++;
 
   }while(! full_area_contained);
 
