@@ -6,16 +6,16 @@
 #define MAX_LINE_LENGTH 64
 #define MAX_CHARS 26
 
-int a_less_than_b(const void *a, const void *b) {
+int char_compare(const void *a, const void *b){
 
-  return * (int *) b - * (int *) a;
-
+  return (*(char*)b - *(char*)a);
+  
 }
 
-bool is_in_arr(int num, int arr[], int n) {
+bool is_in_arr(char c, char arr[], int n) {
 
   for(int i=0; i<n; i++)
-    if(arr[i] == num)
+    if(arr[i] == c)
       return true;
 
   return false;
@@ -30,10 +30,11 @@ int main(){
 
   char char_present[MAX_CHARS];
 
-  int must_be_before[MAX_CHARS][MAX_CHARS];
-  int n_must_be_before[MAX_CHARS];
-  int must_be_after[MAX_CHARS][MAX_CHARS];
-  int n_must_be_after[MAX_CHARS];
+  char must_be_before[MAX_CHARS][MAX_CHARS];
+  char n_must_be_before[MAX_CHARS];
+
+  char must_be_after[MAX_CHARS][MAX_CHARS];
+  char n_must_be_after[MAX_CHARS];
 
   memset(n_must_be_before, 0, sizeof(n_must_be_before));
   memset(n_must_be_after, 0, sizeof(n_must_be_after));
@@ -41,13 +42,13 @@ int main(){
 
   while(fgets(line, sizeof(line), in_file) != NULL){
     
-    int a = line[5] - 'A';
-    int b = line[36] - 'A';
+    char a = line[5] - 'A';
+    char b = line[36] - 'A';
 
     char_present[a] = true;
     char_present[b] = true;
 
-    int i = 0;
+    char i = 0;
 
     if(! is_in_arr(a, must_be_before[b], n_must_be_before[b])){
       
@@ -71,9 +72,9 @@ int main(){
 
   char str[MAX_CHARS];
 
-  int n_chars = 0;
+  char n_chars = 0;
 
-  for(int i=0; i<MAX_CHARS; i++){
+  for(char i=0; i<MAX_CHARS; i++){
     if(char_present[i]){
 
       str[n_chars] = i;
@@ -83,31 +84,31 @@ int main(){
     }
   }
 
-  for(int i=0; i<n_chars; i++)
+  for(char i=0; i<n_chars; i++)
     printf("%c", str[i] + 'A');
   printf("\n");
 
-  for(int i=0; i<n_chars; i++){
+  for(char i=0; i<n_chars; i++){
     
     char c = str[i];
 
     printf("%c: ", 'A' + c);
 
-    for(int j=0; j<n_must_be_before[c]; j++)
+    for(char j=0; j<n_must_be_before[c]; j++)
       printf("%c", must_be_before[j][c] + 'A');
 
     printf(",");
 
-    for(int j=0; j<n_must_be_after[c]; j++)
+    for(char j=0; j<n_must_be_after[c]; j++)
       printf("%c", must_be_after[j][c] + 'A');
 
     printf("\n");
 
   }
 
-  int start;
+  char start;
 
-  for(int i=0; i<n_chars; i++){
+  for(char i=0; i<n_chars; i++){
     if(n_must_be_after[str[i]] == 0){
       
       start = str[i];
@@ -120,8 +121,8 @@ int main(){
   printf("%c\n\n", start + 'A');
 
   char order[MAX_CHARS][MAX_CHARS];
-  int n_y[MAX_CHARS];
-  int x = 0;
+  char n_y[MAX_CHARS];
+  char x = 0;
 
   memset(n_y, 0, sizeof(n_y));
 
@@ -134,10 +135,12 @@ int main(){
     
     done = true;
     
-    for(int y=0; y<n_y[x]; y++){
-      for(int i=0; i<n_must_be_before[order[y][x]]; i++){
-
+    for(char y=0; y<n_y[x]; y++){
+      for(char i=0; i<n_must_be_before[order[y][x]]; i++){
+        
         order[n_y[x + 1]][x + 1] = must_be_before[i][order[y][x]];
+
+        printf("%i %i %c%c\n", n_y[x + 1], x + 1, order[n_y[x + 1]][x + 1] + 'A', order[y][x] + 'A');
 
         n_y[x + 1]++;
 
@@ -156,17 +159,22 @@ int main(){
 
   char * ptr = result + MAX_CHARS;
 
-  for(int X=0; X<x; X++){
+  for(char X=0; X<x; X++){
 
-//    qsort(order[X], n_y[X], sizeof(char), a_less_than_b);
+    char col[n_y[X]];
 
-    for(int Y=0; Y<n_y[X]; Y++){
-      printf("%c", order[Y][X] + 'A');
-      if(order[Y][X] + 'A' != * ptr){
+    for(char Y=0; Y<n_y[X]; Y++)
+      col[Y] = order[Y][X];
+
+    qsort(col, n_y[X], sizeof(char), char_compare);
+
+    for(char Y=0; Y<n_y[X]; Y++){
+      printf("%c", col[Y] + 'A');
+      if(col[Y] + 'A' != * ptr){
         
         ptr--;
 
-        * ptr = order[Y][X] + 'A';
+        * ptr = col[Y] + 'A';
 
       }
     }
@@ -174,9 +182,6 @@ int main(){
     printf("\n");
 
   }
-
-//  while(* result == '\0')
-//   (result)++;
 
   printf("%s\n", ptr);
 
