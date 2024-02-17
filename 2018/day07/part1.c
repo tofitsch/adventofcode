@@ -24,14 +24,14 @@ bool is_in_arr(char c, char arr[], int n) {
 
 int main(){
 
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   char line[MAX_LINE_LENGTH];
 
   char char_present[MAX_CHARS];
 
   char must_be_before[MAX_CHARS][MAX_CHARS];
-  char n_must_be_before[MAX_CHARS];
+  int n_must_be_before[MAX_CHARS];
 
   char must_be_after[MAX_CHARS][MAX_CHARS];
   char n_must_be_after[MAX_CHARS];
@@ -94,7 +94,7 @@ int main(){
 
     printf("%c: ", 'A' + c);
 
-    for(char j=0; j<n_must_be_before[c]; j++)
+    for(int j=0; j<n_must_be_before[c]; j++)
       printf("%c", must_be_before[j][c] + 'A');
 
     printf(",");
@@ -118,11 +118,12 @@ int main(){
     }
   }
 
-  printf("%c\n\n", start + 'A');
 
-  char order[MAX_CHARS][MAX_CHARS];
-  char n_y[MAX_CHARS];
-  char x = 0;
+  printf("start: %c\n\n", start + 'A');
+
+  char order[1000][MAX_CHARS];
+  int n_y[MAX_CHARS];
+  int x = 0;
 
   memset(n_y, 0, sizeof(n_y));
 
@@ -135,12 +136,13 @@ int main(){
     
     done = true;
     
-    for(char y=0; y<n_y[x]; y++){
-      for(char i=0; i<n_must_be_before[order[y][x]]; i++){
+    for(int y=0; y<n_y[x]; y++){
+//      printf("TEST %i %c\n", n_must_be_before[order[y][x]], order[y][x] + 'A');
+      for(int i=0; i<n_must_be_before[order[y][x]]; i++){
         
         order[n_y[x + 1]][x + 1] = must_be_before[i][order[y][x]];
 
-        printf("%i %i %c%c\n", n_y[x + 1], x + 1, order[n_y[x + 1]][x + 1] + 'A', order[y][x] + 'A');
+//        printf("%i %i %c%c\n", n_y[x + 1], x + 1, order[n_y[x + 1]][x + 1] + 'A', order[y][x] + 'A');
 
         n_y[x + 1]++;
 
@@ -153,24 +155,27 @@ int main(){
 
   }
 
-  char result[MAX_CHARS + 1];
+  int N = 10000; //XXX
+  char result[N + 1];
 
   memset(result, '\0', sizeof(result));
 
-  char * ptr = result + MAX_CHARS;
+  char * ptr = result + N;
 
   for(char X=0; X<x; X++){
 
+    printf("TEST %i %i \n", X, n_y[X]);
+
     char col[n_y[X]];
 
-    for(char Y=0; Y<n_y[X]; Y++)
+    for(int Y=0; Y<n_y[X]; Y++)
       col[Y] = order[Y][X];
 
     qsort(col, n_y[X], sizeof(char), char_compare);
 
-    for(char Y=0; Y<n_y[X]; Y++){
-      printf("%c", col[Y] + 'A');
+    for(int Y=0; Y<n_y[X]; Y++){
       if(col[Y] + 'A' != * ptr){
+        printf("%c", col[Y] + 'A');
         
         ptr--;
 
@@ -185,9 +190,10 @@ int main(){
 
   printf("%s\n", ptr);
 
+
   memset(char_present, false, sizeof(char_present));
 
-  char solution[MAX_CHARS];
+  char solution[N];
 
   memset(solution, '\0', sizeof(solution));
 
