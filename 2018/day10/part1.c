@@ -94,15 +94,13 @@ int main(){
   int t_min_area;
 
   int t = 0;
-/*
+
   while(true){
 
-    simulate(t, stars, n_stars, & x_min, & x_max, & y_min, & y_max);
+    simulate(1, stars, n_stars, & x_min, & x_max, & y_min, & y_max);
 
     area = x_max - x_min;
     area *= y_max - y_min;
-
-    printf("%i %i %i %i %i %i %i %li\n", t, x_min, x_max, y_min, y_max, x_max - x_min, y_max - y_min, area);
 
     if(area < min_area){
 
@@ -118,16 +116,8 @@ int main(){
     t++;
 
   }
-*/
 
-  for(t=0; t<146; t++){
-    simulate(t, stars, n_stars, & x_min, & x_max, & y_min, & y_max);
-    printf("%i %i %i %i %i %i %i\n", t, x_min, x_max, y_min, y_max, x_max - x_min, y_max - y_min);
-  }
-
-//  for(int i=0; i<n_stars; i++)
-//    printf("%i %i\n",  stars[i].y - y_min, stars[i].x - x_min);
-
+  simulate(t_min_area - t, stars, n_stars, & x_min, & x_max, & y_min, & y_max);
 
   char grid[y_max - y_min + 1][x_max - x_min + 1];
 
@@ -144,6 +134,5 @@ int main(){
     printf("\n");
 
   }
-
 
 }
