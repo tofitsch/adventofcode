@@ -16,20 +16,15 @@ struct tree_node{
 
 void read_tree_node(tree_node * node, FILE * in_file, int * sum_data){
   
-  fscanf(in_file, "%d", & (node->n_nodes));
+  fscanf(in_file, "%d", & node->n_nodes);
   node->nodes = (tree_node *) malloc(node->n_nodes * sizeof(tree_node));
 
-  fscanf(in_file, "%d", & (node->n_data));
+  fscanf(in_file, "%d", & node->n_data);
   node->data = (int *) malloc(node->n_data * sizeof(int));
 
 
-  for(int i=0; i<node->n_nodes; i++){
-
-    tree_node new_node;
-
-    read_tree_node(& new_node, in_file, sum_data);
-
-  }
+  for(int i=0; i<node->n_nodes; i++)
+    read_tree_node(& node->nodes[i], in_file, sum_data);
 
   for(int i=0; i<node->n_data; i++){
 
