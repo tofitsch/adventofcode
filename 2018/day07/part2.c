@@ -65,6 +65,10 @@ int main(){
 
       }
 
+    }
+
+    for(int w=0; w<N_WORKERS; w++){
+
       if(time[w] <= 0){
         
         char c = MAX_CHARS;
@@ -112,7 +116,7 @@ int main(){
 
   }
 
-  printf("\n%i\n", t - 2);
+  printf("\n%i\n", t - 1);
 
 }
 
