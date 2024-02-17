@@ -52,18 +52,12 @@ int main(){
     
     done = true;
 
-    printf("%i\t", t);
-    
     for(int w=0; w<N_WORKERS; w++){
       
       time[w]--;
 
-      if(time[w] <= 0 && task[w] != ' '){
-
+      if(time[w] <= 0 && task[w] != ' ')
         finished[task[w] - 'A'] = true;
-        task[w] = ' '; //XXX
-
-      }
 
     }
 
@@ -103,20 +97,16 @@ int main(){
 
       }
 
-      printf("%c", task[w]);
-
       if(time[w] > 0)
         done = false;
 
     }
 
-    printf("\n");
-
     t++;
 
   }
 
-  printf("\n%i\n", t - 1);
+  printf("%i\n", t - 1);
 
 }
 
