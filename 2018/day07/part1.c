@@ -185,4 +185,30 @@ int main(){
 
   printf("%s\n", ptr);
 
+  memset(char_present, false, sizeof(char_present));
+
+  char solution[MAX_CHARS];
+
+  memset(solution, '\0', sizeof(solution));
+
+  int i = 0;
+
+  while(* ptr != '\0'){
+    
+    if(!char_present[* ptr - 'A']){
+
+      solution[i] = * ptr;
+
+      i++;
+
+    }
+
+    char_present[* ptr - 'A'] = true;
+
+    ptr++;
+
+  }
+
+  printf("%s\n", solution);
+
 }
