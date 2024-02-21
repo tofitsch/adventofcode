@@ -33,7 +33,7 @@ int main(){
     char num = scores[pos_0] + scores[pos_1];
 
     if(num > 9)
-      scores[n_scores++] = num / 10;
+      scores[n_scores++] = '1';
 
     scores[n_scores++] = num % 10;
     
