@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define MAX_LINE_LENGTH 16
-#define MAX_CHARS 2016550400
+#define MAX_CHARS 50000000
 #define START_0 3
 #define START_1 7
 
@@ -20,8 +20,6 @@ int main(){
   line[length] = '\0';
 
   fclose(in_file);
-
-//  char scores[MAX_CHARS];
 
   char * scores = malloc(MAX_CHARS * sizeof(char));
   
@@ -40,28 +38,21 @@ int main(){
     char num = scores[pos_0] - '0' + scores[pos_1] - '0';
 
     if(num > 9){
-      
-      scores[n_scores] = num / 10 + '0';
 
-      n_scores++;
-      
+      scores[n_scores++] = '1';
+
+      if(strcmp(line, scores + n_scores - length) == 0)
+        break;
+
     }
 
-    scores[n_scores] = num % 10 + '0';
-
-    n_scores++;
-
-    if(n_scores % (MAX_CHARS / 10) == 0)
-      printf("%s %s\n", scores + n_scores - length, line);
+    scores[n_scores++] = num % 10 + '0';
 
     pos_0 += scores[pos_0] - '0' + 1;
     pos_1 += scores[pos_1] - '0' + 1;
 
     pos_0 %= n_scores;
     pos_1 %= n_scores;
-
-    if(n_scores >= MAX_CHARS) //XXX
-      exit(0);
 
   }
 
