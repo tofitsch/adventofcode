@@ -32,17 +32,10 @@ int main(){
     
     char num = scores[pos_0] + scores[pos_1];
 
-    if(num > 9){
-      
-      scores[n_scores] = num / 10;
+    if(num > 9)
+      scores[n_scores++] = num / 10;
 
-      n_scores++;
-      
-    }
-
-    scores[n_scores] = num % 10;
-
-    n_scores++;
+    scores[n_scores++] = num % 10;
     
     pos_0 += scores[pos_0] + 1;
     pos_1 += scores[pos_1] + 1;
