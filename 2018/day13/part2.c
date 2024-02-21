@@ -95,10 +95,10 @@ int from_top_left(const void * a, const void * b) {
   const cart * cart_b = (const cart *) b;
 
   if(cart_a->y > cart_b->y)
-    return -1;
+    return 1;
 
   if(cart_a->y < cart_b->y)
-    return 1;
+    return -1;
 
   if(cart_a->x > cart_b->x)
     return -1;
@@ -115,8 +115,11 @@ bool step(char (* grid)[MAX_LINE_LENGTH], char (* grid_occupied)[MAX_LINE_LENGTH
   qsort(carts, * n_carts, sizeof(cart), from_top_left);
 
   for(int i=0; i< * n_carts; i++){
-    
+
     cart * c = & carts[i];
+
+    if(c->deactivate)
+      continue;
 
     grid_occupied[c->y][c->x] = 0;
     
@@ -279,8 +282,6 @@ bool step(char (* grid)[MAX_LINE_LENGTH], char (* grid_occupied)[MAX_LINE_LENGTH
 
     }
 
-    printf("%i\n", * n_carts);
-
   }
 
   if(* n_carts < 2)
@@ -299,7 +300,7 @@ int main(){
 
   int n_carts, n_x, n_y;
 
-  read_file("example.txt", grid, carts, & n_carts, & n_x, & n_y);
+  read_file("input.txt", grid, carts, & n_carts, & n_x, & n_y);
 
   memset(grid_occupied, 0, sizeof(grid_occupied));
 
