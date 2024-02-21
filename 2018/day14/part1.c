@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 #define MAX_LINE_LENGTH 16
-#define MAX_SCORES 1048576
-#define MAX_DIGITS 16
 #define SOLUTION_LENGTH 10
 #define START_0 3
 #define START_1 7
@@ -20,32 +18,32 @@ int main(){
 
   fclose(in_file);
 
-  int n_scores = 2;
-
-  int scores[MAX_SCORES];
+  char scores[pos_solution + SOLUTION_LENGTH];
 
   scores[0] = START_0;
   scores[1] = START_1;
+
+  int n_scores = 2;
 
   int pos_0 = 0;
   int pos_1 = 1;
 
   while(n_scores < pos_solution + SOLUTION_LENGTH){
     
-    int num = scores[pos_0] + scores[pos_1];
-    
-    char digits_str[MAX_DIGITS];
+    char num = scores[pos_0] + scores[pos_1];
 
-    sprintf(digits_str, "%d", num);
-
-    for(int i=0; digits_str[i]!='\0'; i++){
+    if(num > 9){
       
-      scores[n_scores] = digits_str[i] - '0';
+      scores[n_scores] = num / 10;
 
       n_scores++;
-
+      
     }
 
+    scores[n_scores] = num % 10;
+
+    n_scores++;
+    
     pos_0 += scores[pos_0] + 1;
     pos_1 += scores[pos_1] + 1;
 
@@ -55,7 +53,7 @@ int main(){
   }
 
   for(int i=pos_solution; i<pos_solution + SOLUTION_LENGTH; i++)
-    printf("%i", scores[i]);
+    printf("%c", scores[i] + '0');
 
   printf("\n");
 
