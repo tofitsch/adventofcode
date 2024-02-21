@@ -52,11 +52,6 @@ int main(){
     pos_0 %= n_scores;
     pos_1 %= n_scores;
 
-//    for(int i=0; i<n_scores; i++)
-//      printf("%i ", scores[i]);
-//
-//    printf("\n");
-
   }
 
   for(int i=pos_solution; i<pos_solution + SOLUTION_LENGTH; i++)
