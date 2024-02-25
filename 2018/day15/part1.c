@@ -289,9 +289,9 @@ void move(graph_node * units[], int n_units, graph_node * graph[], int n_nodes, 
       else
         break;
 
-    for(int j=0; j<units[id]->n_neighbours; j++)
-      printf("%i ", units[id]->neighbours[j]->distance);
-    printf("\n");
+//    for(int j=0; j<units[id]->n_neighbours; j++)
+//      printf("%i ", units[id]->neighbours[j]->distance);
+//    printf("\n");
 
     qsort(units[id]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
 
@@ -334,7 +334,7 @@ void attack(graph_node * units[], int * n_units, int * id, graph_node * target, 
     }
   }
 
-  printf("id_in_units: %i\n", id_in_units);
+//  printf("id_in_units: %i\n", id_in_units);
 
   for(int i=id_in_units; i<* n_units; i++)
     units[i] = units[i + 1];
@@ -356,26 +356,24 @@ int main(){
 
   int n_nodes, n_units, n_e, n_g;
 
-  make_graph("example.txt", grid, graph, units, & n_nodes, & n_units, & n_e, & n_g);
+  make_graph("input.txt", grid, graph, units, & n_nodes, & n_units, & n_e, & n_g);
 
   int n_rounds = 0;
 
   while(n_e > 0 && n_g > 0){
-    
-    n_rounds++;
 
     qsort(units, n_units, sizeof(graph_node *), from_top_left);
 
     for(int id=0; id<n_units; id++){
 
-      printf("from: %c %c\n", units[id]->x + '0', units[id]->y + '0');
+//      printf("from: %c %c\n", units[id]->x + '0', units[id]->y + '0');
 
       graph_node * target = get_target(units[id]);
 
       if(target == NULL)
         move(units, n_units, graph, n_nodes, id);
 
-      printf("to: %c %c %i\n", units[id]->x + '0', units[id]->y + '0', units[id]->distance);
+//      printf("to: %c %c %i\n", units[id]->x + '0', units[id]->y + '0', units[id]->distance);
 
       target = get_target(units[id]);
 
@@ -387,10 +385,15 @@ int main(){
       if(target != NULL) //attack
         attack(units, & n_units, & id, target, & n_e, & n_g);
 
+      if(n_e == 0 || n_g == 0)
+        goto end;
+
 //      printf("\n");
 
     }
 
+    //XXX
+    /*
     printf("%i\n", n_rounds);
 
     for(int y=0; y<7; y++){
@@ -412,14 +415,21 @@ int main(){
       printf(" %i %i\n", health_sum_E, health_sum_G);
   
     }
+    */
+    //XXX
+    
+    n_rounds++;
 
   }
+
+  end:;
 
   int sum_health = 0;
 
   for(int i=0; i<n_units; i++)
     sum_health += units[i]->health;
 
-  printf("%i %i %i\n", n_rounds, sum_health, n_rounds * sum_health);
+//  printf("%i %i %i\n", n_rounds, sum_health, n_rounds * sum_health);
+  printf("%i\n", n_rounds * sum_health);
 
 }
