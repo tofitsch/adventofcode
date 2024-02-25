@@ -79,16 +79,6 @@ void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * gr
 
   fclose(in_file);
 
-  //XXX
-//  for(int y=0; y<n_y; y++){
-//
-//    for(int x=0; x<n_x; x++)
-//      printf("%c", grid[y][x].type);
-//
-//    printf("\n");
-//
-//  }
-
   for(int i=0; i<* n_nodes; i++){
 
     graph_node * node = graph[i];
@@ -290,10 +280,6 @@ void move(graph_node * units[], int n_units, graph_node * graph[], int n_nodes, 
       else
         break;
 
-//    for(int j=0; j<units[id]->n_neighbours; j++)
-//      printf("%i ", units[id]->neighbours[j]->distance);
-//    printf("\n");
-
     qsort(units[id]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
 
     units[id]->neighbours[0]->health = units[id]->health;
@@ -310,8 +296,6 @@ void move(graph_node * units[], int n_units, graph_node * graph[], int n_nodes, 
 
 void attack(graph_node * units[], int * n_units, int * id, graph_node * target, int * n_e, int * n_g, int attack_power_e){
 
-//  printf("attack: %c %c %i\n", target->x + '0', target->y + '0', target->health);
-  
   if(units[* id]->type == 'E')
     target->health -= attack_power_e;
   else
@@ -337,8 +321,6 @@ void attack(graph_node * units[], int * n_units, int * id, graph_node * target, 
 
     }
   }
-
-//  printf("id_in_units: %i\n", id_in_units);
 
   for(int i=id_in_units; i<* n_units; i++)
     units[i] = units[i + 1];
@@ -376,23 +358,14 @@ int main(){
 
       for(int id=0; id<n_units; id++){
 
-//        printf("from: %c %c\n", units[id]->x + '0', units[id]->y + '0');
-
         graph_node * target = get_target(units[id]);
 
         if(target == NULL)
           move(units, n_units, graph, n_nodes, id);
 
-//        printf("to: %c %c %i\n", units[id]->x + '0', units[id]->y + '0', units[id]->distance);
-
         target = get_target(units[id]);
 
-//        if(target != NULL) //attack
-//          printf("target: %c %c\n", target->x + '0', target->y + '0');
-//        else
-//          printf("target: NULL\n");
-
-        if(target != NULL) //attack
+        if(target != NULL)
           attack(units, & n_units, & id, target, & n_e, & n_g, attack_power_e);
 
         if(n_e != n_e_initial)
@@ -401,36 +374,8 @@ int main(){
         if(n_g == 0)
           goto end;
 
-//        printf("\n");
-
       }
 
-      //XXX
-      /*
-      printf("%i\n", n_rounds);
-
-      for(int y=0; y<7; y++){
-        
-        int health_sum_E = 0;
-        int health_sum_G = 0;
-        
-        for(int x=0; x<7; x++){
-          printf("%c", grid[y][x].type);
-
-          if(grid[y][x].type == 'E')
-            health_sum_E += grid[y][x].health;
-
-          if(grid[y][x].type == 'G')
-            health_sum_G += grid[y][x].health;
-
-        }
-    
-        printf(" %i %i\n", health_sum_E, health_sum_G);
-    
-      }
-      */
-      //XXX
-      
       n_rounds++;
 
     }
@@ -448,7 +393,6 @@ int main(){
   for(int i=0; i<n_units; i++)
     sum_health += units[i]->health;
 
-//  printf("%i %i %i\n", n_rounds, sum_health, n_rounds * sum_health);
   printf("%i\n", n_rounds * sum_health);
 
 }
