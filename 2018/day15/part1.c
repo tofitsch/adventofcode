@@ -176,6 +176,17 @@ void dijkstra(graph_node * queue[], int n_queue, graph_node * start){
 
 }
 
+graph_node * get_target(graph_node * unit){
+
+  for(int i=0; i<unit->n_neighbours; i++)
+    if((unit->type == 'E' && unit->neighbours[i]->type == 'G') ||
+       (unit->type == 'G' && unit->neighbours[i]->type == 'E'))
+      return unit->neighbours[i];
+
+  return NULL;
+
+}
+
 int main(){
 
   graph_node grid[MAX_Y][MAX_X];
@@ -193,92 +204,108 @@ int main(){
 
   for(int i=0; i<n_units; i++){
 
-    graph_node * target = NULL;
+    printf("from: %c %c\n", units[i]->x + '0', units[i]->y + '0');
 
-    graph_node * adjacents[MAX_Y * MAX_X];
+    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), from_top_left);
 
-    int n_adjacents = 0;
+    graph_node * target = get_target(units[i]);
 
-    for(int j=0; j<n_units; j++){
-      
-      if(units[i]->type == units[j]->type)
-        continue;
+    if(target == NULL){ //move
 
-      for(int k=0; k<units[j]->n_neighbours; k++)
-        if(units[j]->neighbours[k]->type == '.')
-          adjacents[n_adjacents++] = units[j]->neighbours[k];
+      graph_node * adjacents[MAX_Y * MAX_X];
+
+      int n_adjacents = 0;
+
+      for(int j=0; j<n_units; j++){
+        
+        if(units[i]->type == units[j]->type)
+          continue;
+
+        for(int k=0; k<units[j]->n_neighbours; k++)
+          if(units[j]->neighbours[k]->type == '.')
+            adjacents[n_adjacents++] = units[j]->neighbours[k];
+
+      }
+
+      graph_node * queue[MAX_Y * MAX_X];
+
+      int n_queue = 0;
+
+      for(int j=0; j<n_nodes; j++){
+        
+        if(graph[j]->type != '.')
+          continue;
+
+        queue[n_queue++] = graph[j];
+
+      }
+
+      for(int j=0; j<n_units; j++)
+        units[j]->distance = INF;
+
+      queue[n_queue++] = units[i];
+
+      graph_node * queue_cpy[MAX_Y * MAX_X];
+
+      memcpy(queue_cpy, queue, sizeof(queue));
+
+      dijkstra(queue, n_queue, units[i]);
+
+      int min_dist = INF;
+
+      for(int j=0; j<n_adjacents; j++)
+        if(adjacents[j]->distance < min_dist)
+          min_dist = adjacents[j]->distance;
+
+      if(min_dist != INF){
+
+        graph_node * clostest_adjacents[MAX_Y * MAX_X];
+
+        int n_clostest_adjacents = 0;
+
+        for(int j=0; j<n_adjacents; j++)
+          if(adjacents[j]->distance == min_dist)
+            clostest_adjacents[n_clostest_adjacents++] = adjacents[j];
+
+        qsort(clostest_adjacents, n_clostest_adjacents, sizeof(graph_node *), from_top_left);
+
+        dijkstra(queue_cpy, n_queue, clostest_adjacents[0]);
+
+        qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), distance_increasing);
+
+        int n_min_dist_neighbours = 1;
+
+        for(int j=1; j<units[i]->n_neighbours; j++)
+          if(units[i]->neighbours[j]->distance == units[i]->neighbours[0]->distance)
+            n_min_dist_neighbours++;
+          else
+            break;
+
+        qsort(units[i]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
+
+        units[i]->neighbours[0]->health = units[i]->health;
+        units[i]->neighbours[0]->type = units[i]->type;
+
+        units[i]->health = 0;
+        units[i]->type = '.';
+
+        units[i] = units[i]->neighbours[0];
+
+      }
 
     }
 
-    graph_node * queue[MAX_Y * MAX_X];
+    printf("to: %c %c\n", units[i]->x + '0', units[i]->y + '0');
 
-    int n_queue = 0;
+    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), from_top_left);
 
-    for(int j=0; j<n_nodes; j++){
-      
-      if(graph[j]->type != '.')
-        continue;
+    target = get_target(units[i]);
 
-      queue[n_queue++] = graph[j];
-
-    }
-
-    for(int j=0; j<n_units; j++)
-      units[j]->distance = INF;
-
-    queue[n_queue++] = units[i];
-
-    graph_node * queue_cpy[MAX_Y * MAX_X];
-
-    memcpy(queue_cpy, queue, sizeof(queue));
-
-    dijkstra(queue, n_queue, units[i]);
-
-    int min_dist = INF;
-
-//    for(int j=0; j<n_adjacents; j++)
-//      printf("%c %c %i\n", adjacents[j]->x + '0', adjacents[j]->y + '0', adjacents[j]->distance);
-
-    for(int j=0; j<n_adjacents; j++)
-      if(adjacents[j]->distance < min_dist)
-        min_dist = adjacents[j]->distance;
-
-    if(min_dist == INF)
-      continue; //XXX
-
-    graph_node * clostest_adjacents[MAX_Y * MAX_X];
-
-    int n_clostest_adjacents = 0;
-
-    for(int j=0; j<n_adjacents; j++)
-      if(adjacents[j]->distance == min_dist)
-        clostest_adjacents[n_clostest_adjacents++] = adjacents[j];
-
-    qsort(clostest_adjacents, n_clostest_adjacents, sizeof(graph_node *), from_top_left);
-
-    printf("%c %c %c %c\n", units[i]->x + '0', units[i]->y + '0', clostest_adjacents[0]->x + '0', clostest_adjacents[0]->y + '0');
-
-    dijkstra(queue_cpy, n_queue, clostest_adjacents[0]);
-
-    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), distance_increasing);
-
-    int n_min_dist_neighbours = 1;
-
-    for(int j=1; j<units[i]->n_neighbours; j++)
-      if(units[i]->neighbours[j]->distance == units[i]->neighbours[0]->distance)
-        n_min_dist_neighbours++;
-      else
-        break;
-
-    qsort(units[i]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
-
-    target = units[i]->neighbours[0];
-
-//    for(int j=0; j<units[i]->n_neighbours; j++)
-//      printf("%i ", units[i]->neighbours[j]->distance);
-    printf("%c %c %i\n", target->x + '0', target->y + '0', target->distance);
+    if(target != NULL) //attack
+      printf("target: %c %c\n\n", target->x + '0', target->y + '0');
+    else
+      printf("target: NULL\n\n");
 
   }
 
 }
-
