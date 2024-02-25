@@ -17,8 +17,6 @@ struct graph_node{
 
   bool visited;
 
-  graph_node * prev;
-
   graph_node * neighbours[4];
 
 };
@@ -126,19 +124,26 @@ int distance_decreasing(const void * a, const void * b) {
   const graph_node ** node_a = (const graph_node **) a;
   const graph_node ** node_b = (const graph_node **) b;
 
-//  printf("TEST %i %i\n", (* node_a)->distance, (* node_b)->distance);
-
   return (* node_a)->distance < (* node_b)->distance;
 
 }
 
-void dijkstra(graph_node * queue[], int n_queue, graph_node * start, graph_node * end){
+int distance_increasing(const void * a, const void * b) {
+
+  const graph_node ** node_a = (const graph_node **) a;
+  const graph_node ** node_b = (const graph_node **) b;
+
+  return (* node_a)->distance > (* node_b)->distance;
+
+}
+
+
+void dijkstra(graph_node * queue[], int n_queue, graph_node * start){
 
   for(int i=0; i<n_queue; i++){
     
     queue[i]->distance = INF;
     queue[i]->visited = false;
-    queue[i]->prev = NULL;
 
   }
 
@@ -149,9 +154,6 @@ void dijkstra(graph_node * queue[], int n_queue, graph_node * start, graph_node 
     qsort(queue, n_queue, sizeof(graph_node *), distance_decreasing);
 
     graph_node * node = queue[n_queue - 1];
-
-    if(node == end)
-      break;
 
     node->visited = true;
 
@@ -164,12 +166,8 @@ void dijkstra(graph_node * queue[], int n_queue, graph_node * start, graph_node 
 
         int distance_update = node->distance + 1;
 
-        if(distance_update < node->neighbours[i]->distance){
-
+        if(distance_update < node->neighbours[i]->distance)
           node->neighbours[i]->distance = distance_update;
-          node->neighbours[i]->prev = node;
-
-        }
 
       }
     }
@@ -195,13 +193,15 @@ int main(){
 
   for(int i=0; i<n_units; i++){
 
+    graph_node * target = NULL;
+
     graph_node * adjacents[MAX_Y * MAX_X];
 
     int n_adjacents = 0;
 
     for(int j=0; j<n_units; j++){
       
-      if(i == j)
+      if(units[i]->type == units[j]->type)
         continue;
 
       for(int k=0; k<units[j]->n_neighbours; k++)
@@ -214,14 +214,17 @@ int main(){
 
     int n_queue = 0;
 
-    for(int i=0; i<n_nodes; i++){
+    for(int j=0; j<n_nodes; j++){
       
-      if(graph[i]->type != '.')
+      if(graph[j]->type != '.')
         continue;
 
-      queue[n_queue++] = graph[i];
+      queue[n_queue++] = graph[j];
 
     }
+
+    for(int j=0; j<n_units; j++)
+      units[j]->distance = INF;
 
     queue[n_queue++] = units[i];
 
@@ -229,7 +232,7 @@ int main(){
 
     memcpy(queue_cpy, queue, sizeof(queue));
 
-    dijkstra(queue, n_queue, units[i], NULL);
+    dijkstra(queue, n_queue, units[i]);
 
     int min_dist = INF;
 
@@ -239,6 +242,9 @@ int main(){
     for(int j=0; j<n_adjacents; j++)
       if(adjacents[j]->distance < min_dist)
         min_dist = adjacents[j]->distance;
+
+    if(min_dist == INF)
+      continue; //XXX
 
     graph_node * clostest_adjacents[MAX_Y * MAX_X];
 
@@ -250,14 +256,29 @@ int main(){
 
     qsort(clostest_adjacents, n_clostest_adjacents, sizeof(graph_node *), from_top_left);
 
-    printf("%c %c %c %c %i %i\n", units[i]->x + '0', units[i]->y + '0', clostest_adjacents[0]->x + '0', clostest_adjacents[0]->y + '0', clostest_adjacents[0]->distance, n_clostest_adjacents);
+    printf("%c %c %c %c\n", units[i]->x + '0', units[i]->y + '0', clostest_adjacents[0]->x + '0', clostest_adjacents[0]->y + '0');
 
-//    dijkstra(queue_cpy, n_queue, clostest_adjacents[0], units[i]);
-//
-//    printf("%c %c\n", units[i]->prev->x + '0', units[i]->prev->y + '0');
+    dijkstra(queue_cpy, n_queue, clostest_adjacents[0]);
+
+    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), distance_increasing);
+
+    int n_min_dist_neighbours = 1;
+
+    for(int j=1; j<units[i]->n_neighbours; j++)
+      if(units[i]->neighbours[j]->distance == units[i]->neighbours[0]->distance)
+        n_min_dist_neighbours++;
+      else
+        break;
+
+    qsort(units[i]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
+
+    target = units[i]->neighbours[0];
+
+//    for(int j=0; j<units[i]->n_neighbours; j++)
+//      printf("%i ", units[i]->neighbours[j]->distance);
+    printf("%c %c %i\n", target->x + '0', target->y + '0', target->distance);
 
   }
-
 
 }
 
