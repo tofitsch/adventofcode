@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define MAX_LINE_LENGTH 32
 #define MAX_EXAMPLES 2000
+#define N_OPS 16
 
 typedef struct example example;
 
@@ -52,16 +54,8 @@ bool read_example(FILE * in_file, example examples[], int * n_examples){
   
   fgets(line, sizeof(line), in_file);
 
-  if(line[0] == '\n'){
-
-    //TODO: better way to skip 3 lines
-    fgets(line, sizeof(line), in_file);
-    fgets(line, sizeof(line), in_file);
-    fgets(line, sizeof(line), in_file);
-
+  if(line[0] == '\n')
     return false;
-
-  }
 
   read_register(line, ex->before);
   
@@ -73,22 +67,94 @@ bool read_example(FILE * in_file, example examples[], int * n_examples){
 
   read_register(line, ex->after);
 
-  fgets(line, sizeof(line), in_file); //TODO: better way to skip 1 line
+  fgets(line, sizeof(line), in_file);
 
   (* n_examples)++;
 
-  for(int i=0; i<4; i++)
-    printf("%i ", ex->before[i]);
-  printf("\n");
-  for(int i=0; i<4; i++)
-    printf("%i ", ex->operation[i]);
-  printf("\n");
-  for(int i=0; i<4; i++)
-    printf("%i ", ex->after[i]);
-  printf("\n\n");
-
   return true;
 
+
+}
+
+void apply(int op_id, int op[], int reg[]){
+  
+  switch(op_id){
+    
+    case 0: //addr
+      reg[op[3]] = reg[op[1]] + reg[op[2]];
+      break;
+
+    case 1: //addi
+      reg[op[3]] = reg[op[1]] + op[2];
+      break;
+
+    case 2: //mulr
+      reg[op[3]] = reg[op[1]] * reg[op[2]];
+      break;
+
+    case 3: //muli
+      reg[op[3]] = reg[op[1]] * op[2];
+      break;
+
+    case 4: //banr
+      reg[op[3]] = reg[op[1]] & reg[op[2]];
+      break;
+
+    case 5: //bani
+      reg[op[3]] = reg[op[1]] & op[2];
+      break;
+
+    case 6: //borr
+      reg[op[3]] = reg[op[1]] | reg[op[2]];
+      break;
+
+    case 7: //bori
+      reg[op[3]] = reg[op[1]] | op[2];
+      break;
+
+    case 8: //setr
+      reg[op[3]] = reg[op[1]];
+      break;
+
+    case 9: //seti
+      reg[op[3]] = op[1];
+      break;
+
+    case 10: //gtir
+      reg[op[3]] = op[1] > reg[op[2]] ? 1 : 0;
+      break;
+
+    case 11: //gtri
+      reg[op[3]] = reg[op[1]] > op[2] ? 1 : 0;
+      break;
+
+    case 12: //gtrr
+      reg[op[3]] = reg[op[1]] > reg[op[2]] ? 1 : 0;
+      break;
+
+    case 13: //eqir
+      reg[op[3]] = op[1] == reg[op[2]] ? 1 : 0;
+      break;
+
+    case 14: //eqri
+      reg[op[3]] = reg[op[1]] == op[2] ? 1 : 0;
+      break;
+
+    case 15: //eqrr
+      reg[op[3]] = reg[op[1]] == reg[op[2]] ? 1 : 0;
+      break;
+
+  };
+
+}
+
+bool registers_eq(int a[], int b[]){
+  
+  for(int i=0; i<4; i++)
+    if(a[i] != b[i])
+      return false;
+
+  return true;
 
 }
 
@@ -104,5 +170,35 @@ int main(){
     continue;
 
   fclose(in_file);
+
+  int result = 0;
+
+  for(int i=0; i<n_examples; i++){
+    
+    example * ex = & examples[i];
+
+    int n_ops = 0;
+
+    for(int j=0; j<N_OPS; j++){
+      
+      int reg[4];
+
+      memcpy(reg, ex->before, sizeof(reg));
+      
+      apply(j, ex->operation, reg);
+
+      if(registers_eq(reg, ex->after))
+        n_ops++;
+
+    }
+
+//    printf("%i\n", n_ops);
+
+    if(n_ops >= 3)
+      result++;
+
+  }
+
+  printf("%i\n", result);
 
 }
