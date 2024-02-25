@@ -137,7 +137,6 @@ int distance_increasing(const void * a, const void * b) {
 
 }
 
-
 void dijkstra(graph_node * queue[], int n_queue, graph_node * start){
 
   for(int i=0; i<n_queue; i++){
@@ -178,10 +177,29 @@ void dijkstra(graph_node * queue[], int n_queue, graph_node * start){
 
 graph_node * get_target(graph_node * unit){
 
-  for(int i=0; i<unit->n_neighbours; i++)
+  int min_health = INF;
+  
+  graph_node * enemy_neighbors[4];
+
+  int n_enemy_neighbors = 0;
+
+  for(int i=0; i<unit->n_neighbours; i++){
     if((unit->type == 'E' && unit->neighbours[i]->type == 'G') ||
-       (unit->type == 'G' && unit->neighbours[i]->type == 'E'))
-      return unit->neighbours[i];
+       (unit->type == 'G' && unit->neighbours[i]->type == 'E')){
+        
+        enemy_neighbors[n_enemy_neighbors++] = unit->neighbours[i];
+
+        if(unit->neighbours[i]->health < min_health)
+          min_health = unit->neighbours[i]->health;
+
+    }
+  }
+
+  qsort(enemy_neighbors, n_enemy_neighbors, sizeof(graph_node *), from_top_left);
+
+  for(int i=0; i<n_enemy_neighbors; i++)
+    if(enemy_neighbors[i]->health == min_health)
+      return enemy_neighbors[i];
 
   return NULL;
 
@@ -205,8 +223,6 @@ int main(){
   for(int i=0; i<n_units; i++){
 
     printf("from: %c %c\n", units[i]->x + '0', units[i]->y + '0');
-
-    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), from_top_left);
 
     graph_node * target = get_target(units[i]);
 
@@ -296,8 +312,6 @@ int main(){
     }
 
     printf("to: %c %c\n", units[i]->x + '0', units[i]->y + '0');
-
-    qsort(units[i]->neighbours, units[i]->n_neighbours, sizeof(graph_node *), from_top_left);
 
     target = get_target(units[i]);
 
