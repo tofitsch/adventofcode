@@ -6,14 +6,16 @@
 #define MAX_X 64
 #define MAX_Y 64
 #define INF 1000
+#define HEALTH 200
+#define ATTACK_POWER 3
 
 typedef struct graph_node graph_node;
 
 struct graph_node{
 
-  char x, y, type, health, n_neighbours;
+  char x, y, type, n_neighbours;
 
-  int distance;
+  int health, distance;
 
   bool visited;
 
@@ -21,7 +23,7 @@ struct graph_node{
 
 };
 
-void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * graph[], graph_node * units[], int * n_nodes, int * n_units){
+void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * graph[], graph_node * units[], int * n_nodes, int * n_units, int * n_e, int * n_g){
   
   FILE * in_file = fopen(in_file_name, "r");
 
@@ -31,6 +33,8 @@ void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * gr
 
   * n_nodes = 0;
   * n_units = 0;
+  * n_e = 0;
+  * n_g = 0;
 
   while(fgets(line, sizeof(line), in_file) != NULL){
     
@@ -49,7 +53,7 @@ void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * gr
 
       if(node->type == 'E' || node->type == 'G'){
 
-        node->health = 200;
+        node->health = HEALTH;
 
         units[(* n_units)++] = node;
 
@@ -57,6 +61,12 @@ void make_graph(char * in_file_name, graph_node (* grid)[MAX_X], graph_node * gr
 
       if(node->type != '#')
         graph[(* n_nodes)++] = node;
+
+      if(node->type == 'E')
+        (* n_e)++;
+
+      if(node->type == 'G')
+        (* n_g)++;
 
       n_x++;
 
@@ -266,6 +276,9 @@ void move(graph_node * units[], int n_units, graph_node * graph[], int n_nodes, 
 
     dijkstra(queue_cpy, n_queue, clostest_adjacents[0]);
 
+    for(int j=0; j<n_units; j++)
+      units[j]->distance = INF;
+
     qsort(units[id]->neighbours, units[id]->n_neighbours, sizeof(graph_node *), distance_increasing);
 
     int n_min_dist_neighbours = 1;
@@ -276,17 +289,60 @@ void move(graph_node * units[], int n_units, graph_node * graph[], int n_nodes, 
       else
         break;
 
+    for(int j=0; j<units[id]->n_neighbours; j++)
+      printf("%i ", units[id]->neighbours[j]->distance);
+    printf("\n");
+
     qsort(units[id]->neighbours, n_min_dist_neighbours, sizeof(graph_node *), from_top_left);
 
     units[id]->neighbours[0]->health = units[id]->health;
     units[id]->neighbours[0]->type = units[id]->type;
-
+     
     units[id]->health = 0;
     units[id]->type = '.';
 
     units[id] = units[id]->neighbours[0];
 
   }
+
+}
+
+void attack(graph_node * units[], int * n_units, int * id, graph_node * target, int * n_e, int * n_g){
+
+//  printf("attack: %c %c %i\n", target->x + '0', target->y + '0', target->health);
+  
+  target->health -= ATTACK_POWER;
+
+  if(target->health >= 0)
+    return;
+
+  if(target->type == 'E')
+    (* n_e)--;
+  else if(target->type == 'G')
+    (* n_g)--;
+  
+  target->type = '.';
+
+  int id_in_units, id_in_graph;
+
+  for(int i=0; i<* n_units; i++){
+    if(units[i] == target){
+
+      id_in_units = i;
+      break;
+
+    }
+  }
+
+  printf("id_in_units: %i\n", id_in_units);
+
+  for(int i=id_in_units; i<* n_units; i++)
+    units[i] = units[i + 1];
+
+  (* n_units)--;
+
+  if(id_in_units < * id)
+    (* id)--;
 
 }
 
@@ -298,31 +354,72 @@ int main(){
 
   graph_node * units[MAX_Y * MAX_X];
 
-  int n_nodes;
-  int n_units;
+  int n_nodes, n_units, n_e, n_g;
 
-  make_graph("example.txt", grid, graph, units, & n_nodes, & n_units);
+  make_graph("example.txt", grid, graph, units, & n_nodes, & n_units, & n_e, & n_g);
 
-  qsort(units, n_units, sizeof(graph_node *), from_top_left);
+  int n_rounds = 0;
 
-  for(int id=0; id<n_units; id++){
+  while(n_e > 0 && n_g > 0){
+    
+    n_rounds++;
 
-    printf("from: %c %c\n", units[id]->x + '0', units[id]->y + '0');
+    qsort(units, n_units, sizeof(graph_node *), from_top_left);
 
-    graph_node * target = get_target(units[id]);
+    for(int id=0; id<n_units; id++){
 
-    if(target == NULL)
-      move(units, n_units, graph, n_nodes, id);
+      printf("from: %c %c\n", units[id]->x + '0', units[id]->y + '0');
 
-    printf("to: %c %c\n", units[id]->x + '0', units[id]->y + '0');
+      graph_node * target = get_target(units[id]);
 
-    target = get_target(units[id]);
+      if(target == NULL)
+        move(units, n_units, graph, n_nodes, id);
 
-    if(target != NULL) //attack
-      printf("target: %c %c\n\n", target->x + '0', target->y + '0');
-    else
-      printf("target: NULL\n\n");
+      printf("to: %c %c %i\n", units[id]->x + '0', units[id]->y + '0', units[id]->distance);
+
+      target = get_target(units[id]);
+
+//      if(target != NULL) //attack
+//        printf("target: %c %c\n", target->x + '0', target->y + '0');
+//      else
+//        printf("target: NULL\n");
+
+      if(target != NULL) //attack
+        attack(units, & n_units, & id, target, & n_e, & n_g);
+
+//      printf("\n");
+
+    }
+
+    printf("%i\n", n_rounds);
+
+    for(int y=0; y<7; y++){
+      
+      int health_sum_E = 0;
+      int health_sum_G = 0;
+      
+      for(int x=0; x<7; x++){
+        printf("%c", grid[y][x].type);
+
+        if(grid[y][x].type == 'E')
+          health_sum_E += grid[y][x].health;
+
+        if(grid[y][x].type == 'G')
+          health_sum_G += grid[y][x].health;
+
+      }
+  
+      printf(" %i %i\n", health_sum_E, health_sum_G);
+  
+    }
 
   }
+
+  int sum_health = 0;
+
+  for(int i=0; i<n_units; i++)
+    sum_health += units[i]->health;
+
+  printf("%i %i %i\n", n_rounds, sum_health, n_rounds * sum_health);
 
 }
