@@ -5,7 +5,10 @@
 
 #define MAX_LINE_LENGTH 32
 #define MAX_EXAMPLES 2000
+#define MAX_OPERATIONS 2000
 #define N_OPS 16
+
+#define INF 1000
 
 typedef struct example example;
 
@@ -158,22 +161,76 @@ bool registers_eq(int a[], int b[]){
 
 }
 
+bool solve_step(bool (* a)[N_OPS], int b[], bool transpose){
+
+  int last_x_true, y;
+  
+  for(y=0; y<N_OPS; y++){
+    
+    last_x_true = -1;
+
+    for(int x=0; x<N_OPS; x++)
+      if(a[y][x])
+        if(last_x_true < 0)
+          last_x_true = x;
+        else
+         goto next;
+
+    if(last_x_true != -1)
+      break;
+
+    next:;
+
+  }
+
+  if(last_x_true == -1)
+    return false;
+
+  b[last_x_true] = y;
+
+  for(int y=0; y<N_OPS; y++)
+    a[y][last_x_true] = false;
+
+  return true;
+
+}
+
+void solve(bool (* a)[N_OPS], int b[]){
+  
+  int n_solves = 0;
+
+  while(n_solves < N_OPS)
+    n_solves += solve_step(a, b, false);
+
+}
+
 int main(){
 
   example examples[MAX_EXAMPLES];
 
-  int n_examples;
+  int n_examples = 0;
+
+  example operations[MAX_OPERATIONS];
+
+  int n_operations = 0;
   
   FILE * in_file = fopen("input.txt", "r");
 
   while(read_example(in_file, examples, & n_examples))
     continue;
 
+  char line[MAX_LINE_LENGTH];
+
+  fgets(line, sizeof(line), in_file);
+
+  while(fgets(line, sizeof(line), in_file) != NULL)
+    read_operation(line, operations[n_operations++].operation);
+
   fclose(in_file);
 
-  bool valid[N_OPS][N_OPS];
+  bool incidence_mtx[N_OPS][N_OPS];
 
-  memset(valid, true, sizeof(valid));
+  memset(incidence_mtx, true, sizeof(incidence_mtx));
 
   for(int i=0; i<n_examples; i++){
     
@@ -188,19 +245,21 @@ int main(){
       apply(j, ex->operation, reg);
 
       if(! registers_eq(reg, ex->after))
-        valid[j][ex->operation[0]] = false;
+        incidence_mtx[j][ex->operation[0]] = false;
 
     }
 
   }
 
-  for(int i=0; i<N_OPS; i++){
+  int encoding[N_OPS];
 
-    for(int j=0; j<N_OPS; j++)
-      printf("%i ", valid[j][i]);
+  solve(incidence_mtx, encoding);
 
-    printf("\n");
+  int reg[4] = {0, 0, 0, 0};
 
-  }
+  for(int i=0; i<n_operations; i++)
+    apply(encoding[operations[i].operation[0]], operations[i].operation, reg);
+ 
+  printf("%i\n", reg[0]);
 
 }
