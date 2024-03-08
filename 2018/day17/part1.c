@@ -4,7 +4,7 @@
 #include <string.h>
 
 #define MAX_LINE_LENGTH 32
-#define MAX_STACK 32768
+#define MAX_STACK 65536
 #define MAX_X 1024
 #define MAX_Y 2048
 #define SOURCE_X 500
@@ -95,9 +95,11 @@ void print_grid(char (* grid)[MAX_X], int x_min, int y_min, int x_max, int y_max
   
   int ctr = 0;
   
-  for(int y=y_min; y<=y_max; y++){
+  for(int y=0; y<=y_max; y++){
+    
+//    printf("%3i", y);
 
-    for(int x=x_min; x<=x_max; x++){
+    for(int x=x_min - 1; x<=x_max; x++){
 
         printf("%c", grid[y][x]);
 
@@ -147,7 +149,7 @@ int main(){
   bool done = false;
   
   while(! done){
-//  for(int r=0; r<1339; r++){
+//  for(int r=0; r<1357; r++){
    
     done = true;
    
@@ -184,17 +186,15 @@ int main(){
               goto yes;
            
             for(int x=w->x; x>0; x--)
-              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ')
+              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ' || grid[w->y + 1][x] == '#')
                 break;
-//              else if(grid[w->y + 1][x] != 'x' && grid[w->y + 1][x] != '#')
-              else if(grid[w->y + 1][x] == '|' || grid[w->y][x] == '~')
+              else if(grid[w->y + 1][x] == '|' || grid[w->y + 1][x] == '~' || grid[w->y][x] == '~')
                 goto no;
 
             for(int x=w->x; x<=x_max + 1; x++)
-              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ')
+              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ' || grid[w->y + 1][x] == '#')
                 break;
-//              else if(grid[w->y + 1][x] != 'x' && grid[w->y + 1][x] != '#')
-              else if(grid[w->y + 1][x] == '|' || grid[w->y][x] == '~')
+              else if(grid[w->y + 1][x] == '|' || grid[w->y + 1][x] == '~' || grid[w->y][x] == '~')
                 goto no;
 
             yes:;
@@ -251,8 +251,15 @@ int main(){
       
   }
 
+  int ctr = 0;
+
+  for(int y=y_min; y<=y_max; y++)
+    for(int x=x_min - 1; x<=x_max; x++)
+      if(grid[y][x] == 'x' || grid[y][x] == '|' || grid[y][x] == '.')
+        ctr++;
+
   print_grid(grid, x_min, y_min, x_max, y_max);
 
-  printf("%i\n", n_water - 1);
+  printf("%i %i %i %i %i\n", ctr, x_min, y_min, x_max, y_max);
 
 }
