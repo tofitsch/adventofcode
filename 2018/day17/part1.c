@@ -93,26 +93,24 @@ void read_line(char * line, char (* grid)[MAX_X], int * x_min, int * y_min, int 
 
 void print_grid(char (* grid)[MAX_X], int x_min, int y_min, int x_max, int y_max){
   
-  int ctr = 0;
-  
   for(int y=0; y<=y_max; y++){
     
 //    printf("%3i", y);
 
-    for(int x=x_min - 1; x<=x_max; x++){
-
-        printf("%c", grid[y][x]);
+    for(int x=x_min - 2; x<=x_max + 1; x++){
 
         if(grid[y][x] == 'x' || grid[y][x] == '|' || grid[y][x] == '.')
-          ctr++;
+          printf("x");
+        else if(grid[y][x] == '#')
+          printf("#");
+        else
+          printf(".");
 
     }
 
     printf("\n");
 
   }
-
-  printf("%i\n", ctr);
 
 }
 
@@ -182,28 +180,23 @@ int main(){
           }
           else if(grid[w->y + 1][w->x] == 'x' || grid[w->y + 1][w->x] == '#'){
             
-            if(grid[w->y][w->x + 1] == 'x' || grid[w->y][w->x - 1] == 'x')
-              goto yes;
-           
-            for(int x=w->x; x>0; x--)
+            for(int x=w->x; x>=x_min - 1; x--)
               if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ' || grid[w->y + 1][x] == '#')
                 break;
               else if(grid[w->y + 1][x] == '|' || grid[w->y + 1][x] == '~' || grid[w->y][x] == '~')
-                goto no;
+                goto brk;
 
             for(int x=w->x; x<=x_max + 1; x++)
               if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ' || grid[w->y + 1][x] == '#')
                 break;
               else if(grid[w->y + 1][x] == '|' || grid[w->y + 1][x] == '~' || grid[w->y][x] == '~')
-                goto no;
-
-            yes:;
+                goto brk;
 
             grid[w->y][w->x] = '~';
 
             done = false;
 
-            no:;
+            brk:;
 
           }
 
@@ -254,12 +247,12 @@ int main(){
   int ctr = 0;
 
   for(int y=y_min; y<=y_max; y++)
-    for(int x=x_min - 1; x<=x_max; x++)
+    for(int x=x_min - 1; x<=x_max + 1; x++)
       if(grid[y][x] == 'x' || grid[y][x] == '|' || grid[y][x] == '.')
         ctr++;
 
-  print_grid(grid, x_min, y_min, x_max, y_max);
+//  print_grid(grid, x_min, y_min, x_max, y_max);
 
-  printf("%i %i %i %i %i\n", ctr, x_min, y_min, x_max, y_max);
+  printf("%i\n", ctr);
 
 }
