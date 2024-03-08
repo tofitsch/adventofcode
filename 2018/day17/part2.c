@@ -91,21 +91,6 @@ void read_line(char * line, char (* grid)[MAX_X], int * x_min, int * y_min, int 
 
 }
 
-void print_grid(char (* grid)[MAX_X], int x_min, int y_min, int x_max, int y_max){
-  
-  for(int y=0; y<=y_max; y++){
-    
-//    printf("%3i", y);
-
-    for(int x=x_min - 2; x<=x_max + 1; x++)
-      printf("%c", grid[y][x]);
-
-    printf("\n");
-
-  }
-
-}
-
 int main(){
   
   char grid[MAX_Y][MAX_X];
@@ -139,15 +124,12 @@ int main(){
   bool done = false;
   
   while(! done){
-//  for(int r=0; r<1357; r++){
    
     done = true;
    
     for(int i=0; i<n_water; i++){
           
       coord * w = & water[i];
-
-//      printf("%i %i %c %i %i\n", r, i, grid[w->y][w->x], w->y, w->x);
 
       switch(grid[w->y][w->x]){
         
@@ -263,8 +245,6 @@ int main(){
   for(int i=0; i<n_water; i++)
     if(grid[water[i].y][water[i].x] == 'x')
       ctr++;
-
-//  print_grid(grid, x_min, y_min, x_max, y_max);
 
   printf("%i\n", ctr);
 
