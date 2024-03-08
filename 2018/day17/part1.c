@@ -91,44 +91,26 @@ void read_line(char * line, char (* grid)[MAX_X], int * x_min, int * y_min, int 
 
 }
 
-void rm_coord(int * idx, coord a[], int * n){
-  
-  (* n)--;
- 
-  for(int i=* idx; i<* n; i++)
-    a[i] = a[i + 1];
-
-  (* idx)--;
-
-}
-
-void insert_coord(int * idx, coord a[], int * n, int y, int x){
-  
-  for(int i=(* n) - 1; i>* idx; i--)
-    a[i + 1] = a[i];
-
-  (* idx)++;
-
-  a[* idx].x = x;
-  a[* idx].y = y;
-
-  (* n)++;
-
-
-}
-
 void print_grid(char (* grid)[MAX_X], int x_min, int y_min, int x_max, int y_max){
   
-  printf("\n");
-
+  int ctr = 0;
+  
   for(int y=y_min; y<=y_max; y++){
 
-    for(int x=x_min; x<=x_max; x++)
+    for(int x=x_min; x<=x_max; x++){
+
         printf("%c", grid[y][x]);
+
+        if(grid[y][x] == 'x' || grid[y][x] == '|' || grid[y][x] == '.')
+          ctr++;
+
+    }
 
     printf("\n");
 
   }
+
+  printf("%i\n", ctr);
 
 }
 
@@ -153,95 +135,124 @@ int main(){
 
   fclose(in_file);
 
-  coord stack[MAX_STACK];
+  coord water[MAX_STACK];
 
-  int n_water = 0;
+  water[0].x = SOURCE_X;
+  water[0].y = 0;
 
-  int n_water_prev = -1;
+  grid[0][SOURCE_X] = '|';
 
-  int n_settled = 0;
+  int n_water = 1;
 
-  int n_total = 0;
-  int n_total_prev = -1;
-
-  for(int r=0; r<1600; r++){//XXX
-//  for(int r=0; r<0; r++){//XXX
-//  while(n_total_prev != n_total){//XXX
-    
-    n_total_prev = n_total;
-    
-    water[n_water].x = SOURCE_X;
-    water[n_water].y = 0;
-
-    n_water++;
-
+  bool done = false;
+  
+  while(! done){
+//  for(int r=0; r<1339; r++){
+   
+    done = true;
+   
     for(int i=0; i<n_water; i++){
-      
+          
       coord * w = & water[i];
 
-      if(w->y == y_max){
+//      printf("%i %i %c %i %i\n", r, i, grid[w->y][w->x], w->y, w->x);
 
-        grid[w->y][w->x] = ' ';
+      switch(grid[w->y][w->x]){
+        
+        case '|':
 
-        rm_coord(& i, water, & n_water);
+          if(w->y == y_max){
 
-      }
-      else if(grid[w->y + 1][w->x] == ' '){
+            grid[w->y][w->x] = '.';
 
-        grid[w->y][w->x] = ' ';
+          }
+          else if(grid[w->y + 1][w->x] == ' '){
+            
+            water[n_water].x = w->x;
+            water[n_water].y = w->y + 1;
 
-        w->y++;
+            n_water++;
 
-        grid[w->y][w->x] = '~';
+            grid[w->y + 1][w->x] = '|';
 
+            done = false;
 
-      }
-      else if(grid[w->y][w->x - 1] == ' '){
+          }
+          else if(grid[w->y + 1][w->x] == 'x' || grid[w->y + 1][w->x] == '#'){
+            
+            if(grid[w->y][w->x + 1] == 'x' || grid[w->y][w->x - 1] == 'x')
+              goto yes;
+           
+            for(int x=w->x; x>0; x--)
+              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ')
+                break;
+//              else if(grid[w->y + 1][x] != 'x' && grid[w->y + 1][x] != '#')
+              else if(grid[w->y + 1][x] == '|' || grid[w->y][x] == '~')
+                goto no;
 
-        if(grid[w->y][w->x + 1] == ' '){
-          
-          insert_coord(& i, water, & n_water, w->y, w->x + 1);
+            for(int x=w->x; x<=x_max + 1; x++)
+              if(grid[w->y][x] == '#' || grid[w->y + 1][x] == ' ')
+                break;
+//              else if(grid[w->y + 1][x] != 'x' && grid[w->y + 1][x] != '#')
+              else if(grid[w->y + 1][x] == '|' || grid[w->y][x] == '~')
+                goto no;
 
-          grid[w->y][w->x + 1] = '~';
+            yes:;
 
-        }
+            grid[w->y][w->x] = '~';
 
-        grid[w->y][w->x] = ' ';
+            done = false;
 
-        w->x--;
+            no:;
 
-        grid[w->y][w->x] = '~';
+          }
 
-      }
-      else if(grid[w->y][w->x + 1] == ' '){
+          break;
 
-        grid[w->y][w->x] = ' ';
+        case '~':
 
-        w->x++;
+          if(grid[w->y + 1][w->x] == 'x' || grid[w->y + 1][w->x] == '#'){
 
-        grid[w->y][w->x] = '~';
+            if(grid[w->y][w->x + 1] == ' '){
 
-      }
-      else{
+              water[n_water].y = w->y;
+              water[n_water].x = w->x + 1;
 
-        grid[w->y][w->x] = '-';
+              n_water++;
 
-        rm_coord(& i, water, & n_water);
+              grid[w->y][w->x + 1] = '~';
 
-        n_settled++;
+            }
 
-      }
+            if(grid[w->y][w->x - 1] == ' '){
+
+              water[n_water].y = w->y;
+              water[n_water].x = w->x - 1;
+
+              n_water++;
+
+              grid[w->y][w->x - 1] = '~';
+
+            }
+
+            grid[w->y][w->x] = 'x';
+
+          }
+          else
+            grid[w->y][w->x] = '|';
+
+          done = false;
+
+          break;
+
+      };
 
     }
-
-    n_total = n_water + n_settled;
-
-//    printf("%i\n", n_total);
-    
+      
   }
 
   print_grid(grid, x_min, y_min, x_max, y_max);
 
-  printf("%i\n", n_total);
+  printf("%i\n", n_water - 1);
 
 }
