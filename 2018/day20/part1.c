@@ -8,8 +8,6 @@ typedef struct node node;
 typedef struct cursor cursor;
 
 int const N = 50;
-int n_nodes = 0;
-int n_cursors = 0;
 
 int dir[128];
 
@@ -33,9 +31,6 @@ struct cursor {
 node * add_node() {
   
   node * n = malloc(sizeof(node));
-
-  n_nodes++;
-  printf("%i, %i\n", n_nodes, n_cursors);
 
   for(int i=0; i<4; ++i)
     n->edge[i] = NULL;
@@ -68,9 +63,6 @@ cursor * add_cursor(char * regex_ptr, node * graph_ptr) {
 
   cursor * c = malloc(sizeof(cursor));
 
-  n_cursors++;
-  printf("%i, %i\n", n_nodes, n_cursors);
-  
   c->regex_ptr = regex_ptr;
   c->graph_ptr = graph_ptr;
 
@@ -106,12 +98,7 @@ cursor * recurse(cursor * c) {
   switch(* c->regex_ptr){
     
     case ')':
-      c = c->next;
-      free(tmp);
-      break;
-
     case '$':
-      //printf("\n");
       c = c->next;
       free(tmp);
       break;
@@ -150,7 +137,6 @@ cursor * recurse(cursor * c) {
       break;
 
     default:
-      //printf("%c", * c->regex_ptr);
       c->graph_ptr = add_edge(c->graph_ptr, * (c->regex_ptr));
       break;
 
@@ -165,8 +151,6 @@ void fill_grid(char (* grid)[N], node * n, int x, int y){
   if(n == NULL)
     return;
   
-  printf("%i, %i\n", x, y);
-
   grid[x][y] = '.';
 
   for(int i=0; i<4; ++i){
@@ -208,10 +192,10 @@ void print_grid(char (* grid)[N]){
 
   for(int y=0; y<N; ++y){
 
-    printf("\n");
-
     for(int x=0; x<N; ++x)
       printf("%c", grid[x][y]);
+
+    printf("\n");
 
   }
 
