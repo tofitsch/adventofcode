@@ -31,7 +31,7 @@ int main(){
   
   char line[MAX_LINE_LENGTH];
 
-  fgets(line, sizeof(line), in_file) != NULL;
+  fgets(line, sizeof(line), in_file);
 
   fclose(in_file);
 
