@@ -7,7 +7,7 @@
 typedef struct node node;
 typedef struct cursor cursor;
 
-int const N = 20;
+int const N = 50;
 int n_nodes = 0;
 int n_cursors = 0;
 
@@ -106,6 +106,8 @@ cursor * recurse(cursor * c) {
   switch(* c->regex_ptr){
     
     case ')':
+      c = c->next;
+      free(tmp);
       break;
 
     case '$':
@@ -224,7 +226,7 @@ int main() {
 
   char line[MAX_LINE_LENGTH];
 
-  FILE * in_file = fopen("input.txt", "r");
+  FILE * in_file = fopen("example.txt", "r");
 
   fgets(line, sizeof(line), in_file);
 
