@@ -7,6 +7,10 @@
 typedef struct node node;
 typedef struct cursor cursor;
 
+int const N = 20;
+int n_nodes = 0;
+int n_cursors = 0;
+
 int dir[128];
 
 struct node {
@@ -29,6 +33,9 @@ struct cursor {
 node * add_node() {
   
   node * n = malloc(sizeof(node));
+
+  n_nodes++;
+  printf("%i, %i\n", n_nodes, n_cursors);
 
   for(int i=0; i<4; ++i)
     n->edge[i] = NULL;
@@ -60,6 +67,9 @@ node * add_edge(node * a, char dir_str) {
 cursor * add_cursor(char * regex_ptr, node * graph_ptr) {
 
   cursor * c = malloc(sizeof(cursor));
+
+  n_cursors++;
+  printf("%i, %i\n", n_nodes, n_cursors);
   
   c->regex_ptr = regex_ptr;
   c->graph_ptr = graph_ptr;
@@ -82,10 +92,10 @@ void append_cursor(cursor * prev) {
 
 }
 
-void recurse(cursor * c) {
+cursor * recurse(cursor * c) {
   
   if(c == NULL)
-    return;
+    return NULL;
   
   c->regex_ptr++;
 
@@ -99,7 +109,7 @@ void recurse(cursor * c) {
       break;
 
     case '$':
-      printf("\n");
+      //printf("\n");
       c = c->next;
       free(tmp);
       break;
@@ -138,17 +148,16 @@ void recurse(cursor * c) {
       break;
 
     default:
-      printf("%c", * c->regex_ptr);
+      //printf("%c", * c->regex_ptr);
       c->graph_ptr = add_edge(c->graph_ptr, * (c->regex_ptr));
       break;
 
   };
 
-  recurse(c);
+  return c;
 
 }
 
-int const N = 20;
 void fill_grid(char (* grid)[N], node * n, int x, int y){
 
   if(n == NULL)
@@ -215,7 +224,7 @@ int main() {
 
   char line[MAX_LINE_LENGTH];
 
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   fgets(line, sizeof(line), in_file);
 
@@ -225,7 +234,8 @@ int main() {
 
   cursor * active_cursor = add_cursor(line, start_node);
 
-  recurse(active_cursor);
+  while(active_cursor != NULL)
+    active_cursor = recurse(active_cursor);
 
   char grid[N][N];
 
