@@ -8,8 +8,6 @@
 typedef struct node node;
 typedef struct cursor cursor;
 
-int const N = 50;
-
 int dir[128];
 
 struct node {
@@ -19,8 +17,6 @@ struct node {
   node * bfs_next;
 
   bool bfs_visited;
-
-  bool done[4];
 
 };
 
@@ -43,9 +39,6 @@ node * add_node() {
   n->bfs_next = NULL;
 
   n->bfs_visited = false;
-
-  for(int i=0; i<4; ++i)
-    n->done[i] = false;
 
   return n;
 
@@ -163,61 +156,6 @@ cursor * regex_step(cursor * c) {
 
 }
 
-void fill_grid(char (* grid)[N], node * n, int x, int y){
-
-  if(n == NULL)
-    return;
-  
-  grid[x][y] = '.';
-
-  for(int i=0; i<4; ++i){
-    
-    if(n->done[i] || n->edge[i] == NULL)
-      continue;
-
-    n->done[i] = true;
-      
-    switch(i){
-
-      case 0:
-        grid[x][y - 1] = '-';
-        fill_grid(grid, n->edge[i], x, y - 2);
-        break;
-
-      case 1:
-        grid[x + 1][y] = '|';
-        fill_grid(grid, n->edge[i], x + 2, y);
-        break;
-
-      case 2:
-        grid[x][y + 1] = '-';
-        fill_grid(grid, n->edge[i], x, y + 2);
-        break;
-
-      case 3:
-        grid[x - 1][y] = '|';
-        fill_grid(grid, n->edge[i], x - 2, y);
-        break;
-        
-    };
-
-  }
-  
-}
-
-void print_grid(char (* grid)[N]){
-
-  for(int y=0; y<N; ++y){
-
-    for(int x=0; x<N; ++x)
-      printf("%c", grid[x][y]);
-
-    printf("\n");
-
-  }
-
-}
-
 node * get_end(node * n) {
   
   while(n->bfs_next != NULL)
@@ -251,6 +189,20 @@ int bfs_recurse(node * n, int n_steps){
 
 }
 
+void free_graph(node * n) {
+  
+  while(n != NULL) {
+
+    node * n_done = n;
+     
+    n = n_done->bfs_next;
+
+    free(n_done);
+
+  }
+
+}
+
 int main() {
 
   dir['N'] = 0;
@@ -273,15 +225,8 @@ int main() {
   while(active_cursor != NULL)
     active_cursor = regex_step(active_cursor);
 
-  char grid[N][N];
-
-  for(int x=0; x<N; ++x)
-    for(int y=0; y<N; ++y)
-      grid[x][y] = '#';
-
-//  fill_grid(grid, start_node, N / 2, N / 2);
-//  print_grid(grid);
-
   printf("%i\n", bfs_recurse(start_node, 0) - 1);
+
+  free_graph(start_node);
 
 }
