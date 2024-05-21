@@ -3,17 +3,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-/* 
- not a general solution.
- the following solution R0 comes from observing that in the input only one line is affected by R0:
- ip=28:  eqrr 4 0 5     // R5 = R4 == R0
- when letting the program run (with any value of R0) until it reaches this line one gets the following values in the registers:
- R0=? R1=27 R2=1 R3=1 R4=16128384
- hence, setting R0 to the the value of R4 here yields the solution
-*/
-
-#define R0 16128384
-
 #define MAX_LINE_LENGTH 32
 #define MAX_OPERATIONS 64
 #define OP_LENGTH 4
@@ -132,13 +121,11 @@ void apply(int op[], int reg[]){
 
 }
 
-int run(int r0, int * reg, int ip_reg, int (* ops)[OP_LENGTH], int n_ops) {
+int run(int * reg, int ip_reg, int (* ops)[OP_LENGTH], int n_ops) {
 
   int ip = 0;
 
   memset(reg, 0, sizeof(reg));
-
-  reg[0] = r0;
 
   int n_steps = 0;
   
@@ -152,17 +139,13 @@ int run(int r0, int * reg, int ip_reg, int (* ops)[OP_LENGTH], int n_ops) {
 
     ip = reg[ip_reg] + 1;
 
-    printf("%i\t: ", ip);
-    for(int i=0; i<4; ++i)
-      printf("%i\t", ops[ip][i]);
-    printf(": ");
-    for(int i=0; i<6; ++i)
-      printf("%i\t", reg[i]);
-    printf("\n");
+    //ip=28 is the only line in the input that depends on R0
+    if(ip == 28)
+      break;
 
   }
 
-  return n_steps;
+  return reg[4];
 
 }
 
@@ -192,6 +175,6 @@ int main(){
   
   fclose(in_file);
 
-  printf("%i\n", run(R0, reg, ip_reg, ops, n_ops));
+  printf("%i\n", run(reg, ip_reg, ops, n_ops));
 
 }
