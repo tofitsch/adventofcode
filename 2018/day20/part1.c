@@ -94,6 +94,24 @@ void append_cursor(cursor * prev) {
 
 }
 
+void advance(char ** p, int * n_par_l, int * n_par_r) {
+  
+  (* p)++;
+
+  switch(** p) {
+    
+    case '(':
+      (* n_par_l)++;
+      break;
+
+    case ')':
+      (* n_par_r)++;
+      break;
+      
+  };
+
+}
+
 cursor * regex_step(cursor * c) {
   
   if(c == NULL)
@@ -103,7 +121,8 @@ cursor * regex_step(cursor * c) {
 
   cursor * tmp = c;
 
-  int n_par_l, n_par_r;
+  int n_par_l = 0;
+  int n_par_r = 0;
 
   switch(* c->regex_ptr){
     
@@ -115,34 +134,12 @@ cursor * regex_step(cursor * c) {
 
     case '(':
       append_cursor(c);
-      n_par_l = 0;
-      n_par_r = 0;
-      do{
-
-        c->regex_ptr++;
-
-        if(* c->regex_ptr == '(')
-          n_par_l++;
-        else if(* c->regex_ptr == ')')
-          n_par_r++;
-
-      }
+      do  advance(& c->regex_ptr, & n_par_l, & n_par_r);
       while(* c->regex_ptr != '|' || n_par_r != n_par_l);
       break;
 
     case '|':
-      n_par_l = 0;
-      n_par_r = 0;
-      do{
-
-        c->regex_ptr++;
-
-        if(* c->regex_ptr == '(')
-          n_par_l++;
-        else if(* c->regex_ptr == ')')
-          n_par_r++;
-
-      }
+      do  advance(& c->regex_ptr, & n_par_l, & n_par_r);
       while(* c->regex_ptr != ')' || n_par_r != n_par_l + 1);
       break;
 
