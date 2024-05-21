@@ -3,6 +3,7 @@
 #include<stdbool.h>
 
 #define MAX_LINE_LENGTH 16384
+#define INF 1e8;
 
 typedef struct node node;
 typedef struct cursor cursor;
@@ -14,6 +15,10 @@ int dir[128];
 struct node {
  
   node * edge[4];
+
+  node * bfs_next;
+
+  bool bfs_visited;
 
   bool done[4];
 
@@ -34,6 +39,10 @@ node * add_node() {
 
   for(int i=0; i<4; ++i)
     n->edge[i] = NULL;
+
+  n->bfs_next = NULL;
+
+  n->bfs_visited = false;
 
   for(int i=0; i<4; ++i)
     n->done[i] = false;
@@ -72,6 +81,14 @@ cursor * add_cursor(char * regex_ptr, node * graph_ptr) {
 
 }
 
+void queue_node(node * queue, node * n) {
+
+  while(queue->bfs_next != NULL)
+    queue = queue->bfs_next;
+
+  queue->bfs_next = n;
+
+}
 
 void append_cursor(cursor * prev) {
 
@@ -84,7 +101,7 @@ void append_cursor(cursor * prev) {
 
 }
 
-cursor * recurse(cursor * c) {
+cursor * regex_step(cursor * c) {
   
   if(c == NULL)
     return NULL;
@@ -201,6 +218,39 @@ void print_grid(char (* grid)[N]){
 
 }
 
+node * get_end(node * n) {
+  
+  while(n->bfs_next != NULL)
+    n = n->bfs_next;
+
+  return n;
+
+}
+
+int bfs_recurse(node * n, int n_steps){
+  
+  if(n == NULL)
+    return n_steps;
+  
+  node * end = get_end(n);
+  
+  do{
+    
+    n->bfs_visited = true;
+
+    for(int i=0; i<4; ++i)
+      if(n->edge[i] != NULL && ! n->edge[i]->bfs_visited)
+        queue_node(n, n->edge[i]);
+
+    n = n->bfs_next;
+
+  }
+  while(n != end->bfs_next);
+
+  return bfs_recurse(n, n_steps + 1);
+
+}
+
 int main() {
 
   dir['N'] = 0;
@@ -210,7 +260,7 @@ int main() {
 
   char line[MAX_LINE_LENGTH];
 
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   fgets(line, sizeof(line), in_file);
 
@@ -221,7 +271,7 @@ int main() {
   cursor * active_cursor = add_cursor(line, start_node);
 
   while(active_cursor != NULL)
-    active_cursor = recurse(active_cursor);
+    active_cursor = regex_step(active_cursor);
 
   char grid[N][N];
 
@@ -229,7 +279,9 @@ int main() {
     for(int y=0; y<N; ++y)
       grid[x][y] = '#';
 
-  fill_grid(grid, start_node, N / 2, N / 2);
-  print_grid(grid);
+//  fill_grid(grid, start_node, N / 2, N / 2);
+//  print_grid(grid);
+
+  printf("%i\n", bfs_recurse(start_node, 0) - 1);
 
 }
