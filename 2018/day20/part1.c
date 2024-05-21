@@ -112,7 +112,7 @@ void advance(char ** p, int * n_par_l, int * n_par_r) {
 
 }
 
-cursor * regex_step(cursor * c) {
+cursor * regex_recurse(cursor * c) {
   
   if(c == NULL)
     return NULL;
@@ -149,7 +149,7 @@ cursor * regex_step(cursor * c) {
 
   };
 
-  return c;
+  regex_recurse(c);
 
 }
 
@@ -219,8 +219,7 @@ int main() {
 
   cursor * active_cursor = add_cursor(line, start_node);
 
-  while(active_cursor != NULL)
-    active_cursor = regex_step(active_cursor);
+  regex_recurse(active_cursor);
 
   printf("%i\n", bfs_recurse(start_node, 0) - 1);
 
