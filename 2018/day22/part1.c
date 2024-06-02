@@ -9,7 +9,7 @@
 
 void read_input(int * depth, int * target_x, int * target_y) {
   
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   char line[MAX_LINE_LENGTH];
 
@@ -53,10 +53,7 @@ int main() {
 
   read_input(& depth, & target_x, & target_y);
 
-  printf("%i, %i, %i\n", depth, target_x, target_y);
-
   int  erosion_lvl[target_y + 1][target_x + 1];
-  char   tile_type[target_y + 1][target_x + 1];
 
   for(int x=0; x<=target_x; ++x)
     erosion_lvl[0][x] = (x * FAC_Y + depth) % MOD;
@@ -84,7 +81,7 @@ int main() {
      and traversing top to bottom for each column traverses anti-diagonally over the whole matrix:
 
      for(int x = 0; x < X + Y - 1; ++x)
-       for(int y = (x >= X ? x - X + 1 : 0); y < (x <= X - 1 ? x + 1 : Y); ++y)
+       for(int y = (x >= X ? x - X + 1 : 0); y < (x < Y ? x : Y); ++y)
          printf("%i ", arr[y][x - y]);
 
      1
@@ -104,7 +101,7 @@ int main() {
   int Y = target_y + 1;
 
   for(int x = 0; x < X + Y - 1; ++x)
-    for(int y = (x >= X ? x - X + 1 : 1); y < (x <= X ? x : Y); ++y)
+    for(int y = (x >= X ? x - X + 1 : 1); y < (x < Y ? x : Y); ++y)
       erosion_lvl[y][x - y] = (erosion_lvl[y - 1][x - y] * erosion_lvl[y][x - y - 1] + depth) % MOD;
 
   erosion_lvl[target_y][target_x] = depth % MOD;
@@ -128,6 +125,10 @@ int main() {
           printf("|");
           break;
 
+        default:
+          printf("x");
+          break;
+
       };
 
     }
@@ -135,7 +136,7 @@ int main() {
     printf("\n");
 
   }
- */
+*/
   
   int risk_lvl = 0;
 
