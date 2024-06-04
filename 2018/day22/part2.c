@@ -169,12 +169,9 @@ void map_free(map * m){
 
 }
 
-char get_tile(node * n, int target_x, int target_y) {
+char get_tile(node * n) {
 
   char tile = n->erosion_lvl % 3;
-
-  if(n->x == target_x, n->y == target_y)
-    tile = TARGET;
 
   return tile;
 
@@ -182,7 +179,7 @@ char get_tile(node * n, int target_x, int target_y) {
 
 bool possible(node * a, int target_x, int target_y) {
   
-  char tile = get_tile(a, target_x, target_y);
+  char tile = get_tile(a);
 
   if(tile == ROCKY && a->tool == NEITHER)
     return false;
@@ -191,9 +188,6 @@ bool possible(node * a, int target_x, int target_y) {
     return false;
 
   if(tile == NARROW && a->tool == GEAR)
-    return false;
-
-  if(tile == TARGET && a->tool != TORCH)
     return false;
 
   return true;
@@ -222,25 +216,13 @@ void add_tool_change_nodes(node * n, int target_x, int target_y, map * m) {
   
   node * new_node = NULL;
 
-  char tile = get_tile(n, target_x, target_y);
+  char tile = get_tile(n);
 
   for(int i=0; i<3; i++) {
     
     if(i == n->tool || map_contains(m, n->x, n->y, i))
       continue;
 
-    if(tile == ROCKY && i == NEITHER)
-      continue;
-
-    if(tile == WET && i == TORCH)
-      continue;
-
-    if(tile == NARROW && i == GEAR)
-      continue;
-
-    if(tile == TARGET && i != TORCH)
-      continue;
-  
     new_node = malloc(sizeof(node));
 
     init_node(new_node);
@@ -252,8 +234,11 @@ void add_tool_change_nodes(node * n, int target_x, int target_y, map * m) {
 
     new_node->erosion_lvl = n->erosion_lvl;
 
-    n->edge[4 + i] = new_node;
-    new_node->edge[4 + n->tool] = n;
+    if(possible(new_node, target_x, target_y))
+      n->edge[4 + i] = new_node;
+
+    if(possible(n, target_x, target_y))
+      new_node->edge[4 + n->tool] = n;
     
     map_update(m, n->x, n->y, i, new_node);
 
@@ -347,7 +332,10 @@ node * add_node(node * n, char dir, int tool, int depth, int target_x, int targe
 
   }
 
-  printf("]%i %i %i\n", new_node->x, new_node->y, new_node->tool);
+  if(new_node->x == target_x && new_node->y == target_y)
+    new_node->erosion_lvl = depth % MOD;
+
+//  printf("]%i %i %i\n", new_node->x, new_node->y, new_node->tool);
 
   end:;
 
@@ -388,7 +376,7 @@ void dequeue(node * q, node * n) {
 
 node * queue(node * q, node * n) {
   
-  printf("> %i %i %i\n", n->x, n->y, n->tool);
+//  printf("> %i %i %i\n", n->x, n->y, n->tool);
   
   if(q->distance > n->distance) {
     
@@ -433,7 +421,7 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   while(q != NULL){
 
-    printf("%i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q, target_x, target_y)], q->distance);
+//    printf("%i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q)], q->distance);
 
     q->visited = true;
     
@@ -444,14 +432,14 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
     
       if(q->edge[i] == NULL) {
         
-        printf("TEST %i\n", i);
+//        printf("TEST %i\n", i);
 
         add_node(q, i, q->tool, depth, target_x, target_y, m);
 
         if(q->edge[i] == NULL)
           continue;
 
-        printf(")%i %i %i\n", q->edge[i]->x, q->edge[i]->y, q->edge[i]->tool);
+//        printf(")%i %i %i\n", q->edge[i]->x, q->edge[i]->y, q->edge[i]->tool);
 
       }
 
@@ -460,7 +448,7 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
       int d = q->distance + q->weight[i];
 
-//      printf("TEST %i %c %c %i\n", q->tool, c[get_tile(q, target_x, target_y)], c[get_tile(q->edge[i], target_x, target_y)], q->weight[i]);
+//      printf("TEST %i %c %c %i\n", q->tool, c[get_tile(q)], c[get_tile(q->edge[i])], q->weight[i]);
 
       if(d < q->edge[i]->distance) {
 
@@ -492,10 +480,10 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   do {
 
-    printf("> %i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q, target_x, target_y)], q->distance);
+//    printf("> %i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q)], q->distance);
 
     if(q->y < target_y + 1 && q->x < target_x + 1)
-      grid[q->y][q->x] = c[get_tile(q, target_x, target_y)];
+      grid[q->y][q->x] = c[get_tile(q)];
 
     q = q->prev;
 
