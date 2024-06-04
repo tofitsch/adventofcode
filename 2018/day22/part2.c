@@ -43,6 +43,7 @@ struct node {
   bool visited;
 
   node * next;
+  node * prev;
 
   int weight[7];
 
@@ -213,6 +214,7 @@ void connect_nodes(node * a, node * b, int target_x, int target_y, int dir) {
 void init_node(node * n) {
 
   n->next = NULL;
+  n->prev = NULL;
 
   n->distance = INF;
 
@@ -433,16 +435,9 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
     
     q->visited = true;
 
-    if(q->x == target_x && q->y == target_y && q->tool == TORCH) {
+    if(q->x == target_x && q->y == target_y && q->tool == TORCH)
+      goto brk;
       
-      int d = q->distance;
-
-      free_queue(start_node);
-
-      return d;
-
-    }
-
     for(int i=0; i<7; ++i) {
     
       if(q->edge[i] == NULL) {
@@ -465,6 +460,8 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
         q->edge[i]->distance = d;
 
+        q->edge[i]->prev = q;
+
         q = queue(q, q->edge[i]);
 
       }
@@ -474,6 +471,22 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
     q = q->next;
 
   }
+
+  brk:;
+
+  int dist = q->distance;
+
+  do {
+
+    printf("> %i %i %i %i\n", q->x, q->y, q->tool, q->distance);
+
+    q = q->prev;
+
+  } while(q != NULL);
+
+  free_queue(start_node);
+
+  return dist;
 
   return -1;
 
