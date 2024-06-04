@@ -7,7 +7,7 @@
 #define MOD 20183
 #define FAC_X 48271
 #define FAC_Y 16807
-#define INF 1e8
+#define INF 1e5
 
 typedef struct node node;
 
@@ -180,34 +180,23 @@ char get_tile(node * n, int target_x, int target_y) {
 
 }
 
-void connect_nodes(node * a, node * b, int target_x, int target_y, int dir) {
+bool possible(node * a, int target_x, int target_y) {
   
-  char tile_a = get_tile(a, target_x, target_y);
-  char tile_b = get_tile(b, target_x, target_y);
+  char tile = get_tile(a, target_x, target_y);
 
-  if(tile_b == ROCKY && a->tool == NEITHER)
-    goto skip;
+  if(tile == ROCKY && a->tool == NEITHER)
+    return false;
 
-  if(tile_b == WET && a->tool == TORCH)
-    goto skip;
+  if(tile == WET && a->tool == TORCH)
+    return false;
 
-  if(tile_b == NARROW && a->tool == GEAR)
-    goto skip;
+  if(tile == NARROW && a->tool == GEAR)
+    return false;
 
-  a->edge[dir] = b;
+  if(tile == TARGET && a->tool != TORCH)
+    return false;
 
-  skip:;
-    
-  if(tile_a == ROCKY && b->tool == NEITHER)
-    return;
-
-  if(tile_a == WET && b->tool == TORCH)
-    return;
-
-  if(tile_a == NARROW && b->tool == GEAR)
-    return;
-
-  b->edge[(dir + 2) % 4] = a;
+  return true;
 
 }
 
@@ -273,16 +262,16 @@ void add_tool_change_nodes(node * n, int target_x, int target_y, map * m) {
 }
 
 node * add_node(node * n, char dir, int tool, int depth, int target_x, int target_y, map * m) { //dir = 0:above, 1:right, ...
-  
+
   if(n != NULL && ((n->x == 0 && dir == LEFT) || (n->y == 0 && dir == ABOVE)))
     return NULL;
    
-  node * new_node = malloc(sizeof(node));
-
-  init_node(new_node);
-
   if(n == NULL) {
     
+    node * new_node = malloc(sizeof(node));
+
+    init_node(new_node);
+
     new_node->x = 0;
     new_node->y = 0;
 
@@ -290,7 +279,7 @@ node * add_node(node * n, char dir, int tool, int depth, int target_x, int targe
 
     new_node->erosion_lvl = depth % MOD;
 
-    map_update(m, 0, 0, 0, new_node);
+    map_update(m, 0, 0, tool, new_node);
     
     add_tool_change_nodes(new_node, target_x, target_y, m);
 
@@ -298,67 +287,79 @@ node * add_node(node * n, char dir, int tool, int depth, int target_x, int targe
 
   }
 
-  new_node->x = n->x;
-  new_node->y = n->y;
-
-  new_node->tool = n->tool;
+  int x = n->x;
+  int y = n->y;
 
   switch(dir) {
 
     case ABOVE:
-      new_node->y--;
+      y--;
       break;
 
     case RIGHT:
-      new_node->x++;
+      x++;
       break;
 
     case BELOW:
-      new_node->y++;
+      y++;
       break;
 
     case LEFT:
-      new_node->x--;
+      x--;
       break;
 
   };
 
-  if(map_contains(m, new_node->x, new_node->y, new_node->tool)) {
-    
-    free(new_node); //TODO don't allocate in the first place
+  node * new_node = NULL;
 
-    return NULL;
+  if(map_contains(m, x, y, n->tool)) {
+
+    new_node = map_get_value(m, x, y, n->tool);
+    goto end;
 
   }
+  else
+    new_node = malloc(sizeof(node));
 
-  map_update(m, new_node->x, new_node->y, new_node->tool, new_node);
-  
-  add_tool_change_nodes(new_node, target_x, target_y, m);
+  init_node(new_node);
 
-  if(new_node->y == 0)
-    new_node->erosion_lvl = (new_node->x * FAC_Y + depth) % MOD;
-  else if(new_node->x == 0)
-    new_node->erosion_lvl = (new_node->y * FAC_X + depth) % MOD;
+  new_node->x = x;
+  new_node->y = y;
+
+  new_node->tool = n->tool;
+
+  if(y == 0)
+    new_node->erosion_lvl = (x * FAC_Y + depth) % MOD;
+  else if(x == 0)
+    new_node->erosion_lvl = (y * FAC_X + depth) % MOD;
   else {
    
-    node * node_left = map_get_value(m, new_node->x - 1, new_node->y, new_node->tool);
-    node * node_above = map_get_value(m, new_node->x, new_node->y - 1, new_node->tool);
+    node * node_left = map_get_value(m, x - 1, y, n->tool);
+    node * node_above = map_get_value(m, x, y - 1, n->tool);
 
     if(node_left == NULL)
       node_left = add_node(new_node, LEFT, new_node->tool, depth, target_x, target_y, m);
 
-    connect_nodes(node_left, new_node, target_x, target_y, RIGHT);
-
     if(node_above == NULL)
       node_above = add_node(new_node, ABOVE, new_node->tool, depth, target_x, target_y, m);
-
-    connect_nodes(node_above, new_node, target_x, target_y, BELOW);
 
     new_node->erosion_lvl = (node_left->erosion_lvl * node_above->erosion_lvl + depth) % MOD;
 
   }
 
-  connect_nodes(n, new_node, target_x, target_y, dir);
+  printf("]%i %i %i\n", new_node->x, new_node->y, new_node->tool);
+
+  end:;
+
+  if(possible(new_node, target_x, target_y))
+    n->edge[dir] = new_node;
+
+  if(possible(n, target_x, target_y))
+    new_node->edge[(dir + 2) % 4] = n;
+
+  map_update(m, new_node->x, new_node->y, new_node->tool, new_node);
+  
+  add_tool_change_nodes(new_node, target_x, target_y, m);
 
   return new_node;
 
@@ -387,6 +388,8 @@ void dequeue(node * q, node * n) {
 
 node * queue(node * q, node * n) {
   
+  printf("> %i %i %i\n", n->x, n->y, n->tool);
+  
   if(q->distance > n->distance) {
     
     n->next = q;
@@ -410,7 +413,7 @@ node * queue(node * q, node * n) {
 void free_queue(node * n) {
   
   do {
-
+    
     node * n_done = n;
     n = n->next;
 
@@ -426,26 +429,29 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   node * q = start_node;
 
-  queue(q, add_node(start_node, RIGHT, q->tool, depth, target_x, target_y, m));
-  queue(q, add_node(start_node, BELOW, q->tool, depth, target_x, target_y, m));
+  char c[4] = {'.', '=', '|', 'T'}; //X
 
   while(q != NULL){
-    
-    printf("%i %i %i %i\n", q->tool, q->x, q->y, q->distance);
-    
-    q->visited = true;
 
+    printf("%i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q, target_x, target_y)], q->distance);
+
+    q->visited = true;
+    
     if(q->x == target_x && q->y == target_y && q->tool == TORCH)
       goto brk;
       
     for(int i=0; i<7; ++i) {
     
       if(q->edge[i] == NULL) {
+        
+        printf("TEST %i\n", i);
 
-        q->edge[i] = add_node(q, i, q->tool, depth, target_x, target_y, m);
+        add_node(q, i, q->tool, depth, target_x, target_y, m);
 
         if(q->edge[i] == NULL)
           continue;
+
+        printf(")%i %i %i\n", q->edge[i]->x, q->edge[i]->y, q->edge[i]->tool);
 
       }
 
@@ -454,8 +460,10 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
       int d = q->distance + q->weight[i];
 
+//      printf("TEST %i %c %c %i\n", q->tool, c[get_tile(q, target_x, target_y)], c[get_tile(q->edge[i], target_x, target_y)], q->weight[i]);
+
       if(d < q->edge[i]->distance) {
-       
+
         dequeue(q, q->edge[i]);
 
         q->edge[i]->distance = d;
@@ -476,15 +484,33 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   int dist = q->distance;
 
+  char grid[target_y + 1][target_x + 1];
+
+  for(int y=0; y<=target_y; ++y)
+    for(int x=0; x<=target_x; ++x)
+      grid[y][x] = ' ';
+
   do {
 
-    printf("> %i %i %i %i\n", q->x, q->y, q->tool, q->distance);
+    printf("> %i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q, target_x, target_y)], q->distance);
+
+    if(q->y < target_y + 1 && q->x < target_x + 1)
+      grid[q->y][q->x] = c[get_tile(q, target_x, target_y)];
 
     q = q->prev;
 
   } while(q != NULL);
 
   free_queue(start_node);
+
+  for(int y=0; y<=target_y; ++y) {
+
+    for(int x=0; x<=target_x; ++x)
+      printf("%c", grid[y][x]);
+
+    printf("\n");
+
+  }
 
   return dist;
 
@@ -540,7 +566,7 @@ int main() {
 
   map * m = map_create();
 
-  node * start_node = add_node(NULL, 0, NEITHER, depth, target_x, target_y, m);
+  node * start_node = add_node(NULL, 0, TORCH, depth, target_x, target_y, m);
 
   printf("%i\n", dijkstra(start_node, target_x, target_y, depth, m));
 
