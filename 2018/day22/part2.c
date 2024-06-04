@@ -157,6 +157,8 @@ void map_free(map * m){
       
       map_node * next = node->next;
 
+      free(node->value);
+
       free(node);
 
       node = next;
@@ -398,19 +400,6 @@ node * queue(node * q, node * n) {
 
 }
 
-void free_queue(node * n) {
-  
-  do {
-    
-    node * n_done = n;
-    n = n->next;
-
-    free(n_done);
-
-  } while(n != NULL);
-
-}
-
 int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) {
 
   start_node->distance = 0;
@@ -489,8 +478,6 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   } while(q != NULL);
 
-  free_queue(start_node);
-
   for(int y=0; y<=target_y; ++y) {
 
     for(int x=0; x<=target_x; ++x)
@@ -508,7 +495,7 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
 void read_input(int * depth, int * target_x, int * target_y) {
   
-  FILE * in_file = fopen("example.txt", "r");
+  FILE * in_file = fopen("input.txt", "r");
 
   char line[MAX_LINE_LENGTH];
 
