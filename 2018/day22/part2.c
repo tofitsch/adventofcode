@@ -43,7 +43,6 @@ struct node {
   bool visited;
 
   node * next;
-  node * prev;
 
   int weight[7];
 
@@ -199,7 +198,6 @@ bool possible(node * a, int target_x, int target_y) {
 void init_node(node * n) {
 
   n->next = NULL;
-  n->prev = NULL;
 
   n->distance = INF;
 
@@ -236,11 +234,12 @@ void add_tool_change_nodes(node * n, int target_x, int target_y, map * m) {
 
     new_node->erosion_lvl = n->erosion_lvl;
 
-    if(possible(new_node, target_x, target_y))
-      n->edge[4 + i] = new_node;
+    if(possible(new_node, target_x, target_y) && possible(n, target_x, target_y)) {
 
-    if(possible(n, target_x, target_y))
+      n->edge[4 + i] = new_node;
       new_node->edge[4 + n->tool] = n;
+
+    }
     
     map_update(m, n->x, n->y, i, new_node);
 
@@ -337,15 +336,14 @@ node * add_node(node * n, char dir, int tool, int depth, int target_x, int targe
   if(new_node->x == target_x && new_node->y == target_y)
     new_node->erosion_lvl = depth % MOD;
 
-//  printf("]%i %i %i\n", new_node->x, new_node->y, new_node->tool);
-
   end:;
 
-  if(possible(new_node, target_x, target_y))
-    n->edge[dir] = new_node;
+  if(possible(new_node, target_x, target_y) && possible(n, target_x, target_y)) {
 
-  if(possible(n, target_x, target_y))
+    n->edge[dir] = new_node;
     new_node->edge[(dir + 2) % 4] = n;
+
+  }
 
   map_update(m, new_node->x, new_node->y, new_node->tool, new_node);
   
@@ -378,8 +376,6 @@ void dequeue(node * q, node * n) {
 
 node * queue(node * q, node * n) {
   
-//  printf("> %i %i %i\n", n->x, n->y, n->tool);
-  
   if(q->distance > n->distance) {
     
     n->next = q;
@@ -410,25 +406,19 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
   while(q != NULL){
 
-//    printf("%i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q)], q->distance);
-
     q->visited = true;
     
     if(q->x == target_x && q->y == target_y && q->tool == TORCH)
-      goto brk;
+      return q->distance;
       
     for(int i=0; i<7; ++i) {
     
       if(q->edge[i] == NULL) {
         
-//        printf("TEST %i\n", i);
-
         add_node(q, i, q->tool, depth, target_x, target_y, m);
 
         if(q->edge[i] == NULL)
           continue;
-
-//        printf(")%i %i %i\n", q->edge[i]->x, q->edge[i]->y, q->edge[i]->tool);
 
       }
 
@@ -437,15 +427,11 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
 
       int d = q->distance + q->weight[i];
 
-//      printf("TEST %i %c %c %i\n", q->tool, c[get_tile(q)], c[get_tile(q->edge[i])], q->weight[i]);
-
       if(d < q->edge[i]->distance) {
 
         dequeue(q, q->edge[i]);
 
         q->edge[i]->distance = d;
-
-        q->edge[i]->prev = q;
 
         q = queue(q, q->edge[i]);
 
@@ -456,38 +442,6 @@ int dijkstra(node * start_node, int target_x, int target_y, int depth, map * m) 
     q = q->next;
 
   }
-
-  brk:;
-
-  int dist = q->distance;
-
-  char grid[target_y + 1][target_x + 1];
-
-  for(int y=0; y<=target_y; ++y)
-    for(int x=0; x<=target_x; ++x)
-      grid[y][x] = ' ';
-
-  do {
-
-//    printf("> %i %i %i %c %i\n", q->x, q->y, q->tool, c[get_tile(q)], q->distance);
-
-    if(q->y < target_y + 1 && q->x < target_x + 1)
-      grid[q->y][q->x] = c[get_tile(q)];
-
-    q = q->prev;
-
-  } while(q != NULL);
-
-  for(int y=0; y<=target_y; ++y) {
-
-    for(int x=0; x<=target_x; ++x)
-      printf("%c", grid[y][x]);
-
-    printf("\n");
-
-  }
-
-  return dist;
 
   return -1;
 
