@@ -15,10 +15,16 @@ The scripts return just the solution, no other printout.
 They are written in a different language for each year.
 Here is how to run them:
 
+## 2017: bash
+
+```shell
+bash part1.sh
+```
+
 ## 2018: C
 
 ```shell
-gcc -o x part1.cpp && ./x
+gcc -o x part1.c && ./x
 ```
 
 ## 2019: C++

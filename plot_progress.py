@@ -12,6 +12,7 @@ langs = {
   2020: 'vim',
   2019: 'C++',
   2018: 'C',
+  2017: 'bash',
 }
 
 def count_lines(file_path):
