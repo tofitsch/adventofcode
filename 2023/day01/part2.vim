@@ -16,6 +16,3 @@
 $x										remove the last +
 0D										delete the line, putting it into register "
 i="									evaluate the content of register " with the expression register =
-kD										delete the line containing the result
-:!echo "									print what was just deleted
-:q!										quit
