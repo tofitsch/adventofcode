@@ -13,7 +13,7 @@ i="				evaluate it with the expression register
 :%s/\v,(\d)/,+\1/g		add a + for each number that does not have a -
 				
 :let l=0			init counter
-:g/./let l+=1			counter number of lines
+:g/./let l+=1			count number of lines
 				
 :g/\(				for each unsafe line, i.e. with (
 -.*+\|					either first a -, then a +
