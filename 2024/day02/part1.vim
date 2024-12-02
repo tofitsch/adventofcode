@@ -8,12 +8,9 @@ i="				evaluate it with the expression register
 @a					tail recursion
 "add				end of macro @a
 				
-:g/./norm @a			apply @a ot each line
+:g/./norm @a			apply @a to each line
 :%s/^/,			add a , to the start of each line
 :%s/\v,(\d)/,+\1/g		add a + for each number that does not have a -
-				
-:let l=0			init counter
-:g/./let l+=1			count number of lines
 				
 :g/\(				for each unsafe line, i.e. with (
 -.*+\|					either first a -, then a +
@@ -22,7 +19,10 @@ i="				evaluate it with the expression register
 [4-9]\|					a digit > 3
 0					or 0
 \)				)
-/let l-=1			subtract 1 from counter
+/d				delete the line
+				
+:let l=0			init counter
+:g/./let l+=1			count number of lines
 				
 Gdgg				delete all content
 i=l				insert value of l
