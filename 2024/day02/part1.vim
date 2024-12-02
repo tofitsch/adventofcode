@@ -6,7 +6,7 @@ dt,					cut expression (e.g. "7-6") to "
 i="				evaluate it with the expression register
 2l					go to next expression
 @a					tail recursion
-"add				end of macro @a
+"add				} end of macro @a
 				
 :g/./norm @a			apply @a to each line
 :%s/^/,			add a , to the start of each line
