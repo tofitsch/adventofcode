@@ -14,7 +14,7 @@ Oj				 add empty line above
 				} done
 	
 :g/^$/norm 			for each empty line {
-2j0dw				 remove first number which @b leaves behind
+2j0dw					remove first number which @b leaves behind
 				} done
 				
 :%s/ $//			remove trailing spaces
@@ -43,7 +43,8 @@ i="				evaluate it with the expression register
 				
 :let l=0			init counter
 :g/^,\n../			for each line that's just a ',' but has a non-empty line afterwards {
-let l+=1			count number of lines }
+let l+=1				increment l
+				} done
 						
 Gdgg				delete all content
 i=l				insert value of l
