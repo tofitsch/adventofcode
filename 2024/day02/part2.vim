@@ -9,10 +9,10 @@ k					go back to original position
 "bdd				} end of macro @b
 				
 :g/./norm 			for each line {
-Oj				 add empty line above
+Oj					add empty line above
 @b					apply @b
 				} done
-	
+				
 :g/^$/norm 			for each empty line {
 2j0dw					remove first number which @b leaves behind
 				} done
@@ -45,6 +45,6 @@ i="				evaluate it with the expression register
 :g/^,\n../			for each line that's just a ',' but has a non-empty line afterwards {
 let l+=1				increment l
 				} done
-						
+				
 Gdgg				delete all content
 i=l				insert value of l
