@@ -1,7 +1,7 @@
 :%s/\n//			remove newline chars
 				
 :%s/don't().\{-}		delete everything between a "don't()"
-\zedo()//g			and the next "do()"
+\ze\(do()\|\n\)//g		and the next "do()" or endline
 				
 :let s=0			init sum
 				
