@@ -1,1 +1,1 @@
-:%s/\n//:%s/don't().\{-}\ze\(do()\|\n\)//g:let s=0:%s/mul(\(\d*\),\(\d*\))/_\1*\2/g:g/_/norm lD:let s+="Gdggi=sZZ:qa!
+:%s/\n//:%s/don't().\{-}\ze\(do()\|\n\)//g:let s=0:%s/mul(\(\d\+\),\(\d\+\))/_\1*\2/g:g/_/norm lD:let s+="Gdggi=sZZ:qa!

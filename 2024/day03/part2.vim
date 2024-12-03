@@ -5,7 +5,7 @@
 				
 :let s=0			init sum
 				
-:%s/mul(\(\d*\),\(\d*\))/	find valid mul() instructions
+:%s/mul(\(\d\+\),\(\d\+\))/	find valid mul() instructions
 _				set it onto a new line marked with '_' which doesn't exist in the input
 \1*\2/g			extract the numbers and construct a product expression from them
 				
