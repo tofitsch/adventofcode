@@ -1,19 +1,34 @@
-:%s/^/ /		add a space to the start of each line
+:let c=0	init counter
+qa		start recording @a {
 
-O		start of macro @a {
-"Bx			del char and append it to "b
-jll			go diagonally down right
+			increment c for each line with XMAS (or SAMX) at the start of the line...
+
+			...horizontally
+:g/\v^(XMAS|SAMX)/
+let c+=1
+
+			...vertically
+:g/\v^(X.*\n^M.*\n^A.*\n^S|S.*\n^A.*\n^M.*\n^X)/
+let c+=1
+
+			...diagonally down
+:g/\v^(X.*\n^.M.*\n^..A.*\n^...S|S.*\n^.A.*\n^..M.*\n^...X)/
+let c+=1
+
+			...diagonally up
+:g/\v^...(X.*\n^..M.*\n^.A.*\n^S|S.*\n^..A.*\n^.M.*\n^X)/
+let c+=1
+
+:%s/^.//		delete the first column
+
 @a			tail recursion
-"add		} end of macro @a
 
-:g/./norm 	for each line {
-gg0/\S$		go to end of first line with anything but space
-a "Bx		append space to "b
-@a			call @a
-		} done
+q		end of macro @a
 
-@:		redo last : command
+@a		call @a
 
-"bp		paste from "b
+dgg		delete all content
+i=c		insert c
 
-:%s/\n//	remove newlines
+
+
