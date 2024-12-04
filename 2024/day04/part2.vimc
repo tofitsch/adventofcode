@@ -1,0 +1,1 @@
+:let c=0qa:g/\v(^M.M.*\n^.A.*\n^S.S|^S.M.*\n^.A.*\n^S.M|^M.S.*\n^.A.*\n^M.S|^S.S.*\n^.A.*\n^M.M)/let c+=1:%s/^.//@aq@adggi=cZZ:qa!
