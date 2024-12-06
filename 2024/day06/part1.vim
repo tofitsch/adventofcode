@@ -1,4 +1,4 @@
-	macro to rotate the grid (swap rows with columns)
+	macro to rotate the grid
 qa			start of macro @a {
 gg				go to start of file
 mb				set mark b
