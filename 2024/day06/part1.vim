@@ -1,5 +1,4 @@
-	macro to rotate the grid
-qa			start of macro @a {
+qa			start of macro @a { // rotates the grid
 gg				go to start of file
 mb				set mark b
 :g/^/norm 			for each line {
@@ -22,7 +21,7 @@ qc			start of macro @c {
 q			} end of macro @c
 @c			call @c
 
-:%s/x/x/g		put ech x on a new line
+:%s/x/x/g		put each x on a new line
 :let c=1		init counter (1 for ^ which is not counted when counting x)
 :g/x/let c+=1		increment c for each x
 ggcG			delete all conent
