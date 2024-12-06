@@ -16,7 +16,7 @@ q			} end of macro @a
 
 qc			start of macro @c {
 :silent!/#\^/norm @a/		rotate the grid if there's a # left of ^
-:%s/\v(.|x)\^/^x/		move ^ one leftx mark its previous position with a x
+:%s/\v(.|x)\^/^x/		move ^ one left, mark its previous position with a x
 @c				tail recursion
 q			} end of macro @c
 @c			call @c
