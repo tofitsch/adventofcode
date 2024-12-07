@@ -13,16 +13,17 @@ yyp				copy it
 @a				call @a
 			}
 
-:g/b/norm 		for each line with a binary number {
-:s/\d\d\zs/ /g		add a space after each second bit
-:s/00 /x/g			turn all '00 ' into x
-:s/01 /y/g			turn all '01 ' into y
-:s/10 /z/g			turn all '10 ' into z
-			}
+:%s/\v(\d\d)/,\1/g		comma-separate each pair of bits
 
-	:g/b.*11/d		remove all lines with 11 (the unused 2-bit not mapping onto a trit)
-	:%s/0b//		remove binary prefix 0b
-	
+:g/^,/norm :s/,//g	remove commas from lines starting with ,
+
+:%s/,00/x/g		turn all ',00 ' into x
+:%s/,01/y/g		turn all ',01 ' into y
+:%s/,10/z/g		turn all ',10 ' into z
+
+:g/^0b.*11/d		remove all lines with 11 (the unused 2-bit not mapping onto a trit)
+:%s/^0b//		remove binary prefix 0b
+
 	Go:			add a new line with : to the end of the file
 	
 	:%s/^/ /g		add space as padding to start of each line
