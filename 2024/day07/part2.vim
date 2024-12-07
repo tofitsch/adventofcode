@@ -61,25 +61,26 @@ $a 				add space at end
 0k				but only 1st column until line above
 p				paste the line
 			}
-	
-:g!/[xyz]/norm lD		delete content (except first space) of all lines without xyz
 
-:%s/@/ @/			add one more space as padding before macros
+:g!/[xyz]/norm lD	delete content (except first space) of all lines without xyz
 
-:g/:/norm 			for each line with a : {
-f@					go to the macros @
-D					delete them into "
-:norm "				execute them
-				}
+:%s/@/ @/		add one more space as padding before macros
+
+:g/:/norm 		for each line with a : {
+f@				go to the macros @
+D				delete them into "
+:norm "			execute them
+			}
 
 :%s/: /:/		remove all spaces after :
 :%s/\s\s//		remove all double spaces
 :%s/\n//		remove newlines
-:%s/\s\s/  /g	
-	
-:g!/\v (\d*):\1 /d	delete all lines where no number:number pair matches
-	
-:%s/:.*\n/+		get all results (before:) in the remaining lines and make a sum expression
+:%s/\s\s/  /g	turn double spaces into new lines
+
+:g!/\v (\d*):\1 /d	delete all lines where no num:num pair matches
+
+:%s/:.*\n/		get all results (before:) in the remaining lines
++			and make a sum expression
 $x			delete trailing +
 0D			delete expression into "
 i="		insert result of expression
