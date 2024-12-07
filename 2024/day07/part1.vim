@@ -34,7 +34,7 @@ p				paste the line
 
 :g!/\v(\+|\*)/norm lD		delete content of all lines without + or * (except first space)
 
-o			start of macro @b {
+o			start of macro @b { constructs formula from numbers and operators in line
 f x				find and delete next space (breaks recursion if not found)
 mc				set mark c
 $x				delete + or * from end of line to "
@@ -59,10 +59,9 @@ a="			evaluate formula and insert result
 :%s/\n//		remove newlines
 :%s/\s\s/  /g	turn double space into new lines and spaces at start and end of lines
 
-:let c=0		init counter
+:g!/\v (\d*):\1 /d	delete all lines where no number:number pair matches
 
-:g/\v (\d*):\1 /	for each line where the numbers left and right of : are the same {
-let c+=1		increment c}
-
-Gdgg			delete all content
-i=c			insert c
+:%s/:.*\n/+		get all results (before:) in the remaining lines and make a sum expression
+$x			delete trailing +
+0D			delete expression into "
+i="		insert result of expression
