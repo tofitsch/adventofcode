@@ -15,44 +15,44 @@ yyp				copy it
 
 :g/b/norm 		for each line with a binary number {
 :s/\d\d\zs/ /g		add a space after each second bit
-:s/00 /+/g			turn all '00 ' into +
-:s/01 /*/g			turn all '01 ' into *
-:s/10 /c/g			turn all '10 ' into c
+:s/00 /x/g			turn all '00 ' into x
+:s/01 /y/g			turn all '01 ' into y
+:s/10 /z/g			turn all '10 ' into z
 			}
 
-:g/b.*11/d		remove all lines with 11 (the unused 2-bit not mapping onto a trit
-:%s/0b//		remove binary prefix 0b
-
-Go:			add a new line with : to the end of the file
-
-:%s/^/ /g		add space as padding to start of each line
-
-:g/:/norm 		for each line with : {
-y$				yank it into "
-0j				start of line 1 down
-				block select
-/:				until next line with :
-0k				but only 1st column until line above
-p				paste the line
-			}
-
-:g!/\v(\+|\*)/norm lD		delete content of all lines without + or * (except first space)
-
-o			start of macro @b { constructs formula from numbers and operators in line
-f x				find and delete next space (breaks recursion if not found)
-mc				set mark c
-$x				delete + or * from end of line to "
-`c				go to mark c
-P				paste the yanked + or *
-i)				add a ) after the number
-F:a(			add a ( after :
-@b				tail recursion
-"bdd			} end of macro @b
-
-:g/^/norm 		for each line {
-f x				delete first space
-@b				call @b
-			}
+	:g/b.*11/d		remove all lines with 11 (the unused 2-bit not mapping onto a trit)
+	:%s/0b//		remove binary prefix 0b
+	
+	Go:			add a new line with : to the end of the file
+	
+	:%s/^/ /g		add space as padding to start of each line
+	
+	:g/:/norm 		for each line with : {
+	y$				yank it into "
+	0j				start of line 1 down
+					block select
+	/:				until next line with :
+	0k				but only 1st column until line above
+	p				paste the line
+				}
+	
+	:g!/\v(\+|\*)/norm lD		delete content of all lines without + or * (except first space)
+	
+	o			start of macro @b { constructs formula from numbers and operators in line
+	f x				find and delete next space (breaks recursion if not found)
+	mc				set mark c
+	$x				delete + or * from end of line to "
+	`c				go to mark c
+	P				paste the yanked + or *
+	i)				add a ) after the number
+	F:a(			add a ( after :
+	@b				tail recursion
+	"bdd			} end of macro @b
+	
+	:g/^/norm 		for each line {
+	f x				delete first space
+	@b				call @b
+				}
 	
 	:g/^/norm 		for each line {
 	f:				go to :
