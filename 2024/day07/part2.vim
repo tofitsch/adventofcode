@@ -18,6 +18,7 @@ k				1 up
 
 O			start of macro @z {// concatenates first 2 numbers
 02f x				delete 2nd space
+k				1 up
 "zdd			} end of macro @z
 
 O			start of macro @a { //copy line with binary number and increment it by one
@@ -35,8 +36,11 @@ yyp				copy it
 @a				call @a
 			}
 
-:%s/\v(\d\d)/,\1/g		,-separate each pair of bits
-:g/^,/norm :s/,//g	remove all , from lines starting with ,
+:%s/\v(\d\d)/		for each pair of bits {
+,\1/g			comma-separate it }
+
+:g/^,/norm 		for each line starting with comma {
+:s/,//g		remove all commata }
 
 :%s/,00/@x/g		turn all ',00 ' into '@x'
 :%s/,01/@y/g		turn all ',01 ' into '@y'
@@ -60,42 +64,22 @@ p				paste the line
 	
 :g!/[xyz]/norm lD		delete content (except first space) of all lines without xyz
 
-:%s/@/ @/		add one more space as padding before macros
+:%s/@/ @/			add one more space as padding before macros
 
 :g/:/norm 			for each line with a : {
 f@					go to the macros @
 D					delete them into "
 :norm "				execute them
 				}
+
+:%s/: /:/		remove all spaces after :
+:%s/\s\s//		remove all double spaces
+:%s/\n//		remove newlines
+:%s/\s\s/  /g	
 	
-	o			start of macro @b { constructs formula from numbers and operators in line
-	f x				find and delete next space (breaks recursion if not found)
-	mc				set mark c
-	$x				delete + or * from end of line to "
-	`c				go to mark c
-	P				paste the yanked + or *
-	i)				add a ) after the number
-	F:a(			add a ( after :
-	@b				tail recursion
-	"bdd			} end of macro @b
+:g!/\v (\d*):\1 /d	delete all lines where no number:number pair matches
 	
-	:g/^/norm 		for each line {
-	f x				delete first space
-	@b				call @b
-				}
-	
-	:g/^/norm 		for each line {
-	f:				go to :
-	lD				delete formula to "
-	a="			evaluate formula and insert result
-				}
-	
-	:%s/\n//		remove newlines
-	:%s/\s\s/  /g	turn double space into new lines and spaces at start and end of lines
-	
-	:g!/\v (\d*):\1 /d	delete all lines where no number:number pair matches
-	
-	:%s/:.*\n/+		get all results (before:) in the remaining lines and make a sum expression
-	$x			delete trailing +
-	0D			delete expression into "
-	i="		insert result of expression
+:%s/:.*\n/+		get all results (before:) in the remaining lines and make a sum expression
+$x			delete trailing +
+0D			delete expression into "
+i="		insert result of expression
