@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# usage:
+# ./run_vim_macro.sh part1.vim input.txt
+#
+# or
+#
+# ./run_vim_macro.sh part1.vim input.txt -q
+
 # copy target file (input.txt) to tmp.txt
 cp $2 tmp.txt
 
@@ -10,7 +17,10 @@ while IFS= read -r line; do
   macro+=$(echo "$line" | cut -f1 -d$'\t')
 done < $1
 
-macro+="ZZ" > $1c #write and quit
+# add '-q' at the end of the command to save and quit
+if [[ "$3" == "-q" ]]; then
+  macro+="ZZ:qa!"
+fi
 
 # copy macro to .vimc file
 echo $macro > $1c
