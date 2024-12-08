@@ -24,11 +24,11 @@ void add_antinodes(Coord const& a, Coord const& b, size_t const n_y, size_t cons
 
   int n = 0;
   
-  while(antinodes
-        .insert({b.y + n * (b.y - a.y), b.x + n * (b.x - a.x)})
-        .first
-        ->inbounds(n_y, n_x)
-       )
+  while (antinodes
+          .insert({b.y + n * (b.y - a.y), b.x + n * (b.x - a.x)})
+          .first
+          ->inbounds(n_y, n_x)
+        )
     n++;
 
 }
@@ -78,14 +78,8 @@ int main() {
   int count = 0;
 
   for (Coord const& a : antinodes)
-    if (a.x >= 0 && a.x < n_x && a.y >= 0 && a.y < n_y) {
-      if (lines[a.y][a.x] == '.')
-	lines[a.y][a.x] = '#';
+    if (a.inbounds(n_y, n_x))
       count++;
-    }
-
-  for (string const& line : lines)
-    cout << line << endl;
 
   cout << count << endl;
 
