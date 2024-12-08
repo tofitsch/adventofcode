@@ -20,6 +20,19 @@ struct Coord {
 
 };
 
+void add_antinodes(Coord const& a, Coord const& b, size_t const n_y, size_t const n_x, set<Coord> & antinodes) {
+
+  int n = 0;
+  
+  while(antinodes
+        .insert({b.y + n * (b.y - a.y), b.x + n * (b.x - a.x)})
+        .first
+        ->inbounds(n_y, n_x)
+       )
+    n++;
+
+}
+
 int main() {
 
   ifstream in_file("input.txt");
@@ -55,36 +68,12 @@ int main() {
 
   set<Coord> antinodes;
 
-  for (auto const& [frequency, coords] : frequency_map) {
-
-    for (int i = 0; i < coords.size(); ++i) {
+  for (auto const& [frequency, coords] : frequency_map)
+    for (int i = 0; i < coords.size(); ++i)
       for (int j = i + 1; j < coords.size(); ++j) {
-	
-	Coord const& a = coords.at(i);
-	Coord const& b = coords.at(j);
-
-	int n = 0;
-
-	while(antinodes
-	      .insert({b.y + n * (b.y - a.y), b.x + n * (b.x - a.x)})
-	      .first
-	      ->inbounds(n_y, n_x)
-	     )
-	  n++;
-        
-	n = 0;
-
-	while(antinodes
-	      .insert({a.y + n * (a.y - b.y), a.x + n * (a.x - b.x)})
-	      .first
-	      ->inbounds(n_y, n_x)
-	     )
-	  n++;
-	  
+	add_antinodes(coords.at(i), coords.at(j), n_y, n_x, antinodes);
+	add_antinodes(coords.at(j), coords.at(i), n_y, n_x, antinodes);
       }
-    }
-
-  }
 
   int count = 0;
 
