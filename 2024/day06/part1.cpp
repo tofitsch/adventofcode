@@ -102,7 +102,7 @@ bool State::move() {
 
 int main() {
   
-  State::init_grid("example.txt");
+  State::init_grid("input.txt");
 
   State s;
 
