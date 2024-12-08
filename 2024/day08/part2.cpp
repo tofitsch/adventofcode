@@ -14,7 +14,7 @@ struct Coord {
     return y < other.y ? true : y == other.y ? x < other.x : false;
   }
 
-  bool const inbounds (int const n_y, int const n_x) const {
+  bool const inbounds (size_t const n_y, size_t const n_x) const {
     return x >= 0 && x < n_x && y >= 0 && y < n_y;
   }
 
