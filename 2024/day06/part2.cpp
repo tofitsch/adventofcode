@@ -103,11 +103,15 @@ int main() {
     
     State::grid[state.y][state.x] = '#';
 
-    while (alt_state.move())
-      if(! path.insert(alt_state).second) {
-        obstructions.insert({state.y, state.x});
-	break;
-      }
+    if(state.x != initial_state.x || state.y != initial_state.y) {
+
+      while (alt_state.move())
+        if(! path.insert(alt_state).second) {
+          obstructions.insert({state.y, state.x});
+          break;
+        }
+
+    }
 
     State::grid[state.y][state.x] = '.';
 
