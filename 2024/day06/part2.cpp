@@ -45,8 +45,8 @@ void State::init_xy() {
 
 void State::print() const {
 
-//  for (string const& line : grid)
-//    cout << line << endl;
+  for (string const& line : grid)
+    cout << line << endl;
   
   cout << x << " " << y << endl;
 
@@ -100,14 +100,14 @@ int main() {
 
   state.init_xy();
 
-  int counter = 0;
-
   set<State> path;
+
+  set<pair<int, int>> obstructions; 
 
   while (true) {
 
-    State sub_state = state;
-    set<State> sub_path = path;
+    State future_state = state;
+    set<State> future_path = path;
 
     if(! state.move())
       break;
@@ -116,9 +116,11 @@ int main() {
 
     State::grid[state.y][state.x] = '#';
 
-    while (sub_state.move())
-      if(! sub_path.insert(sub_state).second) {
-	counter++;
+    while (future_state.move())
+      if(! future_path.insert(future_state).second) {
+	obstructions.insert({state.y, state.x});
+//      State::grid[state.y][state.x] = 'O';
+//	state.print();
 	break;
       }
 
@@ -126,7 +128,7 @@ int main() {
 
   }
 
-  cout << counter << endl;
+  cout << obstructions.size() << endl;
 
 }
 
