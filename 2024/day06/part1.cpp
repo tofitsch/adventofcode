@@ -60,7 +60,7 @@ void State::init_grid(string const file_name) {
 
 bool State::move() {
   
-  grid[y][x] = 'x'; //XXX
+  grid[y][x] = 'x';
 
   int prev_x = x;
   int prev_y = y;
