@@ -12,8 +12,6 @@ long concat(long a, long b) {
 
 long solve(string const & line) {
 
-//	cout << line << endl;
-
 	stringstream line_stream{line};
 
 	string field;
