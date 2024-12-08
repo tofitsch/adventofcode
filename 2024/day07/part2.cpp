@@ -7,10 +7,12 @@
 using namespace std;
 
 long concat(long a, long b) {
-	return stol(to_string(a) + to_string(b));
+	return a * pow(10, static_cast<long>(log10(b)) + 1) + b;
 }
 
 long solve(string const & line) {
+
+//	cout << line << endl;
 
 	stringstream line_stream{line};
 
@@ -31,7 +33,7 @@ long solve(string const & line) {
 
 		long result = numbers.at(0);
 
-	  for (char bit = 0; bit < n_ops; bit++) {
+	  for (int bit = 0; bit < n_ops; bit++) {
 
 			bool const b0 = num >> (2 * bit) & 1;
 			bool const b1 = num >> (2 * bit + 1) & 1;
@@ -63,7 +65,7 @@ int main() {
   
   string line;
 
-	ifstream in_file("example.txt");
+	ifstream in_file("input.txt");
 
 	long count = 0;
 
