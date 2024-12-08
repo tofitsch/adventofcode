@@ -15,8 +15,6 @@ struct State {
   void init_xy();
   bool move();
 
-  void print() const; //XXX
-
 };
 
 vector<string> State::grid = {""};
@@ -46,15 +44,6 @@ void State::init_xy() {
 	return;
 
       }
-
-}
-
-void State::print() const {
-
-  for (string const& line : grid)
-    cout << line << endl;
-  
-  cout << x << " " << y << endl;
 
 }
 
