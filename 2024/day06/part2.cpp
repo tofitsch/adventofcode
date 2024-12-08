@@ -22,8 +22,6 @@ struct State {
 		   dir < other.dir;
   }
 
-  void print() const; //XXX
-
 };
 
 vector<string> State::grid = {""};
@@ -40,15 +38,6 @@ void State::init_xy() {
 	return;
 
       }
-
-}
-
-void State::print() const {
-
-  for (string const& line : grid)
-    cout << line << endl;
-  
-  cout << x << " " << y << endl;
 
 }
 
@@ -96,31 +85,27 @@ int main() {
   
   State::init_grid("input.txt");
 
-  State state;
+  State initial_state;
 
-  state.init_xy();
+  initial_state.init_xy();
 
-  set<State> path;
+  State state = initial_state;
 
   set<pair<int, int>> obstructions; 
 
   while (true) {
 
-    State future_state = state;
-    set<State> future_path = path;
+    State alt_state = initial_state;
+    set<State> path;
 
     if(! state.move())
       break;
     
-    path.insert(state);
-
     State::grid[state.y][state.x] = '#';
 
-    while (future_state.move())
-      if(! future_path.insert(future_state).second) {
-	obstructions.insert({state.y, state.x});
-//      State::grid[state.y][state.x] = 'O';
-//	state.print();
+    while (alt_state.move())
+      if(! path.insert(alt_state).second) {
+        obstructions.insert({state.y, state.x});
 	break;
       }
 
