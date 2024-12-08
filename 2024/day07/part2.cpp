@@ -33,7 +33,7 @@ long solve(string const & line) {
 
 		long result = numbers.at(0);
 
-	  for (int bit = 0; bit < n_ops; bit++) {
+	  for (long bit = 0; bit < n_ops; bit++) {
 
 			bool const b0 = num >> (2 * bit) & 1;
 			bool const b1 = num >> (2 * bit + 1) & 1;
@@ -45,7 +45,7 @@ long solve(string const & line) {
 			else if (b0 && !b1) // 10
 				result = concat(result, numbers.at(bit + 1));
 			else // 11
-				break;
+				goto next;
 
 			if (result > target)
 				break;
@@ -54,6 +54,8 @@ long solve(string const & line) {
 
 		if (target == result)
 			return target;
+
+    next:;
 
 	}
 
