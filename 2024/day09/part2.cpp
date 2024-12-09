@@ -34,8 +34,6 @@ vector<Block> get_blocks(string const& line) {
 
 void compress(vector<Block> & blocks) {
 
-	blocks.reserve(blocks.size() * 2);
-
 	Block *r = &blocks.back();
 
 	do {
@@ -48,8 +46,6 @@ void compress(vector<Block> & blocks) {
 	  while (++l <= r && (l->id >= 0 || l->size < r->size));
 
 		if (l < r) {
-
-			blocks.push_back({-1, r->size, r->position});
 
 			r->position = l->position;
 			l->position += r->size;
