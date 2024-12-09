@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-years = np.arange(2015, 2025)
-days = np.arange(1, 25)
+years = np.arange(2015, 2024 + 1)
+days = np.arange(1, 25 + 1)
 langs = {
   2024: 'vim/C++',
   2023: 'C++',
@@ -29,6 +29,8 @@ matrix = np.zeros((len(years), len(days)))
 for y, year in enumerate(years):
   for d, day in enumerate(days):
     matrix[y][d] = count_lines(f'{year}/day{day:02}/solution.txt')
+    if day == 25 and matrix[y][d] == 1:
+      matrix[y][d] = 2
 
 fig, ax = plt.subplots()
 colours = [
