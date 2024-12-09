@@ -39,7 +39,7 @@ void compress(vector<Block> & blocks) {
 
 	  Block *l = &blocks.front();
 
-	  while (++l <= r && (l->id >= 0 || l->size < r->size));
+	  while (++l < r && (l->id >= 0 || l->size < r->size));
 
 		if (l < r) {
 
