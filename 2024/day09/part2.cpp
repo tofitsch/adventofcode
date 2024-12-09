@@ -7,10 +7,6 @@ using namespace std;
 
 struct Block {int id, size, position;};
 
-bool by_position(Block const& a, Block const& b) {
-	return a.position < b.position;
-}
-
 vector<Block> get_blocks(string const& line) {
 
 	vector<Block> blocks;
