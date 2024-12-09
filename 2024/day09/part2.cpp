@@ -20,10 +20,7 @@ vector<Block> get_blocks(string const& line) {
 
 		int size = c - '0';
 
-		if (is_file)
-			blocks.push_back({id++, size, position});
-		else
-			blocks.push_back({-1, size, position});
+	  blocks.push_back({is_file ? id++ : -1, size, position});
 
 		position += size;
 
