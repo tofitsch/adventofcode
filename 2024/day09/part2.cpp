@@ -38,9 +38,6 @@ void compress(vector<Block> & blocks) {
 
 	do {
 
-		if (r->id < 0)
-			r--;
-
 	  Block *l = &blocks.front();
 
 	  while (++l <= r && (l->id >= 0 || l->size < r->size));
@@ -53,7 +50,7 @@ void compress(vector<Block> & blocks) {
 
 		}
 
-	} while (--r > &blocks.front());
+	} while ((r -= 2) > &blocks.front());
 
 }
 
