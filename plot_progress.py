@@ -3,9 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
-years = np.arange(2015, 2024)
+years = np.arange(2015, 2025)
 days = np.arange(1, 25)
 langs = {
+  2024: 'vim/C++',
   2023: 'C++',
   2022: 'AWK',
   2021: 'vimscript',
