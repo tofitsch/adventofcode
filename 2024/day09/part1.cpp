@@ -4,18 +4,6 @@
 
 using namespace std;
 
-void print(vector<int> & blocks) { //XXX
-
-	for (int i : blocks)
-		if (i >= 0)
-			cout << i;
-	  else
-			cout << '.';
-
-	cout << endl;
-
-}
-
 vector<int> get_blocks(string const& line) {
 
 	vector<int> blocks;
@@ -87,11 +75,7 @@ int main() {
 
 	vector<int> blocks = get_blocks(line);
 
-	print(blocks);
-
 	compress(blocks);
-
-	print(blocks);
 
 	cout << checksum(blocks) <<  endl;
 
