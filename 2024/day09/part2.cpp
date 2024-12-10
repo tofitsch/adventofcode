@@ -19,7 +19,7 @@ vector<Block> get_blocks(string const& line) {
 
 		int size = c - '0';
 
-	  blocks.push_back({is_file ? id++ : -1, size, position});
+		blocks.push_back({is_file ? id++ : -1, size, position});
 
 		position += size;
 
@@ -37,9 +37,9 @@ void compress(vector<Block> & blocks) {
 
 	do {
 
-	  Block *l = &blocks.front();
+		Block *l = &blocks.front();
 
-	  while (++l <= r && (l->id >= 0 || l->size < r->size));
+		while (++l < r && (l->id >= 0 || l->size < r->size));
 
 		if (l < r) {
 
