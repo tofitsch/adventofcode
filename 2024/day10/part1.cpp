@@ -21,7 +21,7 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 
 		if (first_line) {
 
-	    len = line.size();
+			len = line.size();
 
 			first_line = false;
 
@@ -30,9 +30,9 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 		for (char c : line)
 			nodes.push_back({c, {}});
 
-  }
+	}
 
-  return move(nodes);
+	return move(nodes);
 
 }
 
@@ -55,7 +55,7 @@ vector<Node*> connect_nodes(vector<Node> & nodes, int len) {
 			start_nodes.push_back(& nodes[i]);
 
 		if (i % len > 0)
-		  check_and_connect(& nodes[i], & nodes[i - 1]);
+			check_and_connect(& nodes[i], & nodes[i - 1]);
 
 		if (i >= len)
 			check_and_connect(& nodes[i], & nodes[i - len]);
@@ -104,7 +104,7 @@ int main() {
 
 	for (Node * n : start_nodes)
 		sum += score(n);
-  
+
 	cout << sum << endl;
 
 }
