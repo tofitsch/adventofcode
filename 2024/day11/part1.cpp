@@ -72,12 +72,7 @@ int main () {
 
 		n = vec.size();
 
-//		cout << s << ": " << n << endl;
-
 	}
-
-//	for (long l : vec)
-//		cout << l << endl; 
 
 	cout << n << endl;
 
