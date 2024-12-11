@@ -6,7 +6,11 @@
 
 using namespace std;
 
-long n_digits(long in) {return static_cast<long>(log10(in)) + 1;}
+long n_digits(long in) {
+
+	return static_cast<long>(log10(in)) + 1;
+
+}
 
 long split_digits(long & in) {
 
