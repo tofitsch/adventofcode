@@ -67,7 +67,7 @@ int main () {
 
 	vector<long> vec = get_vec("input.txt");
 
-  int n = vec.size();
+	int n = vec.size();
 
 	for (int s = 0; s < n_steps; s++) {
 

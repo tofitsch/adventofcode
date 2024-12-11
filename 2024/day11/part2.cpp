@@ -66,7 +66,7 @@ map<long, long> get_stones(string const& in_file_name) {
 	map<long, long> stones;
 
 	while (getline(line_stream, field, ' '))
-	  add(stones, stol(field), 1);
+		add(stones, stol(field), 1);
 
 	return move(stones);
 
