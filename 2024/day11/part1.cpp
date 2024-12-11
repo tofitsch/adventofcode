@@ -22,66 +22,63 @@ long split_digits(long & in) {
 
 }
 
-struct Node {
+void transform(vector<long> & vec, int i) {
 
-	long value;
-
-	Node *l = nullptr, *r = nullptr;
-
-	Node(long v) : value(v) {}
-	Node(string str) {value = stol(str);}
-
-	void transform(vector<Node> & nodes) {
-
-		if (value == 0) {
-			value++;
-			return;
-		}
-
-		if (n_digits(value) % 2 == 0) {
-			nodes.push_back(Node(split_digits(value)));
-			return;
-		}
-
-		value *= 2024;
-
+	if (vec[i] == 0) {
+		vec[i]++;
+		return;
 	}
 
-};
+	if (n_digits(vec[i]) % 2 == 0) {
+		vec.push_back(split_digits(vec[i]));
+		return;
+	}
 
-int main () {
+	vec[i] *= 2024;
 
-	int const n_steps = 25;
+}
+
+vector<long> get_vec(string const& in_file_name) {
 
 	string line, field;
 
-	vector<Node> nodes;
-
-	fstream in_file("input.txt");
+	fstream in_file(in_file_name);
 
 	getline(in_file, line);
 
 	stringstream line_stream(line);
 
-	while (getline(line_stream, field, ' '))
-		nodes.push_back(Node(field));
+	vector<long> vec;
 
-  int n_nodes = nodes.size();
+	while (getline(line_stream, field, ' '))
+		vec.push_back(stol(field));
+
+	return move(vec);
+
+}
+
+int main () {
+
+	int const n_steps = 25;
+
+	vector<long> vec = get_vec("input.txt");
+
+  int n = vec.size();
 
 	for (int s = 0; s < n_steps; s++) {
 
-		for (int i = 0; i < n_nodes; i++)
-			nodes[i].transform(nodes);
+		for (int i = 0; i < n; i++)
+			transform(vec, i);
 
-		n_nodes = nodes.size();
+		n = vec.size();
 
-//		cout << s << ": " << n_nodes << endl;
+//		cout << s << ": " << n << endl;
 
 	}
 
-//	for (Node & n : nodes)
-//		cout << n.value << endl; 
+//	for (long l : vec)
+//		cout << l << endl; 
 
-	cout << n_nodes << endl;
+	cout << n << endl;
 
 }
