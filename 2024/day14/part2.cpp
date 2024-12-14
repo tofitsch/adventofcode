@@ -79,8 +79,6 @@ int measure (vector<Bot> const& bots) {
   for (Bot const& bot : bots)
 		sum += abs(n_x / 2 - bot.x) + abs(n_y / 2 - bot.y);
 
-//  cout << sum << endl;
-
 	return sum;
 
 }
