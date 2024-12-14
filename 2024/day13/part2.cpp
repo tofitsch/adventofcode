@@ -72,8 +72,8 @@ void parse(string const& line, long & x, long & y) {
 
 	regex_search(line, match, re);
 
-	x = stof(match[1].str());
-	y = stof(match[2].str());
+	x = stol(match[1].str());
+	y = stol(match[2].str());
 
 }
 
