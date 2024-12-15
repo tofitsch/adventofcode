@@ -61,7 +61,7 @@ int score(vector<string> const& grid) {
 
 	for (int y = 0; y < grid.size(); y++)
 		for (int x = 0; x < grid[0].size(); x++)
-			if (grid[y][x] == '[' || grid[y][x] == ']')
+			if (grid[y][x] == '[')
 				sum += 100 * y + x;
 
 	return sum;
@@ -138,13 +138,13 @@ bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = 
 	if (grid[next.y][next.x] == '#')
 		return false;
 
-	if (c == '^' || c == 'v' && (tile == '[' || tile == ']')) {
+	if ((c == '^' || c == 'v') && (tile == '[' || tile == ']')) {
 
 		vector<Coord> movers;
 
 		bool origin_moves;
 
-		if (tile == '[')
+		if (tile == '[') 
 			origin_moves = try_move_box_vertically(c, coord, grid, movers);
 		else if (tile == ']')
 			origin_moves = try_move_box_vertically(c, {coord.y, coord.x - 1}, grid, movers);
@@ -185,14 +185,14 @@ int main () {
 	string moves;
 	Coord bot;
 
-	read_file("example.txt", grid, moves, bot);
+	read_file("input.txt", grid, moves, bot);
 
 	print(grid);
 
 	for (char c : moves) {
-	  print(grid);
+//	  print(grid);
 		move(c, bot, grid, & bot);
-		cin.get();
+//		cin.get();
 	}
 
 	print(grid);
