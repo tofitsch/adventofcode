@@ -6,6 +6,8 @@ using namespace std;
 
 struct Coord {int y, x;};
 
+struct Box {Coord coord; Box * dependency1, * dependency2;};
+
 string widen(string const& line) {
 
 	string out = "";
@@ -69,6 +71,26 @@ void undo(char const c, Coord const coord, vector<string> & grid) {
 
 }
 
+
+int score(vector<string> const& grid) {
+
+	int sum = 0;
+
+	for (int y = 0; y < grid.size(); y++)
+		for (int x = 0; x < grid[0].size(); x++)
+			if (grid[y][x] == '[' || grid[y][x] == ']')
+				sum += 100 * y + x;
+
+	return sum;
+
+}
+
+bool move(char const c, Box const box, vector<string> & grid) {
+
+	return false;
+
+}
+
 bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = nullptr) {
 
 	char const tile = grid[coord.y][coord.x];
@@ -88,31 +110,19 @@ bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = 
 	if (grid[next.y][next.x] == '#')
 		return false;
 
-	bool moved = move(c, next, grid);
+	if (c == '^' || tile == 'v') {
 
-	bool moved2 = true;
+		if (tile == '[')
+			return move(c, {coord, nullptr, nullptr}, grid);
 
-	if (moved && (c == '^' || c == 'v')) {
-
-	  if (tile == '[')
-	  	moved2 = move(c, {coord.y, coord.x + 1}, grid);
-
-	  else if (tile == ']')
-	  	moved2 = move(c, {coord.y, coord.x - 1}, grid);
+		else if (tile == '[')
+			return move(c, {{coord.y, coord.x - 1}, nullptr, nullptr}, grid);
 
 	}
 
-	if (moved && !moved2) {
+	if (move(c, next, grid)) {
 
-		undo(c, next, grid);
-
-		return false;
-
-	}
-
-	if (moved && moved2) {
-
-		grid[next.y][next.x] = grid[coord.y][coord.x];
+		grid[next.y][next.x] = tile;
 		grid[coord.y][coord.x] = '.';
 
 		if (bot != nullptr)
@@ -123,19 +133,6 @@ bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = 
 	}
 
 	return false;
-
-}
-
-int score(vector<string> const& grid) {
-
-	int sum = 0;
-
-	for (int y = 0; y < grid.size(); y++)
-		for (int x = 0; x < grid[0].size(); x++)
-			if (grid[y][x] == '[' || grid[y][x] == ']')
-				sum += 100 * y + x;
-
-	return sum;
 
 }
 
