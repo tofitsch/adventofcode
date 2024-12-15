@@ -6,8 +6,6 @@ using namespace std;
 
 struct Coord {int y, x;};
 
-struct Box {Coord coord; Box * dependency1, * dependency2;};
-
 string widen(string const& line) {
 
 	string out = "";
@@ -85,7 +83,42 @@ int score(vector<string> const& grid) {
 
 }
 
-bool move(char const c, Box const box, vector<string> & grid) {
+bool move_box(char const c, Coord const coord, vector<string> & grid) {
+
+	int dy = c == '^' ? -1 : 1;
+
+	int x = coord.x;
+	int y = coord.y;
+
+	vector<Coord> dependencies;
+
+	switch (grid[y + dy][x]) {
+		case '[': dependencies.push_back({y + dy, x}); break;
+		case ']': dependencies.push_back({y + dy, x - 1}); break;
+		case '#': return false;
+	};
+
+	switch (grid[y + dy][x + 1]) {
+		case '[': dependencies.push_back({y + dy, x + 1}); break;
+		case '#': return false;
+	};
+
+	bool movable = true;
+
+	for (Coord const& d : dependencies)
+		movable &= move_box(c, d, grid);
+
+	if (movable) {
+
+		grid[y + dy][x] = grid[y][x];
+		grid[y + dy][x + 1] = grid[y][x + 1];
+
+		grid[y][x] = '.';
+		grid[y][x + 1] = '.';
+
+		return true;
+
+	}
 
 	return false;
 
@@ -110,13 +143,13 @@ bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = 
 	if (grid[next.y][next.x] == '#')
 		return false;
 
-	if (c == '^' || tile == 'v') {
+	if (c == '^' || c == 'v') {
 
 		if (tile == '[')
-			return move(c, {coord, nullptr, nullptr}, grid);
+			return move_box(c, coord, grid);
 
-		else if (tile == '[')
-			return move(c, {{coord.y, coord.x - 1}, nullptr, nullptr}, grid);
+		else if (tile == ']')
+			return move_box(c, {coord.y, coord.x - 1}, grid);
 
 	}
 
