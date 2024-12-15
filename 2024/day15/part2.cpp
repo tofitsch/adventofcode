@@ -55,21 +55,6 @@ void read_file (string const& file_name, vector<string> & grid, string & moves, 
 
 }
 
-void undo(char const c, Coord const coord, vector<string> & grid) {
-
-	Coord next = coord;
-
-	switch (c) {
-		case '^': next.y++; break;
-		case 'v': next.y--; break;
-	};
-
-	grid[next.y][next.x] = grid[coord.y][coord.x];
-	grid[coord.y][coord.x] = '.';
-
-}
-
-
 int score(vector<string> const& grid) {
 
 	int sum = 0;
@@ -83,7 +68,9 @@ int score(vector<string> const& grid) {
 
 }
 
-bool move_box(char const c, Coord const coord, vector<string> & grid) {
+bool try_move_box_vertically(char const c, Coord const coord, vector<string> & grid, vector<Coord> & movers) {
+
+	movers.push_back(coord);
 
 	int dy = c == '^' ? -1 : 1;
 
@@ -106,21 +93,29 @@ bool move_box(char const c, Coord const coord, vector<string> & grid) {
 	bool movable = true;
 
 	for (Coord const& d : dependencies)
-		movable &= move_box(c, d, grid);
+		movable &= try_move_box_vertically(c, d, grid, movers);
 
-	if (movable) {
+	return movable;
 
-		grid[y + dy][x] = grid[y][x];
-		grid[y + dy][x + 1] = grid[y][x + 1];
+}
 
-		grid[y][x] = '.';
-		grid[y][x + 1] = '.';
+void move_boxes_vertically(char const c, vector<Coord> const movers, vector<string> & grid) {
 
-		return true;
+	int dy = c == '^' ? -1 : 1;
+
+	for (Coord const& m : movers) {
+
+		grid[m.y][m.x] = '.';
+		grid[m.y][m.x + 1] = '.';
 
 	}
 
-	return false;
+	for (Coord const& m : movers) {
+
+		grid[m.y + dy][m.x] = '['; 
+		grid[m.y + dy][m.x + 1] = ']';
+
+	}
 
 }
 
@@ -143,13 +138,21 @@ bool move(char const c, Coord const coord, vector<string> & grid, Coord * bot = 
 	if (grid[next.y][next.x] == '#')
 		return false;
 
-	if (c == '^' || c == 'v') {
+	if (c == '^' || c == 'v' && (tile == '[' || tile == ']')) {
+
+		vector<Coord> movers;
+
+		bool origin_moves;
 
 		if (tile == '[')
-			return move_box(c, coord, grid);
-
+			origin_moves = try_move_box_vertically(c, coord, grid, movers);
 		else if (tile == ']')
-			return move_box(c, {coord.y, coord.x - 1}, grid);
+			origin_moves = try_move_box_vertically(c, {coord.y, coord.x - 1}, grid, movers);
+
+		if (origin_moves)
+			move_boxes_vertically(c, movers, grid);
+
+		return origin_moves;
 
 	}
 
