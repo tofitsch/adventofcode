@@ -27,11 +27,13 @@ struct Node {
 	int distance = numeric_limits<int>::max();
 	bool visited = false;
 
-	bool const operator < (Node const& other) const {
-		return distance < other.distance;
-	}
-
 };
+
+bool distance_decreasing(const Node * a, const Node * b){
+
+	return a->distance > b->distance;
+
+}
 
 map<Coord, Node> read_nodes(string const& file_name) {
 
@@ -53,7 +55,7 @@ map<Coord, Node> read_nodes(string const& file_name) {
 				for (char d = 0; d < 4; d++)
 					nodes[{y, x, d}] = {c};
 
-		  x++;
+			x++;
 
 		}
 
@@ -77,9 +79,10 @@ void check_and_connect(Coord const& a, Coord const& b, int weight, map<Coord, No
 
 int mod(int a, int b) {
 
-	int r = a % b;
+	while (a < 0)
+		a += b;
 
-	return r < 0 ? r + b : r;
+	return a % b;
 
 }
 
@@ -93,10 +96,10 @@ Node * connect_nodes(map<Coord, Node> & nodes) {
 			start = & node;
 
 		switch (coord.d) {
-			case 0: check_and_connect(coord, {coord.y - 1, coord.x, 0}, 1, nodes);
-			case 1: check_and_connect(coord, {coord.y, coord.x + 1, 1}, 1, nodes);
-			case 2: check_and_connect(coord, {coord.y + 1, coord.x, 2}, 1, nodes);
-			case 3: check_and_connect(coord, {coord.y + 1, coord.x, 3}, 1, nodes);
+			case 0: check_and_connect(coord, {coord.y - 1, coord.x, 0}, 1, nodes); break;
+			case 1: check_and_connect(coord, {coord.y, coord.x + 1, 1}, 1, nodes); break;
+			case 2: check_and_connect(coord, {coord.y + 1, coord.x, 2}, 1, nodes); break;
+			case 3: check_and_connect(coord, {coord.y + 1, coord.x, 3}, 1, nodes); break;
 		}
 
 		check_and_connect(coord, {coord.y, coord.x, mod(coord.d + 1, 4)}, 1000, nodes);
@@ -110,43 +113,43 @@ Node * connect_nodes(map<Coord, Node> & nodes) {
 
 int dijkstra(Node * start, map<Coord, Node> & nodes) {
 
-  vector<Node *> queue;
+	vector<Node *> queue;
 
 	for (auto & [coord, node] : nodes)
-		queue.push_back(* node);
+		queue.push_back(& node);
 
-  start->distance = 0;
-
-  while (! queue.empty()){
-    
-    sort(queue.begin(), queue.end());
-
-    Node * node = queue.back();
-
-    node->visited = true;
-
-    queue.pop_back();
-
-    int ctr = 0;
-
+	start->distance = 0;
+	
+	while (! queue.empty()){
+	
+		sort(queue.begin(), queue.end(), distance_decreasing);
+		
+		Node * node = queue.back();
+		
+		node->visited = true;
+		
+		queue.pop_back();
+		
+		int ctr = 0;
+		
 		for (int i = 0; i < node->edges.size(); i++) {
-      if(! node->edges[i]->visited){
-        
-        int distance_update = node->distance + node->weights[i];
-          
-        if(distance_update < node->edges[i]->distance){
-        
-          node->edges[i]->distance = distance_update;
+			if(! node->edges[i]->visited){
+				
+				int distance_update = node->distance + node->weights[i];
 
+				if(distance_update < node->edges[i]->distance){
+				
+					node->edges[i]->distance = distance_update;
+				
 					if (node->edges[i]->value == 'E')
 						return distance_update;
+				
+				}
+			
+			}
+		}
 
-        }
-
-      }
-    }
-
-  }
+	}
 
 	return -1;
 
@@ -154,7 +157,7 @@ int dijkstra(Node * start, map<Coord, Node> & nodes) {
 
 int main() {
 
-	map<Coord, Node> nodes = read_nodes("example.txt");
+	map<Coord, Node> nodes = read_nodes("input.txt");
 
 	Node *start = connect_nodes(nodes);
 
