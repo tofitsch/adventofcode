@@ -99,7 +99,7 @@ Node * connect_nodes(map<Coord, Node> & nodes) {
 			case 0: check_and_connect(coord, {coord.y - 1, coord.x, 0}, 1, nodes); break;
 			case 1: check_and_connect(coord, {coord.y, coord.x + 1, 1}, 1, nodes); break;
 			case 2: check_and_connect(coord, {coord.y + 1, coord.x, 2}, 1, nodes); break;
-			case 3: check_and_connect(coord, {coord.y + 1, coord.x, 3}, 1, nodes); break;
+			case 3: check_and_connect(coord, {coord.y, coord.x - 1, 3}, 1, nodes); break;
 		}
 
 		check_and_connect(coord, {coord.y, coord.x, mod(coord.d + 1, 4)}, 1000, nodes);
@@ -133,11 +133,11 @@ int dijkstra(Node * start, map<Coord, Node> & nodes) {
 		int ctr = 0;
 		
 		for (int i = 0; i < node->edges.size(); i++) {
-			if(! node->edges[i]->visited){
+			if (! node->edges[i]->visited) {
 				
 				int distance_update = node->distance + node->weights[i];
 
-				if(distance_update < node->edges[i]->distance){
+				if (distance_update < node->edges[i]->distance) {
 				
 					node->edges[i]->distance = distance_update;
 				
