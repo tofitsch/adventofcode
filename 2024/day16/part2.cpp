@@ -182,33 +182,19 @@ void traverse(Node const* node, set<Tile> & tiles) {
 
 }
 
-void print (string const& in_file_name, set<Tile> const& tiles) {
-
-	ifstream in_file(in_file_name);
-
-	string line;
-
-	vector<string> grid;
-
-	while (getline(in_file, line))
-		grid.push_back(line);
-
-	for (Tile const& tile : tiles)
-		grid[tile.y][tile.x] = 'O';
-
-	for (string const& row: grid)
-		cout << row << endl;
-
-}
-
 int count_tiles_on_best_paths(vector<Node*> ends) {
 
 	set<Tile> tiles;
 
-	for (Node const* end : ends)
-		traverse(end, tiles);
+	int min_dist = numeric_limits<int>::max();
 
-	print("example.txt", tiles);
+	for (Node const* end : ends)
+		if (end->distance < min_dist)
+			min_dist = end->distance;
+
+	for (Node const* end : ends)
+		if (end->distance == min_dist)
+			traverse(end, tiles);
 
 	return tiles.size();
 	
@@ -216,7 +202,7 @@ int count_tiles_on_best_paths(vector<Node*> ends) {
 
 int main() {
 
-	map<Coord, Node> nodes = read_nodes("example.txt");
+	map<Coord, Node> nodes = read_nodes("input.txt");
 
 	vector<Node*> ends;
 
