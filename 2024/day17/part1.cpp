@@ -88,26 +88,27 @@ string Computer::run() {
 		cout << reg_a << " " << reg_b << " " << reg_c << endl;
 
 		int opcode = program[i];
-		int operand = program[i + 1];
+		int literal = program[i + 1];
+		int combo = literal;
 
-		switch (operand) {
+		switch (combo) {
 
-			case 4: operand = reg_a; break;
-			case 5: operand = reg_b; break;
-			case 6: operand = reg_c; break;
+			case 4: combo = reg_a; break;
+			case 5: combo = reg_b; break;
+			case 6: combo = reg_c; break;
 
 		};
 
 		switch (opcode) {
 
-			case 0: reg_a /= ipow(2, operand); break;
-			case 1: reg_b ^= operand; break;
-			case 2: reg_b = operand % 8; break;
-			case 3: if(reg_a != 0) i = operand - 2; break;
+			case 0: reg_a /= ipow(2, combo); break;
+			case 1: reg_b ^= literal; break;
+			case 2: reg_b = combo % 8; break;
+			case 3: if(reg_a != 0) i = literal - 2; break;
 			case 4: reg_b ^= reg_c; break;
-			case 5: output += to_string(operand % 8) + ",";
-			case 6: reg_b = reg_a / ipow(2, operand); break;
-			case 7: reg_c = reg_a / ipow(2, operand); break;
+			case 5: output += to_string(combo % 8) + ",";
+			case 6: reg_b = reg_a / ipow(2, combo); break;
+			case 7: reg_c = reg_a / ipow(2, combo); break;
 
 		};
 
