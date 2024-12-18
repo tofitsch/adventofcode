@@ -85,8 +85,6 @@ string Computer::run() {
 
 	for (int i = 0; i < program.size(); i += 2) {
 
-		cout << reg_a << " " << reg_b << " " << reg_c << endl;
-
 		int opcode = program[i];
 		int literal = program[i + 1];
 		int combo = literal;
@@ -106,7 +104,7 @@ string Computer::run() {
 			case 2: reg_b = combo % 8; break;
 			case 3: if(reg_a != 0) i = literal - 2; break;
 			case 4: reg_b ^= reg_c; break;
-			case 5: output += to_string(combo % 8) + ",";
+			case 5: output += to_string(combo % 8) + ","; break;
 			case 6: reg_b = reg_a / ipow(2, combo); break;
 			case 7: reg_c = reg_a / ipow(2, combo); break;
 
