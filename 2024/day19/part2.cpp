@@ -40,7 +40,7 @@ void read_file(string in_file_name, set<string> & towels, vector<string> & patte
 
 long solve(string const& pattern, set<string> const& towels, int const max_len, int const offset, map<int, long> & cache) {
 
-	int sum = 0;
+	long sum = 0;
 
 	if (offset == pattern.size())
 		return 1;
@@ -73,15 +73,9 @@ int main() {
 
 	for (string const& pattern : patterns) {
 
-		cout << pattern << endl;
-
 		map<int, long> cache;
 
-		long count = solve(pattern, towels, max_len, 0, cache);
-
-		cout << count << endl;
-
-		sum += count;
+		sum += solve(pattern, towels, max_len, 0, cache);
 
 	}
 
