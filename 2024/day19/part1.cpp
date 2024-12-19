@@ -2,10 +2,11 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <set>
 
 using namespace std;
 
-void read_file(string in_file_name, vector<string> &towels, vector<string> &patterns) {
+void read_file(string in_file_name, set<string> & towels, vector<string> & patterns, int & max_len) {
 
 	string line, field;
 
@@ -15,12 +16,17 @@ void read_file(string in_file_name, vector<string> &towels, vector<string> &patt
 
 	stringstream line_stream(line);
 
+	max_len = 0;
+
 	while (getline(line_stream, field, ' ')) {
 
-		towels.push_back(field);
+		if (field.back() == ',')
+			field.pop_back();
 
-		if (towels.back().back() == ',')
-			towels.back().pop_back();
+		if (field.size() > max_len)
+			max_len = field.size();
+
+		towels.insert(field);
 
 	}
 
@@ -31,7 +37,15 @@ void read_file(string in_file_name, vector<string> &towels, vector<string> &patt
 
 }
 
-bool solve(string const& pattern, vector<string> const& towels) {
+bool solve(string const& pattern, set<string> const& towels, int const max_len, int const offset) {
+
+	if (offset == pattern.size())
+		return true;
+
+	for (int i = 1; i <= max_len && offset + i <= pattern.size(); i++)
+		if (towels.find(pattern.substr(offset, i)) != towels.end())
+			if (solve(pattern, towels, max_len, offset + i))
+				return true;
 
 	return false;
 
@@ -39,14 +53,17 @@ bool solve(string const& pattern, vector<string> const& towels) {
 
 int main() {
 
-	vector<string> towels, patterns;
+	set<string> towels;
+	vector<string> patterns;
 
-	read_file("example.txt", towels, patterns);
+	int max_len;
+
+	read_file("input.txt", towels, patterns, max_len);
 
 	int ctr = 0;
 
 	for (string const& pattern : patterns)
-		if (solve(pattern, towels))
+		if (solve(pattern, towels, max_len, 0))
 			ctr++;
 
 	cout << ctr << endl;
