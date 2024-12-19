@@ -38,12 +38,12 @@ void read_file(string in_file_name, set<string> & towels, vector<string> & patte
 
 }
 
-long solve(string const& pattern, set<string> const& towels, int const max_len, int const offset, map<int, long> & cache) {
-
-	long sum = 0;
+long solve(string_view const& pattern, set<string> const& towels, int const max_len, int const offset, map<int, long> & cache) {
 
 	if (offset == pattern.size())
 		return 1;
+
+	long sum = 0;
 
 	for (int i = 1; i <= max_len && offset + i <= pattern.size(); i++) {
 		if (towels.find(pattern.substr(offset, i)) != towels.end()) {
