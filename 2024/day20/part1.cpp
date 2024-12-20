@@ -74,7 +74,7 @@ void check_and_connect(Coord const& a, Coord const& b, map<Coord, Node> & nodes)
 
 }
 
-void connect_nodes(map<Coord, Node> & nodes, Node * start, Node * end) { 
+void connect_nodes(map<Coord, Node> & nodes, Node *& start, Node *& end) { 
 
 	for (auto & [coord, node] : nodes) {
 
@@ -87,7 +87,7 @@ void connect_nodes(map<Coord, Node> & nodes, Node * start, Node * end) {
 		check_and_connect(coord, {coord.y, coord.x + 1}, nodes);
 		check_and_connect(coord, {coord.y + 1, coord.x}, nodes);
 		check_and_connect(coord, {coord.y, coord.x - 1}, nodes);
-	
+
 	}
 
 }
@@ -102,7 +102,7 @@ int dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
 	start->distance = 0;
 	
 	while (! queue.empty()){
-	
+
 		sort(queue.begin(), queue.end(), distance_decreasing);
 		
 		Node * node = queue.back();
