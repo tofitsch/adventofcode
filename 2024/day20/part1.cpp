@@ -65,6 +65,62 @@ map<Coord, Node> read_nodes(string const& file_name) {
 
 }
 
+vector<Coord> neighbors(Coord const& coord) {
+
+	return {
+		{coord.y - 1, coord.x},
+		{coord.y, coord.x + 1},
+		{coord.y + 1, coord.x},
+		{coord.y, coord.x - 1},
+	};
+
+}
+
+int n_neighboring_nodes(Coord const& coord, map<Coord, Node> const& nodes) {
+
+	int ctr = 0;
+
+	for (Coord const& neighbor : neighbors(coord))
+		if (nodes.find(neighbor) != nodes.end())
+			ctr++;
+
+	return ctr;
+
+}
+
+vector<Coord> read_shortcuts(string const& file_name, map<Coord, Node> const& nodes) {
+
+	vector<Coord> shortcuts;
+
+	fstream in_file(file_name);
+
+	string line;
+
+	int y = 0;
+
+	while (getline(in_file, line)) {
+
+		int x = 0;
+
+		for (char c : line) {
+
+			Coord const coord {y, x};
+
+			if (c == '#' && n_neighboring_nodes(coord, nodes) > 1)
+				shortcuts.push_back(coord);
+
+			x++;
+
+		}
+
+		y++;
+
+	}
+
+	return shortcuts;
+
+}
+
 void check_and_connect(Coord const& a, Coord const& b, map<Coord, Node> & nodes) {
 
 	if (nodes.find(a) == nodes.end() || nodes.find(b) == nodes.end())
@@ -83,10 +139,8 @@ void connect_nodes(map<Coord, Node> & nodes, Node *& start, Node *& end) {
 			case 'E': end = & node; break;
 		}
 
-		check_and_connect(coord, {coord.y - 1, coord.x}, nodes);
-		check_and_connect(coord, {coord.y, coord.x + 1}, nodes);
-		check_and_connect(coord, {coord.y + 1, coord.x}, nodes);
-		check_and_connect(coord, {coord.y, coord.x - 1}, nodes);
+		for (Coord const& neighbor : neighbors(coord))
+			check_and_connect(coord, neighbor, nodes);
 
 	}
 
@@ -138,7 +192,11 @@ int dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
 
 int main() {
 
-	map<Coord, Node> nodes = read_nodes("example.txt");
+	string const in_file_name = "example.txt";
+	
+	map<Coord, Node> nodes = read_nodes(in_file_name);
+
+	vector<Coord> shortcuts = read_shortcuts(in_file_name, nodes);
 
 	Node *start, *end;
 
