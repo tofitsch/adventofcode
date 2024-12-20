@@ -17,28 +17,13 @@ struct Coord {
 		return tie(y, x) < tie(other.y, other.x);
 	}
 
-};
-
-struct Node {
-
-	char value;
-
-	vector<Node*> edges {};
-
-	int distance = numeric_limits<int>::max();
-	bool visited = false;
+	bool const operator != (Coord const& other) const {
+		return y != other.y || x != other.x;
+	}
 
 };
 
-bool distance_decreasing(const Node * a, const Node * b){
-
-	return a->distance > b->distance;
-
-}
-
-map<Coord, Node> read_nodes(string const& file_name) {
-
-	map<Coord, Node> nodes;
+void read_path(string const& file_name, map<Coord, int> & path, Coord & start, Coord & end) {
 
 	fstream in_file(file_name);
 
@@ -52,8 +37,12 @@ map<Coord, Node> read_nodes(string const& file_name) {
 
 		for (char c : line) {
 
-			if (c != '#')
-				nodes[{y, x}] = {c};
+			switch (c) {
+				case '#': break;
+				case 'S': start = {y, x};
+				case 'E': end = {y, x};
+				default: path[{y, x}] = 0;
+			};
 
 			x++;
 
@@ -63,11 +52,32 @@ map<Coord, Node> read_nodes(string const& file_name) {
 
 	}
 
-	return nodes;
-
 }
 
-vector<Coord> neighbors(Coord const& coord) {
+/*
+vector<Coord> get_path_within(Coord const& coord, int radius, set<Coord> const& path_set) {
+
+	vector<Coord> vec;
+
+	for (int y = 0; y < radius; y++) {
+		for (int y = 0; y < radius; y++) {
+
+			if (x + y > radius)
+
+			Coord const c{y, x};
+
+			if (c != coord && path_set.find(c) != path_set.end())
+				neighbors.push_back(c);
+
+		}
+	}
+
+	return vec;
+
+}
+*/
+
+vector<Coord> get_neighbors(Coord const& coord) {
 
 	return {
 		{coord.y - 1, coord.x},
@@ -78,162 +88,33 @@ vector<Coord> neighbors(Coord const& coord) {
 
 }
 
-int n_neighboring_nodes(Coord const& coord, map<Coord, Node> const& nodes) {
+void traverse(Coord const& coord, Coord const& prev, map<Coord, int> & path, int dist) {
 
-	int ctr = 0;
+	path[coord] = dist;
 
-	for (Coord const& neighbor : neighbors(coord))
-		if (nodes.find(neighbor) != nodes.end())
-			ctr++;
-
-	return ctr;
-
-}
-
-vector<Coord> read_shortcuts(string const& file_name, map<Coord, Node> const& nodes) {
-
-	vector<Coord> shortcuts;
-
-	fstream in_file(file_name);
-
-	string line;
-
-	int y = 0;
-
-	while (getline(in_file, line)) {
-
-		int x = 0;
-
-		for (char c : line) {
-
-			Coord const coord {y, x};
-
-			if (c == '#' && n_neighboring_nodes(coord, nodes) > 1)
-				shortcuts.push_back(coord);
-
-			x++;
-
-		}
-
-		y++;
-
-	}
-
-	return shortcuts;
-
-}
-
-void check_and_connect(Coord const& a, Coord const& b, map<Coord, Node> & nodes) {
-
-	if (nodes.find(a) == nodes.end() || nodes.find(b) == nodes.end())
-		return;
-
-	nodes[a].edges.push_back(& nodes[b]);
-
-}
-
-void connect_nodes(map<Coord, Node> & nodes, Node *& start, Node *& end) { 
-
-	for (auto & [coord, node] : nodes) {
-
-		switch (node.value) {
-			case 'S': start = & node; break;
-			case 'E': end = & node; break;
-		}
-
-		for (Coord const& neighbor : neighbors(coord))
-			check_and_connect(coord, neighbor, nodes);
-
-	}
-
-}
-
-void dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
-
-	vector<Node *> queue;
-
-	for (auto & [coord, node] : nodes)
-		queue.push_back(& node);
-
-	start->distance = 0;
-	
-	while (! queue.empty()){
-
-		sort(queue.begin(), queue.end(), distance_decreasing);
-		
-		Node * node = queue.back();
-		
-		node->visited = true;
-		
-		queue.pop_back();
-		
-		int ctr = 0;
-		
-		for (int i = 0; i < node->edges.size(); i++) {
-			if (! node->edges[i]->visited) {
-				
-				int distance_update = node->distance + 1;
-
-				if (distance_update < node->edges[i]->distance) {
-				
-					node->edges[i]->distance = distance_update;
-				
-					if (node->edges[i] == end)
-						return;
-				
-				}
-			
-			}
-		}
-
-	}
-
-}
-
-int get_saving(Coord const& shortcut, map<Coord, Node> & nodes) {
-
-	int min = numeric_limits<int>::max();
-	int max = 0;
-
-	for (Coord const& neighbor : neighbors(shortcut)) {
-
-		if (nodes.find(neighbor) == nodes.end())
-			continue;
-
-		Node const& node = nodes[neighbor];
-
-		if (node.distance > max)
-			max = node.distance;
-
-		if (node.distance < min)
-			min = node.distance;
-
-	}
-
-	return max - min - 2;
-
+	for (Coord const &neighbor : get_neighbors(coord))
+		if (path.find(neighbor) != path.end() && neighbor != prev)
+			return traverse(neighbor, coord, path, dist + 1);
 }
 
 int main() {
 
-	string const in_file_name = "input.txt";
+	map<Coord, int> path;
+
+	Coord start, end;
 	
-	map<Coord, Node> nodes = read_nodes(in_file_name);
+	read_path("example.txt", path, start, end);
 
-	vector<Coord> shortcuts = read_shortcuts(in_file_name, nodes);
+	traverse(start, start, path, 0);
 
-	Node *start, *end;
+	cout << path[end] << endl;
 
-	connect_nodes(nodes, start, end);
-
-	dijkstra(start, end, nodes);
-
-	int ctr = 0;
-
-	for (Coord const& shortcut : shortcuts)
-		if (get_saving(shortcut, nodes) >= min_saving)
-			ctr++;
-
-	cout << ctr << endl;
+//	int ctr = 0;
+//
+//	for (Coord const& shortcut : shortcuts)
+//		if (get_saving(shortcut, nodes) >= min_saving)
+//			ctr++;
+//
+//	cout << ctr << endl;
 	
 }
