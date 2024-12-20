@@ -146,12 +146,23 @@ void connect_nodes(map<Coord, Node> & nodes, Node *& start, Node *& end) {
 
 }
 
-int dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
+int dijkstra(Node * start, Node * end, Node * shortcut_node, map<Coord, Node> & nodes) {
 
 	vector<Node *> queue;
 
-	for (auto & [coord, node] : nodes)
+	for (auto & [coord, node] : nodes) {
+
+		node.distance = numeric_limits<int>::max();
+		node.visited = false;
+
 		queue.push_back(& node);
+
+	}
+
+	shortcut_node->distance = numeric_limits<int>::max();
+	shortcut_node->visited = false;
+
+	queue.push_back(shortcut_node);
 
 	start->distance = 0;
 	
@@ -190,9 +201,31 @@ int dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
 
 }
 
+void add_shortcut(Coord const& shortcut_coord, Node * shortcut_node, map<Coord, Node> & nodes) {
+
+	for (Coord const& neighbor : neighbors(shortcut_coord)) {
+		if (nodes.find(neighbor) != nodes.end()) {
+
+			shortcut_node->edges.push_back(& nodes[neighbor]);
+			nodes[neighbor].edges.push_back(shortcut_node);
+
+		}
+	}
+
+}
+
+void remove_shortcut(Node * shortcut_node, map<Coord, Node> & nodes) {
+
+	for (Node * edge : shortcut_node->edges)
+		edge->edges.pop_back();
+
+	shortcut_node->edges.clear();
+
+}
+
 int main() {
 
-	string const in_file_name = "example.txt";
+	string const in_file_name = "input.txt";
 	
 	map<Coord, Node> nodes = read_nodes(in_file_name);
 
@@ -202,6 +235,16 @@ int main() {
 
 	connect_nodes(nodes, start, end);
 
-	cout << dijkstra(start, end, nodes) << endl;
+	Node shortcut_node;
+
+	for (Coord const& shortcut_coord : shortcuts) {
+
+		add_shortcut(shortcut_coord, & shortcut_node, nodes);
+
+		cout << dijkstra(start, end, & shortcut_node, nodes) << endl;
+
+		remove_shortcut(& shortcut_node, nodes);
+
+	}
 	
 }
