@@ -228,20 +228,12 @@ int main() {
 
 	dijkstra(start, end, nodes);
 
-	map<int, int> cheats;
+	int ctr = 0;
 
-	for (Coord const& shortcut : shortcuts) {
+	for (Coord const& shortcut : shortcuts)
+		if (get_saving(shortcut, nodes) >= min_saving)
+			ctr++;
 
-		int saving = get_saving(shortcut, nodes);
-
-		if (cheats.find(saving) == cheats.end())
-			cheats[saving] = 1;
-		else
-			cheats[saving]++;
-
-	}
-
-	for (auto const& [key, val] : cheats)
-		cout << val << " " << key << endl;
+	cout << ctr << endl;
 	
 }
