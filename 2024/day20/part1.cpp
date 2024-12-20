@@ -3,11 +3,13 @@
 #include <limits>
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 
 using namespace std;
 
 int const min_saving = 100;
+int const radius = 2;
 
 struct Coord {
 
@@ -37,12 +39,14 @@ void read_path(string const& file_name, map<Coord, int> & path, Coord & start, C
 
 		for (char c : line) {
 
-			switch (c) {
-				case '#': break;
-				case 'S': start = {y, x};
-				case 'E': end = {y, x};
-				default: path[{y, x}] = 0;
-			};
+			if (c == 'S')
+				start = {y, x};
+
+			if (c == 'E')
+				end = {y, x};
+
+			if (c != '#')
+				path[{y, x}] = 0;
 
 			x++;
 
@@ -53,29 +57,6 @@ void read_path(string const& file_name, map<Coord, int> & path, Coord & start, C
 	}
 
 }
-
-/*
-vector<Coord> get_path_within(Coord const& coord, int radius, set<Coord> const& path_set) {
-
-	vector<Coord> vec;
-
-	for (int y = 0; y < radius; y++) {
-		for (int y = 0; y < radius; y++) {
-
-			if (x + y > radius)
-
-			Coord const c{y, x};
-
-			if (c != coord && path_set.find(c) != path_set.end())
-				neighbors.push_back(c);
-
-		}
-	}
-
-	return vec;
-
-}
-*/
 
 vector<Coord> get_neighbors(Coord const& coord) {
 
@@ -97,24 +78,42 @@ void traverse(Coord const& coord, Coord const& prev, map<Coord, int> & path, int
 			return traverse(neighbor, coord, path, dist + 1);
 }
 
+int n_shortcuts(Coord const& coord, map<Coord, int> & path) {
+
+	set<Coord> shortcuts;
+
+	for (int y = 0; y <= radius; y++)
+		for (int x = 0; x + y <= radius; x++)
+			for (Coord const c : vector<Coord>{ {y, x}, {-y, x}, {y, -x}, {-y, -x} })
+				if (c != coord && path.find(c) != path.end())
+					if (path[c] - path[coord] >= min_saving)
+						shortcuts.insert(c);
+
+	return shortcuts.size();
+
+}
+
+int count_shortcuts(map<Coord, int> & path) {
+
+	int ctr = 0;
+
+	for (auto const& [coord, dist] : path)
+		ctr += n_shortcuts(coord, path);
+
+	return ctr;
+
+}
+
 int main() {
 
 	map<Coord, int> path;
 
 	Coord start, end;
 	
-	read_path("example.txt", path, start, end);
+	read_path("input.txt", path, start, end);
 
 	traverse(start, start, path, 0);
 
-	cout << path[end] << endl;
+	cout << count_shortcuts(path) << endl;
 
-//	int ctr = 0;
-//
-//	for (Coord const& shortcut : shortcuts)
-//		if (get_saving(shortcut, nodes) >= min_saving)
-//			ctr++;
-//
-//	cout << ctr << endl;
-	
 }
