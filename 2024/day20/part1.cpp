@@ -7,6 +7,8 @@
 
 using namespace std;
 
+int const min_saving = 100;
+
 struct Coord {
 
 	int y, x;
@@ -146,23 +148,12 @@ void connect_nodes(map<Coord, Node> & nodes, Node *& start, Node *& end) {
 
 }
 
-int dijkstra(Node * start, Node * end, Node * shortcut_node, map<Coord, Node> & nodes) {
+void dijkstra(Node * start, Node * end, map<Coord, Node> & nodes) {
 
 	vector<Node *> queue;
 
-	for (auto & [coord, node] : nodes) {
-
-		node.distance = numeric_limits<int>::max();
-		node.visited = false;
-
+	for (auto & [coord, node] : nodes)
 		queue.push_back(& node);
-
-	}
-
-	shortcut_node->distance = numeric_limits<int>::max();
-	shortcut_node->visited = false;
-
-	queue.push_back(shortcut_node);
 
 	start->distance = 0;
 	
@@ -188,7 +179,7 @@ int dijkstra(Node * start, Node * end, Node * shortcut_node, map<Coord, Node> & 
 					node->edges[i]->distance = distance_update;
 				
 					if (node->edges[i] == end)
-						return distance_update;
+						return;
 				
 				}
 			
@@ -197,29 +188,29 @@ int dijkstra(Node * start, Node * end, Node * shortcut_node, map<Coord, Node> & 
 
 	}
 
-	return -1;
-
 }
 
-void add_shortcut(Coord const& shortcut_coord, Node * shortcut_node, map<Coord, Node> & nodes) {
+int get_saving(Coord const& shortcut, map<Coord, Node> & nodes) {
 
-	for (Coord const& neighbor : neighbors(shortcut_coord)) {
-		if (nodes.find(neighbor) != nodes.end()) {
+	int min = numeric_limits<int>::max();
+	int max = 0;
 
-			shortcut_node->edges.push_back(& nodes[neighbor]);
-			nodes[neighbor].edges.push_back(shortcut_node);
+	for (Coord const& neighbor : neighbors(shortcut)) {
 
-		}
+		if (nodes.find(neighbor) == nodes.end())
+			continue;
+
+		Node const& node = nodes[neighbor];
+
+		if (node.distance > max)
+			max = node.distance;
+
+		if (node.distance < min)
+			min = node.distance;
+
 	}
 
-}
-
-void remove_shortcut(Node * shortcut_node, map<Coord, Node> & nodes) {
-
-	for (Node * edge : shortcut_node->edges)
-		edge->edges.pop_back();
-
-	shortcut_node->edges.clear();
+	return max - min - 2;
 
 }
 
@@ -235,16 +226,22 @@ int main() {
 
 	connect_nodes(nodes, start, end);
 
-	Node shortcut_node;
+	dijkstra(start, end, nodes);
 
-	for (Coord const& shortcut_coord : shortcuts) {
+	map<int, int> cheats;
 
-		add_shortcut(shortcut_coord, & shortcut_node, nodes);
+	for (Coord const& shortcut : shortcuts) {
 
-		cout << dijkstra(start, end, & shortcut_node, nodes) << endl;
+		int saving = get_saving(shortcut, nodes);
 
-		remove_shortcut(& shortcut_node, nodes);
+		if (cheats.find(saving) == cheats.end())
+			cheats[saving] = 1;
+		else
+			cheats[saving]++;
 
 	}
+
+	for (auto const& [key, val] : cheats)
+		cout << val << " " << key << endl;
 	
 }
