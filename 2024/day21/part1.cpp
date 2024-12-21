@@ -92,11 +92,26 @@ class numeric_pad final : public pad {
 
 	private:
 
+		// To minimize the path on the upstream directional_pad,
+		// keys should be ordered by their distance from 'A'
+		// on the directional_pad in decreasing order of distance: <v^>
+		// Except if this would mean passing over a tile without key
+		// On the numeric_pad this is avoided by doing:
+		// up before left; rigth before down
 		void move(char const to) override {
 
+			// try except if passing over tile without key
+			if (position.y != 3 || mapping[to].x != 0)
+				move_left(to);
+			if (position.x != 0 || mapping[to].y != 3)
+				move_down(to);
+
+			// always ok
 			move_up(to);
-			move_left(to);
 			move_right(to);
+
+			// in case it was avoided above due to tile without key
+			move_left(to);
 			move_down(to);
 
 		}
@@ -119,12 +134,31 @@ class directional_pad final : public pad {
 	
 	private:
 
+		// To minimize the path on the upstream directional_pad,
+		// keys should be ordered by their distance from 'A'
+		// on the directional_pad in decreasing order of distance: <v^>
+		// Except if this would mean passing over a tile without key
+		// On the directional_pad this is avoided by doing:
+		// right before up ;  down before left
 		void move(char const to) override {
 
-			move_right(to);
-			move_up(to);
+			// try except if passing over tile without key
+			if (position.y != 1 || mapping[to].x != 0)
+				move_left(to);
+
+			// always ok
 			move_down(to);
-		  move_left(to);
+
+			// try except if passing over tile without key
+			if (position.x != 0 || mapping[to].y != 1)
+				move_up(to);
+
+			// always ok
+			move_right(to);
+
+			// in case it was avoided above due to tile without key
+			move_left(to);
+		  move_up(to);
 
 		}
 
@@ -134,8 +168,6 @@ int complexity(string line, string const& path) {
 
 	line.pop_back();
 
-	cout << stoi(line) << " * " << path.size() << endl;
-
 	return stoi(line) * path.size();
 
 }
@@ -144,7 +176,7 @@ int main() {
 
 	string line;
 
-	ifstream in_file("example.txt");
+	ifstream in_file("input.txt");
 
 	int sum = 0;
 
