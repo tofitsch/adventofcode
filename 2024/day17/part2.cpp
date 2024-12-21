@@ -8,7 +8,7 @@ using namespace std;
 
 struct Computer {
 
-	int reg_a, reg_b, reg_c, idx = 0;
+	int reg_a, reg_b, reg_c;
 
 	vector<int> program;
 
@@ -82,6 +82,8 @@ int ipow(int base, int exp) {
 
 int Computer::step() {
 
+	int idx = program.size() - 2;
+
 	while (idx < program.size()) {
 
 		int opcode = program[idx];
@@ -120,8 +122,6 @@ int Computer::step() {
 string Computer::run() {
 
 	string output = "";
-
-	idx = 0;
 
 	int out;
 
