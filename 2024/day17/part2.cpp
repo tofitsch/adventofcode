@@ -8,21 +8,14 @@ using namespace std;
 
 struct Computer {
 
-	int reg_a, reg_b, reg_c;
-
-	int reg_a_init;
-
-	pair<int, int> max{0, 0};
+	int reg_a, reg_b, reg_c, idx = 0;
 
 	vector<int> program;
 
-	string program_str;
-
 	Computer(string const& in_file_name);
 
-	bool run();
-
-	void init(int a);
+	int step();
+	string run();
 
 };
 
@@ -65,24 +58,19 @@ Computer::Computer(string const& in_file_name) {
 
 	string line;
 
-	for (int i = 0; i < 5; i++)
-		getline(in_file, line);
+	getline(in_file, line);
+	reg_a = get_int(line);
 
-	program_str = line;
+	getline(in_file, line);
+	reg_b = get_int(line);
 
+	getline(in_file, line);
+	reg_c = get_int(line);
+
+	getline(in_file, line);
+
+	getline(in_file, line);
 	program = get_int_vec(line);
-
-	cout << program.size() << endl;
-
-}
-
-void Computer::init(int a) {
-
-	reg_a_init = a;
-
-	reg_a = a;
-	reg_b = 0;
-	reg_c = 0;
 
 }
 
@@ -92,16 +80,12 @@ int ipow(int base, int exp) {
 
 }
 
-bool Computer::run() {
+int Computer::step() {
 
-	vector<int> output;
+	while (idx < program.size()) {
 
-	int out_idx = 0;
-
-	for (int i = 0; i < program.size(); i += 2) {
-
-		int opcode = program[i];
-		int literal = program[i + 1];
+		int opcode = program[idx];
+		int literal = program[idx + 1];
 		int combo = literal;
 
 		switch (combo) {
@@ -117,33 +101,36 @@ bool Computer::run() {
 			case 0: reg_a /= ipow(2, combo); break;
 			case 1: reg_b ^= literal; break;
 			case 2: reg_b = combo % 8; break;
-			case 3: if(reg_a != 0) i = literal - 2; break;
+			case 3: if(reg_a != 0) idx = literal - 2; break;
 			case 4: reg_b ^= reg_c; break;
+			case 5: idx += 2; return combo % 8;
 			case 6: reg_b = reg_a / ipow(2, combo); break;
 			case 7: reg_c = reg_a / ipow(2, combo); break;
 
-			case 5:
-
-				output.push_back(combo % 8);
-
-				if (output.back() != program[output.size() - 1]) {
-					if (output.size() - 1 > max.second) {
-						max = {reg_a_init, output.size() - 1};
-						cout << max.first << " " << max.second << endl;
-					}
-					return false;
-				}
-
-				if (output.size() == program.size())
-					return true;
-
-				break;
-
 		};
+
+		idx += 2;
 
 	}
 
-	return false;
+	return -1;
+
+}
+
+string Computer::run() {
+
+	string output = "";
+
+	idx = 0;
+
+	int out;
+
+	while ((out = step()) >= 0)
+		output += to_string(out) + ",";
+
+	output.pop_back();
+
+	return output;
 
 }
 
@@ -151,13 +138,6 @@ int main() {
 
 	Computer computer("input.txt");
 
-	int a = 0;
-
-  computer.init(a);
-
-	while(! computer.run())
-		computer.init(++a);
-
-	cout << a << endl;
+	cout << computer.run() << endl;
 
 }
