@@ -84,9 +84,14 @@ int n_shortcuts(Coord const& coord, map<Coord, int> & path) {
 
 	for (int y = 0; y <= radius; y++)
 		for (int x = 0; x + y <= radius; x++)
-			for (Coord const c : vector<Coord>{ {y, x}, {-y, x}, {y, -x}, {-y, -x} })
+			for (Coord const c : vector<Coord>{
+					{coord.y + y, coord.x + x},
+					{coord.y - y, coord.x + x},
+					{coord.y + y, coord.x + x},
+					{coord.y - y, coord.x - x},
+			})
 				if (c != coord && path.find(c) != path.end())
-					if (path[c] - path[coord] >= min_saving)
+					if (path[c] - path[coord] - x - y >= min_saving)
 						shortcuts.insert(c);
 
 	return shortcuts.size();
