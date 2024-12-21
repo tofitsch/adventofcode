@@ -19,9 +19,11 @@ class pad {
 
 	public:
 
-		map<string, int> type(map<string, int> const& in) {
+		using io = map<string, long>;
 
-			map<string, int> out;
+		io type(io const& in) {
+
+			io out;
 
 			for (auto const &[str, n] : in) {
 
@@ -188,16 +190,23 @@ class directional_pad final : public pad {
 
 };
 
-int complexity(string line, map<string, int> const& path) {
+long complexity(string line, pad::io const& path) {
 
 	line.pop_back();
 
-	int ctr = 0;
+	long ctr = 0;
 
 	for (auto const &[key, n] : path)
 		ctr += n * key.size();
 
 	return stoi(line) * ctr;
+
+}
+
+void print(pad::io const& m) {
+
+	for (auto const &[key, n] : m)
+		cout << n << ": " << key << endl;
 
 }
 
@@ -207,13 +216,23 @@ int main() {
 
 	ifstream in_file("input.txt");
 
-	int sum = 0;
+	long sum = 0;
 
 	numeric_pad n;
-	directional_pad d1, d2;
+	directional_pad d;
 
-	while (getline(in_file, line))
-		sum += complexity(line, d2.type(d1.type(n.type({{line, 1}}))));
+	while (getline(in_file, line)) {
+
+		pad::io out = n.type({{line, 1}});
+
+		print(out);
+
+		for (int i = 0; i < 25; i++)
+			out = d.type(out);
+
+		sum += complexity(line, out);
+
+	}
 
 	cout << sum << endl;
 
