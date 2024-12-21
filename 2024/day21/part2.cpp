@@ -169,17 +169,15 @@ class directional_pad final : public pad {
 		void move(char const to) override {
 
 			// try except if passing over tile without key
-			if (position.y != 1 || mapping[to].x != 0)
+			if (position.y != 0 || mapping[to].x != 0)
 				move_left(to);
 
-			// always ok
-			move_down(to);
-
 			// try except if passing over tile without key
-			if (position.x != 0 || mapping[to].y != 1)
+			if (position.x != 0 || mapping[to].y != 0)
 				move_up(to);
 
 			// always ok
+			move_down(to);
 			move_right(to);
 
 			// in case it was avoided above due to tile without key
@@ -203,13 +201,6 @@ long complexity(string line, pad::io const& path) {
 
 }
 
-void print(pad::io const& m) {
-
-	for (auto const &[key, n] : m)
-		cout << n << ": " << key << endl;
-
-}
-
 int main() {
 
 	string line;
@@ -224,8 +215,6 @@ int main() {
 	while (getline(in_file, line)) {
 
 		pad::io out = n.type({{line, 1}});
-
-		print(out);
 
 		for (int i = 0; i < 25; i++)
 			out = d.type(out);
