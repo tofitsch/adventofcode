@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
 
 using namespace std;
@@ -24,26 +25,36 @@ class pad {
 
 			for (auto const &[str, n] : in) {
 
-				path = "";
+				string field;
 
-				for (char const c : str) {
+				stringstream stream(str);
 
-					move(c);
+				while (getline(stream, field, 'A')) {
 
-					path += 'A';
+					field += 'A';
+
+					path = "";
+
+					for (char const c : field) {
+
+						move(c);
+
+						path += 'A';
+
+					}
+
+					position = mapping['A'];
+
+					if (out.find(path) == out.end())
+						out[path] = n;
+					else
+						out[path] += n;
 
 				}
 
-				position = mapping['A'];
-
-				if (out.find(path) == out.end())
-					out[path] = n;
-				else
-					out[path] += n;
-
 			}
 
-			return std::move(out);
+			return out;
 
 		}
 
@@ -184,7 +195,7 @@ int complexity(string line, map<string, int> const& path) {
 	int ctr = 0;
 
 	for (auto const &[key, n] : path)
-		ctr += n;
+		ctr += n * key.size();
 
 	return stoi(line) * ctr;
 
