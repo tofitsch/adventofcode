@@ -87,7 +87,7 @@ int n_shortcuts(Coord const& coord, map<Coord, int> & path) {
 			for (Coord const c : vector<Coord>{
 					{coord.y + y, coord.x + x},
 					{coord.y - y, coord.x + x},
-					{coord.y + y, coord.x + x},
+					{coord.y + y, coord.x - x},
 					{coord.y - y, coord.x - x},
 			})
 				if (c != coord && path.find(c) != path.end())
