@@ -171,8 +171,6 @@ class directional_pad final : public pad {
 			// try except if passing over tile without key
 			if (position.y != 0 || mapping[to].x != 0)
 				move_left(to);
-
-			// try except if passing over tile without key
 			if (position.x != 0 || mapping[to].y != 0)
 				move_up(to);
 
