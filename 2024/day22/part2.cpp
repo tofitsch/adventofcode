@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 #include <deque>
 
 using namespace std;
@@ -27,26 +28,54 @@ int price_increment(long & a) {
 
 }
 
-vector<long> read_file() {
+struct Market {
 
-	vector<long> secrets;
+	using History = vector<vector<int>>;
 
-	string line;
+	vector<vector<int>> prices;
+	vector<History> histories;
 
-	ifstream in_file("example.txt");
+  Market(string const& in_file_name);
+  int revenue(vector<int> const& strategy);
 
-	while (getline(in_file, line))
-		secrets.push_back(stol(line));
+};
 
-	return secrets;
+int Market::revenue(vector<int> const& strategy) {
+
+	int sum = 0;
+	
+	for (int i = 0; i < prices.size(); i++) {
+
+		History const& history = histories[i];
+
+	  auto it = find(history.begin(), history.end(), strategy);
+
+		if (it != history.end()) {
+
+			int idx = distance(history.begin(), it);
+
+			sum += prices[i][idx];
+
+		}
+
+	}
+
+	return sum;
 
 }
 
-int revenue(vector<long> const& secrets, deque<int> const& Q) {
+Market::Market(string const& in_file_name) {
 
-	int sum = 0;
+	string line;
 
-	for (long x : secrets) {
+	ifstream in_file(in_file_name);
+
+	while (getline(in_file, line)) {
+
+		long x = stol(line);
+
+		prices.push_back({});
+		histories.push_back({});
 
 		deque<int> q{0};
 
@@ -58,13 +87,9 @@ int revenue(vector<long> const& secrets, deque<int> const& Q) {
 
 				q.pop_front();
 
-				if (q == Q) {
+				prices.back().push_back(x % 10);
 
-					sum += x % 10;
-
-					break;
-
-				}
+				histories.back().push_back({q[0], q[1], q[2], q[3]});
 
 			}
 
@@ -72,28 +97,13 @@ int revenue(vector<long> const& secrets, deque<int> const& Q) {
 
 	}
 
-	return sum;
-
 }
+
 
 int main() {
 	
-	vector<long> const secrets = read_file();
+	Market market("example.txt");
 
-	int max = 0;
-
-	for (int a = -9; a <= 9; a++)
-		for (int b = -9; b <= 9; b++)
-			for (int c = -9; c <= 9; c++)
-				for (int d = -9; d <= 9; d++) {
-
-					int rev = revenue(secrets, {a, b, c, d});
-
-					if (rev > max)
-						max = rev;
-
-				}
-
-	cout << max << endl;
+	cout << market.revenue({-2, 1, -1, 3}) << endl;
 
 }
