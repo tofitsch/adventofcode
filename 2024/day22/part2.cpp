@@ -83,17 +83,9 @@ int Market::scan() {
 
 	int max = 0;
 
-	for (int a = -9; a <= 9; a++)
-		for (int b = -9; b <= 9; b++)
-			for (int c = -9; c <= 9; c++)
-				for (int d = -9; d <= 9; d++) {
-
-					int rev = revenue_map[{a, b, c, d}];
-
-					if (rev > max)
-						max = rev;
-
-				}
+	for (auto const& [strategy, revenue] : revenue_map)
+		if (revenue > max)
+			max = revenue;
 
 	return max;
 
