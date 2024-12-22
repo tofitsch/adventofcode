@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
+#include <set>
 #include <algorithm>
 #include <deque>
 
@@ -30,13 +32,11 @@ int price_increment(long & a) {
 
 struct Market {
 
-	using History = vector<vector<int>>;
+	using Strategy = vector<int>;
 
-	vector<vector<int>> prices;
-	vector<History> histories;
+	map<Strategy, int> revenue_map;
 
   Market(string const& in_file_name);
-  int revenue(vector<int> const& strategy);
   int scan();
 
 };
@@ -51,8 +51,7 @@ Market::Market(string const& in_file_name) {
 
 		long x = stol(line);
 
-		prices.push_back({});
-		histories.push_back({});
+		set<Strategy> encountered;
 
 		deque<int> q{0};
 
@@ -64,9 +63,13 @@ Market::Market(string const& in_file_name) {
 
 				q.pop_front();
 
-				prices.back().push_back(x % 10);
+				Strategy const strategy{q[0], q[1], q[2], q[3]};
 
-				histories.back().push_back({q[0], q[1], q[2], q[3]});
+				if (encountered.insert(strategy).second)
+					if (revenue_map.find(strategy) == revenue_map.end())
+						revenue_map[strategy] = x % 10;
+					else
+						revenue_map[strategy] += x % 10;
 
 			}
 
@@ -76,46 +79,16 @@ Market::Market(string const& in_file_name) {
 
 }
 
-int Market::revenue(vector<int> const& strategy) {
-
-	int sum = 0;
-	
-	for (int i = 0; i < prices.size(); i++) {
-
-		History const& history = histories[i];
-
-	  auto it = find(history.begin(), history.end(), strategy);
-
-		if (it != history.end()) {
-
-			int idx = distance(history.begin(), it);
-
-			sum += prices[i][idx];
-
-		}
-
-	}
-
-	return sum;
-
-}
-
 int Market::scan() {
 
 	int max = 0;
-
-	int ctr = 0;
 
 	for (int a = -9; a <= 9; a++)
 		for (int b = -9; b <= 9; b++)
 			for (int c = -9; c <= 9; c++)
 				for (int d = -9; d <= 9; d++) {
 
-					ctr++;
-
-					cout << static_cast<float>(ctr) / 130321. * 100. << " %" << endl;
-
-					int rev = revenue({a, b, c, d});
+					int rev = revenue_map[{a, b, c, d}];
 
 					if (rev > max)
 						max = rev;
