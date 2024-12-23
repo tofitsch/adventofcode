@@ -77,9 +77,14 @@ Computer::Computer(string const& in_file_name) {
 
 }
 
-int ipow(int base, int exp) {
+long lpow(long base, long exp) {
 
-	return static_cast<int>(pow(base, exp));
+	long out = 1;
+
+	while (exp-- > 0)
+		out *= base;
+
+	return out;
 
 }
 
@@ -105,14 +110,14 @@ vector<int> Computer::run(int a) {
 
 		switch (opcode) {
 
-			case 0: reg_a /= ipow(2, combo); break;
+			case 0: reg_a /= lpow(2, combo); break;
 			case 1: reg_b ^= literal; break;
 			case 2: reg_b = combo % 8; break;
 			case 3: if(reg_a != 0) i = literal - 2; break;
 			case 4: reg_b ^= reg_c; break;
 			case 5: output.push_back(combo % 8); break;
-			case 6: reg_b = reg_a / ipow(2, combo); break;
-			case 7: reg_c = reg_a / ipow(2, combo); break;
+			case 6: reg_b = reg_a / lpow(2, combo); break;
+			case 7: reg_c = reg_a / lpow(2, combo); break;
 
 		};
 
@@ -175,7 +180,7 @@ int Computer::find_quine() {
 
 int main() {
 
-	Computer computer("input.txt");
+	Computer computer("example.txt");
 
 	cout << computer.find_quine() << endl;
 
