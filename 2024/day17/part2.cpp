@@ -10,15 +10,15 @@ using namespace std;
 
 struct Computer {
 
-	int reg_a, reg_b, reg_c;
+	long reg_a, reg_b, reg_c;
 
 	vector<int> program;
 
 	Computer(string const& in_file_name);
 
-	vector<int> run(int a);
+	vector<int> run(long a);
 
-	int find_quine();
+	long find_quine();
 
 };
 
@@ -88,7 +88,7 @@ long lpow(long base, long exp) {
 
 }
 
-vector<int> Computer::run(int a) {
+vector<int> Computer::run(long a) {
 
 	reg_a = a;
 
@@ -98,7 +98,7 @@ vector<int> Computer::run(int a) {
 
 		int opcode = program[i];
 		int literal = program[i + 1];
-		int combo = literal;
+		long combo = literal;
 
 		switch (combo) {
 
@@ -143,7 +143,7 @@ bool last_n_match(vector<int> const& a, vector<int> const& b, int n) {
 
 }
 
-int Computer::find_quine() {
+long Computer::find_quine() {
 
 	set<string> valids = {""};
 
@@ -167,7 +167,7 @@ int Computer::find_quine() {
 
 	for (string const& str : valids) {
 
-		int x = oct_stol(str);
+		long x = oct_stol(str);
 
 		if (x < min)
 			min = x;
@@ -180,7 +180,7 @@ int Computer::find_quine() {
 
 int main() {
 
-	Computer computer("example.txt");
+	Computer computer("input.txt");
 
 	cout << computer.find_quine() << endl;
 
