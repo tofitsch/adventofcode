@@ -40,7 +40,7 @@ map<string, Node> read_graph(string const& in_file_name) {
 
 }
 
-void recurse(map<string, Node> & graph, list<string> r, list<string> p, list<string> x, vector<string> & max_cliques) {
+void recurse(map<string, Node> & graph, list<string> & r, list<string> & p, list<string> & x, vector<string> & max_cliques) {
 
 	while (! p.empty()) {
 
