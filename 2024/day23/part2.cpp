@@ -3,6 +3,7 @@
 #include <map>
 #include <set>
 #include <list>
+#include <algorithm>
 
 using namespace std;
 
@@ -39,22 +40,7 @@ map<string, Node> read_graph(string const& in_file_name) {
 
 }
 
-void recurse(map<string, Node> & graph, list<string> r, list<string> p, list<string> x) {
-
-	if (p.empty() && x.empty()) {
-
-		string max_clique = "";
-		
-		for (const string& v : r)
-			max_clique += v + ",";
-
-		max_clique.pop_back();
-
-	  cout << max_clique << endl;
-
-		exit(0);
-
-	}
+void recurse(map<string, Node> & graph, list<string> r, list<string> p, list<string> x, vector<string> & max_cliques) {
 
 	while (! p.empty()) {
 
@@ -75,30 +61,55 @@ void recurse(map<string, Node> & graph, list<string> r, list<string> p, list<str
 		p_next.remove_if(not_in_edges_v);
 		x_next.remove_if(not_in_edges_v);
 
-		recurse(graph, r_next, p_next, x_next);
+		recurse(graph, r_next, p_next, x_next, max_cliques);
 
 		p.remove(v);
 		x.push_front(v);
 
 	}
 
+	if (p.empty() && x.empty()) {
+
+		string max_clique = "";
+		
+		for (string const& v : r)
+			max_clique += v + ",";
+
+		max_clique.pop_back();
+
+		max_cliques.push_back(max_clique);
+
+	}
+
 }
 
-void bron_kerbosch(map<string, Node> & graph) {
+string bron_kerbosch(map<string, Node> & graph) {
+
+	vector<string> max_cliques;
 
 	list<string> r, p, x;
 
 	for (auto & [name, node] : graph)
 		p.push_front(name);
 
-	recurse(graph, r, p, x);
+	recurse(graph, r, p, x, max_cliques);
+
+	auto by_length = [](const string& a, const string& b) {
+
+		return a.length() < b.length();
+
+	};
+
+	sort(max_cliques.begin(), max_cliques.end(), by_length);
+
+	return max_cliques.back();
 
 }
 
 int main() {
 
-	map<string, Node> graph = read_graph("example.txt");
+	map<string, Node> graph = read_graph("input.txt");
 
-	bron_kerbosch(graph);
+	cout << bron_kerbosch(graph) << endl;
 
 }
