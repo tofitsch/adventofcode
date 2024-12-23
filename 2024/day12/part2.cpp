@@ -5,7 +5,17 @@
 
 using namespace std;
 
-struct Node {char value; vector<Node*> edges; vector<bool> visited, is_horizontal; int id;};
+struct Node {
+
+	char value;
+
+	vector<Node*> edges;
+
+	vector<Node*> neighbors;
+
+	int id;
+
+};
 
 vector<Node> read_nodes(string const& file_name, int & len) {
 
@@ -27,8 +37,14 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 
 		}
 
-		for (char c : line)
-			nodes.push_back({c, {}, {}, {}, 0});
+		for (char c : line) {
+
+			nodes.push_back({c, {}, {}, 0});
+
+			for (int i=0; i < 4; i++)
+				nodes.back().neighbors.push_back(nullptr);
+
+		}
 
 	}
 
@@ -36,19 +52,20 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 
 }
 
-void check_and_connect(Node * const a, Node * const b, bool is_horizontal) {
+void check_and_connect(Node * const a, Node * const b, bool horizontally) {
+
+	if (horizontally) {
+		a->neighbors[3] = b;
+		b->neighbors[1] = a;
+	}
+	else {
+		a->neighbors[0] = b;
+		b->neighbors[2] = a;
+	}
 
 	if (b->value == a->value) {
-
 		a->edges.push_back(b);
 		b->edges.push_back(a);
-
-		a->is_horizontal.push_back(is_horizontal);
-		b->is_horizontal.push_back(is_horizontal);
-
-		a->visited.push_back(false);
-		b->visited.push_back(false);
-
 	};
 
 }
@@ -79,44 +96,57 @@ void traverse(Node *n, int id) {
 
 }
 
-int count_sides(Node *n, Node *prev, bool is_first=true, bool prev_is_horizontal=false, int s = 0) {
+struct Plot {
 
-	int i = 0;
+	int id;
 
-	while (i < n->edges.size() && (n->visited[i] || n->edges[i]->edges.size() == 4 || n->edges[i] == prev))
-		i++;
+	int area;
 
-	
-	if (i == n->edges.size()) { // try again but allowing == prev
-		
-	  i = 0;
+	vector<vector<Node *>> fence_segments;
 
-	  while (i < n->edges.size() && (n->visited[i] || n->edges[i]->edges.size() == 4))
-			i++;
+	void merge_fence_segments();
+
+	void print() { //XXX
+
+		for (int i=0; i < 4; i++) {
+
+			cout << "Border " << i << " of plot " << id << ": ";
+
+			for (Node *n : fence_segments[i])
+				cout << n->id << " ";
+
+			cout << endl;
+
+		}
 
 	}
 
-	if (i == n->edges.size())
-		return s;
+};
 
-	n->visited[i] = true;
+void Plot::merge_fence_segments() {
 
-	if (!is_first && n->is_horizontal[i] != prev_is_horizontal)
-	  s++;
-
-	return s + count_sides(n->edges[i], n, false, n->is_horizontal[i], s);
+	// TODO
 
 }
 
-void measure(Node *n, map<int, int> & area, map<int, int> & n_sides) {
+map<int, Plot> form_plots(vector<Node> const& nodes) {
 
-	if (area.find(n->id) == area.end())
-		area[n->id] = 1;
-	else
-		area[n->id]++;
+	map<int, Plot> plots;
 
-	if (n->edges.size() < 4 && n_sides.find(n->id) == n_sides.end())
-		n_sides[n->id] = count_sides(n, nullptr);
+	for (Node const& n : nodes) {
+
+		if (plots.find(n.id) == plots.end())
+			plots[n.id] = {n.id, 0, {{}, {}, {}, {}}};
+
+		plots[n.id].area++;
+
+		for (int i=0; i < 4; i++)
+			if (n.neighbors[i] != nullptr && n.neighbors[i]->id != n.id)
+				plots[n.id].fence_segments[i].push_back(n.neighbors[i]);
+	
+	}
+
+	return plots;
 
 }
 
@@ -124,7 +154,7 @@ int main() {
 
 	int len;
 
-	vector<Node> nodes = read_nodes("example.txt", len);
+	vector<Node> nodes = read_nodes("input.txt", len);
 
 	connect_nodes(nodes, len);
 	
@@ -133,15 +163,23 @@ int main() {
 	for (Node & n : nodes)
 		traverse(&n, ++id);
 
-	map<int, int> area, n_sides;
-
-	for (Node & n : nodes)
-		measure(&n, area, n_sides);
+	map<int, Plot> plots = form_plots(nodes);
 
 	int sum = 0;
 
-	for (auto const& [id, a] : area)
-		sum += a * n_sides[id];
+	for (auto & [id, plot] : plots)
+		plot.print();
+
+	for (auto const& [id, plot] : plots) {
+
+		int n_segments = 0;
+
+		for (int i=0; i < 4; i++)
+			n_segments += plot.fence_segments[i].size();
+
+		sum += plot.area * n_segments;
+
+	}
 
 	cout << sum << endl;
 
