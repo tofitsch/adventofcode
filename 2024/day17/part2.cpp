@@ -2,6 +2,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <limits>
+#include <set>
 #include <math.h>
 
 using namespace std;
@@ -14,8 +16,9 @@ struct Computer {
 
 	Computer(string const& in_file_name);
 
-	int step();
-	string run();
+	vector<int> run(int a);
+
+	int find_quine();
 
 };
 
@@ -80,14 +83,16 @@ int ipow(int base, int exp) {
 
 }
 
-int Computer::step() {
+vector<int> Computer::run(int a) {
 
-	int idx = program.size() - 2;
+	reg_a = a;
 
-	while (idx < program.size()) {
+	vector<int> output;
 
-		int opcode = program[idx];
-		int literal = program[idx + 1];
+	for (int i = 0; i < program.size(); i += 2) {
+
+		int opcode = program[i];
+		int literal = program[i + 1];
 		int combo = literal;
 
 		switch (combo) {
@@ -103,34 +108,68 @@ int Computer::step() {
 			case 0: reg_a /= ipow(2, combo); break;
 			case 1: reg_b ^= literal; break;
 			case 2: reg_b = combo % 8; break;
-			case 3: if(reg_a != 0) idx = literal - 2; break;
+			case 3: if(reg_a != 0) i = literal - 2; break;
 			case 4: reg_b ^= reg_c; break;
-			case 5: idx += 2; return combo % 8;
+			case 5: output.push_back(combo % 8); break;
 			case 6: reg_b = reg_a / ipow(2, combo); break;
 			case 7: reg_c = reg_a / ipow(2, combo); break;
 
 		};
 
-		idx += 2;
-
 	}
 
-	return -1;
+	return output;
 
 }
 
-string Computer::run() {
+long oct_stol(string const& str) {
 
-	string output = "";
+	return stol(str, nullptr, 8);
 
-	int out;
+}
 
-	while ((out = step()) >= 0)
-		output += to_string(out) + ",";
+bool last_n_match(vector<int> const& a, vector<int> const& b, int n) {
 
-	output.pop_back();
+	for (int i = 0; i < n; i++)
+		if (a[a.size() - 1 - i] != b[b.size() - 1 - i])
+			return false;
 
-	return output;
+	return true;
+
+}
+
+int Computer::find_quine() {
+
+	set<string> valids = {""};
+
+	for (int n = 1; n <= program.size(); n++) {
+
+		set<string> new_valids;
+
+		for (string const& str : valids) {
+
+			for (char c = '0'; c <= '7'; c++)
+			 	if (last_n_match(run(oct_stol(str + c)), program, n))
+					new_valids.insert(str + c);
+
+		}
+
+		valids = new_valids;
+
+	}
+
+	long min = numeric_limits<long>::max();
+
+	for (string const& str : valids) {
+
+		int x = oct_stol(str);
+
+		if (x < min)
+			min = x;
+
+	}
+
+	return min;
 
 }
 
@@ -138,6 +177,6 @@ int main() {
 
 	Computer computer("input.txt");
 
-	cout << computer.run() << endl;
+	cout << computer.find_quine() << endl;
 
 }
