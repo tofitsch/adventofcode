@@ -75,7 +75,12 @@ Computer::Computer(string const& in_file_name) {
 
 int ipow(int base, int exp) {
 
-	return static_cast<int>(pow(base, exp));
+	int out = 1;
+
+	while (exp-- > 0)
+		out *= base;
+
+	return out;
 
 }
 
