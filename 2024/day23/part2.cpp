@@ -2,6 +2,7 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <list>
 
 using namespace std;
 
@@ -38,29 +39,7 @@ map<string, Node> read_graph(string const& in_file_name) {
 
 }
 
-set<string> set_union(set<string> a, string b) {
-
-	a.insert(b);
-
-	return a;
-
-}
-
-set<string> set_intersect(set<string> & a, set<string> & b) {
-
-	set<string> c;
-
-	for (string x : a)
-		if (b.find(x) != b.end())
-			c.insert(x);
-
-	return c;
-
-}
-
-string recurse(map<string, Node> & graph, set<string> r, set<string> p, set<string> x) {
-
-	cout << r.size() << endl;
+void recurse(map<string, Node> & graph, list<string> r, list<string> p, list<string> x) {
 
 	if (p.empty() && x.empty()) {
 
@@ -71,36 +50,48 @@ string recurse(map<string, Node> & graph, set<string> r, set<string> p, set<stri
 
 		max_clique.pop_back();
 
-		return max_clique;
+	  cout << max_clique << endl;
+
+		exit(0);
 
 	}
 
-	if (! p.empty()) {
+	while (! p.empty()) {
 
-		for (set<string>::iterator it = p.begin(); it != p.end(); ) {
+		list<string> r_next = r;
+		list<string> p_next = p;
+		list<string> x_next = x;
 
-  	  string v = *it;
+		string const v = p.front();
 
-			recurse(graph, set_union(r, v), set_intersect(p, graph[v].edges), set_intersect(x, graph[v].edges));
+		r_next.push_front(v);
 
-			x.insert(v);
+		auto not_in_edges_v = [&](string const& s) {
 
-			it = p.erase(it);
+			return graph[v].edges.find(s) == graph[v].edges.end();
 
-		}
+		};
+
+		p_next.remove_if(not_in_edges_v);
+		x_next.remove_if(not_in_edges_v);
+
+		recurse(graph, r_next, p_next, x_next);
+
+		p.remove(v);
+		x.push_front(v);
 
 	}
 
 }
 
-string bron_kerbosch(map<string, Node> & graph) {
+void bron_kerbosch(map<string, Node> & graph) {
 
-	set<string> r, p, x;
+	list<string> r, p, x;
 
 	for (auto & [name, node] : graph)
-		p.insert(name);
+		p.push_front(name);
 
-	return recurse(graph, r, p, x);
+	recurse(graph, r, p, x);
 
 }
 
@@ -108,6 +99,6 @@ int main() {
 
 	map<string, Node> graph = read_graph("example.txt");
 
-	cout << bron_kerbosch(graph) << endl;
+	bron_kerbosch(graph);
 
 }
