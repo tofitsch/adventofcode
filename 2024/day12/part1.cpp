@@ -91,7 +91,7 @@ int main() {
 
 	int len;
 
-	vector<Node> nodes = read_nodes("example.txt", len);
+	vector<Node> nodes = read_nodes("input.txt", len);
 
 	connect_nodes(nodes, len);
 	
