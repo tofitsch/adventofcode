@@ -230,13 +230,7 @@ void print_bits(bitset<64> & bits, int n) {
 
 void Network::print() {
 
-	bitset<64> bits_z;
-
-	for (int i = 0; i < out_z.size(); i++)
-  	bits_z[i] = * out_z[i];
-
-	bitset<64> bits_x;
-	bitset<64> bits_y;
+	bitset<64> bits_x, bits_y, bits_z;
 
 	for (int i = 0; i < in_x.size(); i++)
   	bits_x[i] = * in_x[i];
@@ -244,6 +238,8 @@ void Network::print() {
 	for (int i = 0; i < in_y.size(); i++)
   	bits_y[i] = * in_y[i];
 
+	for (int i = 0; i < out_z.size(); i++)
+  	bits_z[i] = * out_z[i];
 
 	long target_z = bits_x.to_ulong() + bits_y.to_ulong();
 
