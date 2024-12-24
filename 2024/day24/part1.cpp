@@ -18,7 +18,7 @@ struct Wire {
 
 	vector<Gate *> targets;
 
-	void propagate(); //TODO
+	void propagate();
 
 };
 
@@ -53,6 +53,18 @@ void Gate::propagate() {
 
 }
 
+void Wire::propagate() {
+
+	if (! active)
+		return;
+
+	cout << name << " " << val << endl;
+
+	for (Gate * target : targets)
+		target->propagate();
+
+}
+
 struct Network {
 
 	map<string, Wire> wires;
@@ -65,6 +77,9 @@ struct Network {
 	void read_wires(string const& in_file_name);
 	void read_gates(string const& in_file_name);
 
+	void connect_inputs();
+	void connect_targets();
+
 	int output();
 
 };
@@ -75,9 +90,30 @@ Network::Network(string const& in_file_name) {
 	read_wires(in_file_name);
 	read_gates(in_file_name);
 
+	connect_inputs();
+	connect_targets();
+
+	for (Wire * wire : inputs)
+		wire->propagate();
+
+}
+
+void Network::connect_inputs() {
+
 	for (auto const& [name, wire] : wires)
 		if (wire.active)
 			inputs.push_back(& wires[name]);
+
+}
+
+void Network::connect_targets() {
+
+	for (Gate & gate : gates) {
+
+		gate.in_a->targets.push_back(& gate);
+		gate.in_b->targets.push_back(& gate);
+
+	}
 
 }
 
@@ -170,6 +206,8 @@ int Network::output() {
 		if (name[0] == 'z')
 			binary += wire.val ? '1' : '0';
 
+	cout << binary << endl;
+
   reverse(binary.begin(), binary.end());
 
 	return stoi(binary, nullptr, 2);
@@ -178,7 +216,7 @@ int Network::output() {
 
 int main() {
 
-	Network network{"input.txt"};
+	Network network{"example.txt"};
 
 	cout << network.output() << endl;
 
