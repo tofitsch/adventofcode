@@ -1,83 +1,102 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <set>
 
 using namespace std;
 
+struct Gate;
+
 struct Wire {
 
-	string name{""};
+	string name;
 
-	bool val{false}, active{false};
+	bool active, val;
+
+	vector<Gate *> targets;
+
+	void propagate(); //TODO
 
 };
 
 struct Gate {
 
-	enum class Type {AND, OR, XOR, ID} type;
+	enum class Type {AND, OR, XOR} type;
 
-	Wire in_a, in_b, out;
+	Wire *in_a, *in_b, *out;
 
-	void eval();
+	vector<Gate *> out_gates;
+
+	void propagate();
 
 };
 
-void Gate::eval() {
+void Gate::propagate() {
+
+	if (! in_a->active || ! in_b->active)
+		return;
 
 	switch (type) {
 
-		case Type::ID:  out.val = in_a.val; break;
-		case Type::AND: out.val = (in_a.val && in_b.val); break;
-		case Type::OR:  out.val = (in_a.val || in_b.val); break;
-		case Type::XOR: out.val = (in_a.val != in_b.val); break;
+		case Type::AND: out->val = (in_a->val && in_b->val); break;
+		case Type::OR:  out->val = (in_a->val || in_b->val); break;
+		case Type::XOR: out->val = (in_a->val != in_b->val); break;
 
 	};
+
+	out->active = true;
+
+	out->propagate();
 
 }
 
 struct Network {
 
+	map<string, Wire> wires;
 	vector<Gate> gates;
 
-	set<string> wire_names;
-
-	map<string, vector<Gate*>> in_a_map, in_b_map, out_map;
+	vector<Wire *> inputs;
 
 	Network(string const& in_file_name);
 
+	void read_wires(string const& in_file_name);
+	void read_gates(string const& in_file_name);
+
+	int output();
+
 };
 
+
 Network::Network(string const& in_file_name) {
+
+	read_wires(in_file_name);
+	read_gates(in_file_name);
+
+	for (auto const& [name, wire] : wires)
+		if (wire.active)
+			inputs.push_back(& wires[name]);
+
+}
+
+void Network::read_wires(string const& in_file_name) {
 
 	ifstream in_file(in_file_name);
 
 	string line;
-
-	wire_names.insert("");
 
 	while (getline(in_file, line)) {
 
 		if (line.size() == 0)
 			continue;
 
-		Gate gate;
-
 		if (line[3] == ':') {
 
-			gate.out.name = line.substr(0, 3);
-
-			wire_names.insert(gate.out.name);
-
-			gate.out.val = (line[5] == '1');
-
-			gate.in_a.active = true;
-			gate.in_b.active = true;
-			gate.out.active = true;
-
-			gate.type = Gate::Type::ID;
+			string name = line.substr(0, 3);
+			
+			wires[name] = {name, true, (line[5] == '1')};
 
 		} else {
 
@@ -85,55 +104,82 @@ Network::Network(string const& in_file_name) {
 
 			string field;
 
-			getline(line_stream, field, ' ');
-			gate.in_a.name = field;
-			wire_names.insert(field);
+			int ctr = 0;
 
-			getline(line_stream, field, ' ');
+			while (getline(line_stream, field, ' ')) {
 
-			switch (field[0]) {
+				if (ctr++ % 2 == 1)
+					continue;
 
-				case 'A': gate.type = Gate::Type::AND; break;
-				case 'O': gate.type = Gate::Type::OR; break;
-				case 'X': gate.type = Gate::Type::XOR; break;
+				if (wires.find(field) != wires.end())
+					continue;
 
-			};
+				wires[field] = {field, false, false};
 
-			getline(line_stream, field, ' ');
-			gate.in_b.name = field;
-			wire_names.insert(field);
-
-			getline(line_stream, field, ' ');
-			getline(line_stream, field, ' ');
-			gate.out.name = field;
-			wire_names.insert(field);
+			}
 
 		}
-
-		gates.push_back(gate);
-
-	}
-
-	for (string const& wire_name : wire_names) {
-
-			in_a_map[wire_name] = {};
-			in_b_map[wire_name] = {};
-			out_map[wire_name] = {};
-
-	}
-
-	for (Gate & gate : gates) {
-
-		in_a_map[gate.in_a.name].push_back(& gate);
-		in_b_map[gate.in_b.name].push_back(& gate);
-		out_map[gate.out.name].push_back(& gate);
 
 	}
 
 }
 
+void Network::read_gates(string const& in_file_name) {
+
+	ifstream in_file(in_file_name);
+
+	string line;
+
+	while (getline(in_file, line)) {
+
+		if (line.size() == 0 || line[3] == ':')
+			continue;
+
+		stringstream line_stream(line);
+
+		string field;
+
+		Gate gate;
+
+		getline(line_stream, field, ' ');
+		gate.in_a = & wires[field];
+
+		getline(line_stream, field, ' ');
+		switch (field[0]) {
+			case 'A': gate.type = Gate::Type::AND; break;
+			case 'O': gate.type = Gate::Type::OR; break;
+			case 'X': gate.type = Gate::Type::XOR; break;
+		};
+
+		getline(line_stream, field, ' ');
+		gate.in_b = & wires[field];
+
+		getline(line_stream, field, ' ');
+		getline(line_stream, field, ' ');
+		gate.out = & wires[field];
+
+	}
+
+}
+
+int Network::output() {
+
+	string binary;
+
+	for (auto const& [name, wire] : wires)
+		if (name[0] == 'z')
+			binary += wire.val ? '1' : '0';
+
+  reverse(binary.begin(), binary.end());
+
+	return stoi(binary, nullptr, 2);
+
+}
+
 int main() {
 
-	Network network{"example.txt"};
+	Network network{"input.txt"};
+
+	cout << network.output() << endl;
 
 }
