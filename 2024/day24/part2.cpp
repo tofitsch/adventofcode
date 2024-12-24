@@ -29,8 +29,6 @@ struct Gate {
 
 	Wire *in_a, *in_b, *out;
 
-	vector<Gate *> out_gates;
-
 	void propagate();
 
 };
@@ -71,6 +69,8 @@ struct Network {
 
 	vector<Wire *> inputs;
 
+	map<string, Gate *> gates_map;
+
 	vector<bool *> in_x, in_y, out_z;
 
 	Network(string const& in_file_name);
@@ -81,6 +81,10 @@ struct Network {
 	void connect_inputs();
 	void connect_targets();
 	void connect_bits();
+
+	void propagate();
+
+	void swap_gates(string const& a, string const& b);
 
 	void print();
 
@@ -94,6 +98,10 @@ Network::Network(string const& in_file_name) {
 	connect_inputs();
 	connect_targets();
 	connect_bits();
+
+}
+
+void Network::propagate() {
 
 	for (Wire * wire : inputs)
 		wire->propagate();
@@ -216,6 +224,9 @@ void Network::read_gates(string const& in_file_name) {
 
 	}
 
+	for (Gate & gate : gates)
+		gates_map[gate.out->name] = & gate;
+
 }
 
 void print_bits(bitset<64> & bits, int n) {
@@ -230,7 +241,7 @@ void print_bits(bitset<64> & bits, int n) {
 
 void Network::print() {
 
-	bitset<64> bits_x, bits_y, bits_z;
+	bitset<64> bits_x{0}, bits_y{0}, bits_z{0};
 
 	for (int i = 0; i < in_x.size(); i++)
   	bits_x[i] = * in_x[i];
@@ -259,10 +270,26 @@ void Network::print() {
 
 }
 
+void Network::swap_gates(string const& a, string const& b) {
+
+	Wire * temp = gates_map[b]->out;
+
+	gates_map[b]->out = gates_map[a]->out;
+	gates_map[a]->out = temp;
+
+}
+
 int main() {
 
 	Network network{"example.txt"};
-	
+
+	network.propagate();
+	network.print();
+
+	network.swap_gates("z05", "z00");
+	network.swap_gates("z02", "z01");
+
+	network.propagate();
 	network.print();
 
 }
