@@ -41,9 +41,9 @@ void Gate::propagate() {
 
 	switch (type) {
 
-		case Type::AND: out->val = (in_a->val && in_b->val); break;
-		case Type::OR:  out->val = (in_a->val || in_b->val); break;
-		case Type::XOR: out->val = (in_a->val != in_b->val); break;
+		case Type::AND : out->val = (in_a->val && in_b->val); break;
+		case Type::OR  : out->val = (in_a->val || in_b->val); break;
+		case Type::XOR : out->val = (in_a->val != in_b->val); break;
 
 	};
 
@@ -57,8 +57,6 @@ void Wire::propagate() {
 
 	if (! active)
 		return;
-
-	cout << name << " " << val << endl;
 
 	for (Gate * target : targets)
 		target->propagate();
@@ -80,10 +78,9 @@ struct Network {
 	void connect_inputs();
 	void connect_targets();
 
-	int output();
+	long output();
 
 };
-
 
 Network::Network(string const& in_file_name) {
 
@@ -194,11 +191,13 @@ void Network::read_gates(string const& in_file_name) {
 		getline(line_stream, field, ' ');
 		gate.out = & wires[field];
 
+		gates.push_back(gate);
+
 	}
 
 }
 
-int Network::output() {
+long Network::output() {
 
 	string binary;
 
@@ -206,17 +205,15 @@ int Network::output() {
 		if (name[0] == 'z')
 			binary += wire.val ? '1' : '0';
 
-	cout << binary << endl;
-
   reverse(binary.begin(), binary.end());
 
-	return stoi(binary, nullptr, 2);
+	return stol(binary, nullptr, 2);
 
 }
 
 int main() {
 
-	Network network{"example.txt"};
+	Network network{"input.txt"};
 
 	cout << network.output() << endl;
 
