@@ -251,7 +251,7 @@ void Network::print() {
 	cout << "in_y: ";
 	print_bits(bits_y, in_y.size());
 
-	cout << "out_z: ";
+	cout << "out_z:    ";
 	print_bits(bits_z, out_z.size());
 
 	cout << "target_z: ";
