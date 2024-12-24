@@ -28,8 +28,6 @@ struct Gate {
 
 	Wire *in_a, *in_b, *out;
 
-	vector<Gate *> out_gates;
-
 	void propagate();
 
 };
