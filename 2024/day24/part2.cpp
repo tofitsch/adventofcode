@@ -272,10 +272,15 @@ void Network::print() {
 
 void Network::swap_gates(string const& a, string const& b) {
 
-	Wire * temp = gates_map[b]->out;
+	Wire * temp_wire = gates_map[b]->out;
 
 	gates_map[b]->out = gates_map[a]->out;
-	gates_map[a]->out = temp;
+	gates_map[a]->out = temp_wire;
+
+	Gate * temp_gate = gates_map[b];
+
+	gates_map[b] = gates_map[a];
+	gates_map[a] = temp_gate;
 
 }
 
@@ -286,10 +291,10 @@ int main() {
 	network.propagate();
 	network.print();
 
-	network.swap_gates("z05", "z00");
-	network.swap_gates("z02", "z01");
+//	network.swap_gates("z05", "z00");
+//	network.swap_gates("z02", "z01");
 
-	network.propagate();
-	network.print();
+//	network.propagate();
+//	network.print();
 
 }
