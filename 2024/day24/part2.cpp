@@ -19,8 +19,6 @@ struct Wire {
 
 	vector<Gate *> targets;
 
-	void propagate();
-
 };
 
 struct Gate {
@@ -29,36 +27,53 @@ struct Gate {
 
 	Wire *in_a, *in_b, *out;
 
-	void propagate();
+	bool is_faulty(map<string, Gate *> & gates_map);
+	bool other_xor_has_this_input(map<string, Gate *> & gates_map);
 
 };
 
-void Gate::propagate() {
+bool Gate::other_xor_has_this_input(map<string, Gate *> & gates_map) {
+	
+	for (auto const& [name, gate] : gates_map)
+			if (gate->type == Type::XOR && (gate->in_a == out || gate->in_b == out))
+				return true;
 
-	if (! in_a->active || ! in_b->active)
-		return;
-
-	switch (type) {
-
-		case Type::AND : out->val = (in_a->val && in_b->val); break;
-		case Type::OR  : out->val = (in_a->val || in_b->val); break;
-		case Type::XOR : out->val = (in_a->val != in_b->val); break;
-
-	};
-
-	out->active = true;
-
-	out->propagate();
+	return false;
 
 }
 
-void Wire::propagate() {
+bool Gate::is_faulty(map<string, Gate *> & gates_map) {
 
-	if (! active)
-		return;
+	Gate * last_out = gates_map.rbegin()->second;
 
-	for (Gate * target : targets)
-		target->propagate();
+	if (
+			out->name[0] == 'z' &&
+			this != last_out &&
+			type != Type::XOR
+	 	 )
+		cout << "1" << endl;
+//		return true;
+
+	if (
+			out->name[0] != 'z' &&
+		 	in_a->name[0] != 'x' &&
+			in_a->name[0] != 'y' &&
+		 	in_b->name[0] != 'x' &&
+			in_b->name[0] != 'y' &&
+			type == Type::XOR
+		 )
+		cout << "2" << endl;
+//		return true;
+
+	if (
+		 	(in_a->name[0] == 'x' || in_a->name[0] == 'y') &&
+		 	(in_b->name[0] == 'x' || in_b->name[0] == 'y') &&
+			! other_xor_has_this_input(gates_map)
+		 )
+		cout << "3" << endl;
+//		return true;
+
+	return false;
 
 }
 
@@ -69,7 +84,7 @@ struct Network {
 
 	vector<Wire *> inputs;
 
-	map<string, Gate *> gates_map;
+	map<string, Gate *> gates_map; //XXX
 
 	vector<bool *> in_x, in_y, out_z;
 
@@ -78,15 +93,10 @@ struct Network {
 	void read_wires(string const& in_file_name);
 	void read_gates(string const& in_file_name);
 
-	void connect_inputs();
+	void connect_inputs(); //XXX
 	void connect_targets();
-	void connect_bits();
 
-	void propagate();
-
-	void swap_gates(string const& a, string const& b);
-
-	void print();
+	string find_faults();
 
 };
 
@@ -97,30 +107,6 @@ Network::Network(string const& in_file_name) {
 
 	connect_inputs();
 	connect_targets();
-	connect_bits();
-
-}
-
-void Network::propagate() {
-
-	for (Wire * wire : inputs)
-		wire->propagate();
-
-}
-
-void Network::connect_bits() {
-
-	for (auto & [name, wire] : wires) {
-
-		switch (name[0]) {
-
-			case 'x': in_x.push_back(& wire.val); break;
-			case 'y': in_y.push_back(& wire.val); break;
-			case 'z': out_z.push_back(& wire.val); break;
-
-		};
-
-	}
 
 }
 
@@ -229,72 +215,30 @@ void Network::read_gates(string const& in_file_name) {
 
 }
 
-void print_bits(bitset<64> & bits, int n) {
+string Network::find_faults() {
 
-	string str = bits.to_string();
+	set<string> faults;
 
-	str = str.substr(str.length() - n);
+	for (Gate & gate : gates)
+		if (gate.is_faulty(gates_map))
+			faults.insert(gate.out->name);
 
-	cout << str << " " << stol(str, nullptr, 2) << endl;
+	string output{""};
 
-}
+	for (string const& fault : faults)
+		output += fault + ",";
 
-void Network::print() {
+	if (output.size() > 0)
+		output.pop_back();
 
-	bitset<64> bits_x{0}, bits_y{0}, bits_z{0};
-
-	for (int i = 0; i < in_x.size(); i++)
-  	bits_x[i] = * in_x[i];
-
-	for (int i = 0; i < in_y.size(); i++)
-  	bits_y[i] = * in_y[i];
-
-	for (int i = 0; i < out_z.size(); i++)
-  	bits_z[i] = * out_z[i];
-
-	long target_z = bits_x.to_ulong() + bits_y.to_ulong();
-
-	bitset<64> bits_target_z(target_z);
-
-	cout << "in_x: ";
-	print_bits(bits_x, in_x.size());
-
-	cout << "in_y: ";
-	print_bits(bits_y, in_y.size());
-
-	cout << "out_z:    ";
-	print_bits(bits_z, out_z.size());
-
-	cout << "target_z: ";
-	print_bits(bits_target_z, out_z.size());
-
-}
-
-void Network::swap_gates(string const& a, string const& b) {
-
-	Wire * temp_wire = gates_map[b]->out;
-
-	gates_map[b]->out = gates_map[a]->out;
-	gates_map[a]->out = temp_wire;
-
-	Gate * temp_gate = gates_map[b];
-
-	gates_map[b] = gates_map[a];
-	gates_map[a] = temp_gate;
+	return output;
 
 }
 
 int main() {
 
-	Network network{"example.txt"};
+	Network network{"input.txt"};
 
-	network.propagate();
-	network.print();
-
-//	network.swap_gates("z05", "z00");
-//	network.swap_gates("z02", "z01");
-
-//	network.propagate();
-//	network.print();
+	cout << network.find_faults() << endl;
 
 }
