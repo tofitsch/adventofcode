@@ -76,5 +76,4 @@ int main() {
 
 	cout << count_matches(keys, locks) << endl;
 
-
 }
