@@ -2,8 +2,19 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <set>
 
 using namespace std;
+
+struct Coord{
+
+	int y, x;
+
+	bool const operator < (Coord const& other) const {
+		return tie(y, x) < tie(other.y, other.x);
+	}
+
+};
 
 struct Node {
 
@@ -14,6 +25,8 @@ struct Node {
 	vector<Node*> neighbors;
 
 	int id;
+
+	Coord coord;
 
 };
 
@@ -27,6 +40,8 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 
 	bool first_line = true;
 
+	int y = 0;
+
 	while(getline(in_file, line)) {
 
 		if (first_line) {
@@ -37,14 +52,20 @@ vector<Node> read_nodes(string const& file_name, int & len) {
 
 		}
 
+		int x = 0;
+
 		for (char c : line) {
 
-			nodes.push_back({c, {}, {}, 0});
+			nodes.push_back({c, {}, {}, 0, {y, x}});
+
+			x++;
 
 			for (int i=0; i < 4; i++)
 				nodes.back().neighbors.push_back(nullptr);
 
 		}
+
+		y++;
 
 	}
 
@@ -57,8 +78,7 @@ void check_and_connect(Node * const a, Node * const b, bool horizontally) {
 	if (horizontally) {
 		a->neighbors[3] = b;
 		b->neighbors[1] = a;
-	}
-	else {
+	} else {
 		a->neighbors[0] = b;
 		b->neighbors[2] = a;
 	}
@@ -102,32 +122,39 @@ struct Plot {
 
 	int area;
 
-	vector<vector<Node *>> fence_segments;
+	vector<set<Coord>> fence_segments;
 
 	void merge_fence_segments();
 
-	void print() { //XXX
-
-		for (int i=0; i < 4; i++) {
-
-			cout << "Border " << i << " of plot " << id << ": ";
-
-			for (Node *n : fence_segments[i])
-				cout << n->id << " ";
-
-			cout << endl;
-
-		}
-
-	}
-
 };
+
+Coord neighbor_coord(Coord const& c, int i) {
+
+	switch (i) {
+		case 0: return {c.y - 1, c.x};
+		case 1: return {c.y, c.x + 1};
+		case 2: return {c.y + 1, c.x};
+		case 3: return {c.y, c.x - 1};
+	};
+
+	return {-2, -2};
+
+}
 
 void Plot::merge_fence_segments() {
 
-	// TODO
+	for (int i = 0; i < 4; i++) {
+
+		set<Coord> s = fence_segments[i];
+
+		for (Coord c : s)
+			do {c = neighbor_coord(c, (i + 1) % 4);}
+			while (fence_segments[i].erase(c) > 0);
+
+	}
 
 }
+
 
 map<int, Plot> form_plots(vector<Node> const& nodes) {
 
@@ -141,10 +168,13 @@ map<int, Plot> form_plots(vector<Node> const& nodes) {
 		plots[n.id].area++;
 
 		for (int i=0; i < 4; i++)
-			if (n.neighbors[i] != nullptr && n.neighbors[i]->id != n.id)
-				plots[n.id].fence_segments[i].push_back(n.neighbors[i]);
+			if (n.neighbors[i] == nullptr || n.neighbors[i]->id != n.id)
+				plots[n.id].fence_segments[i].insert(neighbor_coord(n.coord, i));
 	
 	}
+
+	for (auto & [id, plot] : plots)
+		plot.merge_fence_segments();
 
 	return plots;
 
@@ -167,14 +197,11 @@ int main() {
 
 	int sum = 0;
 
-	for (auto & [id, plot] : plots)
-		plot.print();
-
 	for (auto const& [id, plot] : plots) {
 
 		int n_segments = 0;
 
-		for (int i=0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			n_segments += plot.fence_segments[i].size();
 
 		sum += plot.area * n_segments;
