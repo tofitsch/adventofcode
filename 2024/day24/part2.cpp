@@ -35,8 +35,8 @@ struct Gate {
 bool Gate::other_xor_has_this_input(map<string, Gate *> & gates_map) {
 	
 	for (auto const& [name, gate] : gates_map)
-			if (gate->type == Type::XOR && (gate->in_a == out || gate->in_b == out))
-				return true;
+		if (gate->type == Type::XOR && (gate->in_a == out || gate->in_b == out))
+			return true;
 
 	return false;
 
@@ -51,8 +51,7 @@ bool Gate::is_faulty(map<string, Gate *> & gates_map) {
 			this != last_out &&
 			type != Type::XOR
 	 	 )
-		cout << "1" << endl;
-//		return true;
+		return true;
 
 	if (
 			out->name[0] != 'z' &&
@@ -62,16 +61,16 @@ bool Gate::is_faulty(map<string, Gate *> & gates_map) {
 			in_b->name[0] != 'y' &&
 			type == Type::XOR
 		 )
-		cout << "2" << endl;
-//		return true;
+		return true;
 
 	if (
-		 	(in_a->name[0] == 'x' || in_a->name[0] == 'y') &&
-		 	(in_b->name[0] == 'x' || in_b->name[0] == 'y') &&
+			type == Type::XOR &&
+		 	( (in_a->name[0] == 'x' && in_b->name[0] == 'y') ||
+				(in_a->name[0] == 'y' && in_b->name[0] == 'x')
+			) &&
 			! other_xor_has_this_input(gates_map)
 		 )
-		cout << "3" << endl;
-//		return true;
+		return true;
 
 	return false;
 
