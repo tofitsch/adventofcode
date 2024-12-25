@@ -28,14 +28,14 @@ struct Gate {
 	Wire *in_a, *in_b, *out;
 
 	bool is_faulty(map<string, Gate *> & gates_map);
-	bool other_xor_has_this_input(map<string, Gate *> & gates_map);
+	bool other_gate_of_type_has_this_as_input(Type t, map<string, Gate *> & gates_map);
 
 };
 
-bool Gate::other_xor_has_this_input(map<string, Gate *> & gates_map) {
+bool Gate::other_gate_of_type_has_this_as_input(Type t, map<string, Gate *> & gates_map) {
 	
 	for (auto const& [name, gate] : gates_map)
-		if (gate->type == Type::XOR && (gate->in_a == out || gate->in_b == out))
+		if (gate->type == t && (gate->in_a == out || gate->in_b == out))
 			return true;
 
 	return false;
@@ -43,6 +43,9 @@ bool Gate::other_xor_has_this_input(map<string, Gate *> & gates_map) {
 }
 
 bool Gate::is_faulty(map<string, Gate *> & gates_map) {
+
+	// looking at a diagram of a Carry-Ripple Adder, one can deduce some rules that all gates have to 
+	// fulfill. If any of the if statements below are true, then the gate is faulty.
 
 	Gate * last_out = gates_map.rbegin()->second;
 
@@ -68,7 +71,17 @@ bool Gate::is_faulty(map<string, Gate *> & gates_map) {
 		 	( (in_a->name[0] == 'x' && in_b->name[0] == 'y') ||
 				(in_a->name[0] == 'y' && in_b->name[0] == 'x')
 			) &&
-			! other_xor_has_this_input(gates_map)
+			! (in_a->name == "x00" || in_a->name == "y00") &&
+			! (in_b->name == "x00" || in_b->name == "y00") &&
+			! other_gate_of_type_has_this_as_input(Type::XOR, gates_map)
+		 )
+		return true;
+
+	if (
+			type == Type::AND &&
+			! (in_a->name == "x00" || in_a->name == "y00") &&
+			! (in_b->name == "x00" || in_b->name == "y00") &&
+			! other_gate_of_type_has_this_as_input(Type::OR, gates_map)
 		 )
 		return true;
 
@@ -81,9 +94,7 @@ struct Network {
 	map<string, Wire> wires;
 	vector<Gate> gates;
 
-	vector<Wire *> inputs;
-
-	map<string, Gate *> gates_map; //XXX
+	map<string, Gate *> gates_map;
 
 	vector<bool *> in_x, in_y, out_z;
 
@@ -92,7 +103,6 @@ struct Network {
 	void read_wires(string const& in_file_name);
 	void read_gates(string const& in_file_name);
 
-	void connect_inputs(); //XXX
 	void connect_targets();
 
 	string find_faults();
@@ -104,16 +114,7 @@ Network::Network(string const& in_file_name) {
 	read_wires(in_file_name);
 	read_gates(in_file_name);
 
-	connect_inputs();
 	connect_targets();
-
-}
-
-void Network::connect_inputs() {
-
-	for (auto const& [name, wire] : wires)
-		if (wire.active)
-			inputs.push_back(& wires[name]);
 
 }
 
