@@ -1,8 +1,6 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
-#include<vector>
-#include<map>
 
 using namespace std;
 
@@ -12,9 +10,11 @@ int main(){
 
   ifstream in_file("input.txt");
 
-  int pos = 50, sum = 0;
+  int 
+    pos = 50,
+    sum = 0;
 
-  while(getline(in_file, line)){
+  while (getline(in_file, line)) {
     
     string subline = line;
 

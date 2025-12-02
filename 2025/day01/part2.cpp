@@ -1,8 +1,6 @@
 #include<iostream>
 #include<fstream>
 #include<sstream>
-#include<vector>
-#include<map>
 
 using namespace std;
 
@@ -12,20 +10,21 @@ int main(){
 
   ifstream in_file("input.txt");
 
-  int pos = 50, ctr = 0;
+  int
+    pos = 50,
+    ctr = 0;
 
-  while(getline(in_file, line)){
-
+  while (getline(in_file, line)) {
 
     string subline = line;
 
     subline.erase(0, 1);
 
-    int increment = (line[0] == 'R') ? 1 : -1;
+    int const increment = (line[0] == 'R') ? 1 : -1;
 
     int dist = stoi(subline);
 
-    while (dist-- > 0){
+    while (dist-- > 0) {
 
       pos += increment;
 
