@@ -16,7 +16,7 @@ int main(){
 
   size_t sum{0};
 
-  while(getline(line_stream, field, ',')) {
+  while (getline(line_stream, field, ',')) {
 
     size_t const 
       pos = field.find('-'),
