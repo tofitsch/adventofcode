@@ -42,9 +42,6 @@ struct Node {
 
   }
 
-  void print() const
-    {cout << x << " " << y << " " << z;}
-
   long x, y, z;
 
   bool visited{false};
@@ -67,9 +64,6 @@ struct Edge{
 
   bool operator < (Edge const& other) const
     {return distance_squared < other.distance_squared;}
-
-  void print() const
-    {a->print(); cout << " - "; b->print(); cout << " | " << distance_squared << endl;}
 
   unsigned long distance_squared;
 
