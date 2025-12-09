@@ -26,18 +26,18 @@ struct Coordinate {
 long rectangle_area(Coordinate const& a, Coordinate const& b)
   {return (abs(a.x - b.x) + 1) * (abs(a.y - b.y) + 1);}
 
-bool is_rectange(Coordinate const& a, Coordinate const& b, vector<vector<char>> const& grid) {
+bool is_rectange(Coordinate const& a, Coordinate const& b, vector<string> const& grid) {
 
-  for (size_t x = min(a.compact_x, b.compact_x); x < max(a.compact_x, b.compact_x); ++x)
-    for (size_t y = min(a.compact_y, b.compact_y); y < max(a.compact_y, b.compact_y); ++y)
-      if (grid[y][x] == 'x')
+  for (size_t x = min(a.compact_x, b.compact_x); x <= max(a.compact_x, b.compact_x); ++x)
+    for (size_t y = min(a.compact_y, b.compact_y); y <= max(a.compact_y, b.compact_y); ++y)
+      if (grid[y][x] == '.')
         return false;
 
   return true;
 
 }
 
-void flood_fill(vector<vector<char>> & grid) {
+void flood_fill(vector<string> & grid) {
 
   vector<pair<long, long>> q; 
 
@@ -56,7 +56,7 @@ void flood_fill(vector<vector<char>> & grid) {
 
     if (grid[y][x] == 'b') {
 
-      grid[y][x] = 'x';
+      grid[y][x] = '.';
 
       q.push_back({x + 1, y});
       q.push_back({x - 1, y});
@@ -82,15 +82,15 @@ void compactify(vector<Coordinate> & coordinates) {
 
   for (Coordinate & c : coordinates) {
 
-    c.compact_x = distance(x.begin(), x.find(c.x));
-    c.compact_y = distance(y.begin(), y.find(c.y));
+    c.compact_x = distance(x.begin(), x.find(c.x)) + 1;
+    c.compact_y = distance(y.begin(), y.find(c.y)) + 1;
 
   }
 
 }
 
 
-vector<vector<char>> make_grid(vector<Coordinate> const& coordinates) {
+vector<string> make_grid(vector<Coordinate> const& coordinates) {
 
   long
     max_x{0},
@@ -106,7 +106,7 @@ vector<vector<char>> make_grid(vector<Coordinate> const& coordinates) {
 
   }
 
-  vector<vector<char>> grid(max_y + 2, vector<char>(max_x + 2, 'b'));
+  vector<string> grid(max_y + 2, string(max_x + 2, 'b'));
 
   for (size_t i = 0; i < coordinates.size(); ++i) {
 
@@ -143,14 +143,14 @@ int main() {
 
   vector<Coordinate> coordinates;
 
-  ifstream in_file("example.txt");
+  ifstream in_file("input.txt");
 
   while (getline(in_file, line))
     coordinates.emplace_back(line);
 
   compactify(coordinates);
 
-  vector<vector<char>> grid = make_grid(coordinates);
+  vector<string> grid = make_grid(coordinates);
 
   flood_fill(grid);
 
