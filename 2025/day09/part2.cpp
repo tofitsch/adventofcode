@@ -29,9 +29,12 @@ long rectangle_area(Coordinate const& a, Coordinate const& b)
 bool is_rectange(Coordinate const& a, Coordinate const& b, vector<string> const& grid) {
 
   for (size_t x = min(a.compact_x, b.compact_x); x <= max(a.compact_x, b.compact_x); ++x)
-    for (size_t y = min(a.compact_y, b.compact_y); y <= max(a.compact_y, b.compact_y); ++y)
-      if (grid[y][x] == '.')
-        return false;
+    if (grid[a.compact_y][x] == '.' || grid[b.compact_y][x] == '.')
+      return false;
+
+  for (size_t y = min(a.compact_y, b.compact_y); y <= max(a.compact_y, b.compact_y); ++y)
+    if (grid[y][a.compact_x] == '.' || grid[y][b.compact_x] == '.')
+      return false;
 
   return true;
 
@@ -136,7 +139,6 @@ vector<string> make_grid(vector<Coordinate> const& coordinates) {
 
 }
 
-
 int main() {
 
   string line;
@@ -156,8 +158,12 @@ int main() {
 
   long max_area{0};
 
-  for (Coordinate const& a : coordinates) {
-    for (Coordinate const& b : coordinates) {
+  for (size_t i = 0; i < coordinates.size(); ++i) {
+    for (size_t j = i + 1; j < coordinates.size(); ++j) {
+
+      Coordinate const &
+        a = coordinates[i],
+        b = coordinates[j];
 
       if (! is_rectange(a, b, grid))
         continue;
