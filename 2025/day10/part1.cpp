@@ -5,16 +5,6 @@
 
 using namespace std;
 
-std::string to_binary(size_t x) { //TODO
-    if (x == 0) return "0";
-    std::string out;
-    while (x > 0) {
-        out.push_back((x & 1) ? '1' : '0');
-        x >>= 1;
-    }
-    return out;
-}
-
 struct Button {
 
   Button(string const str) {
