@@ -7,18 +7,30 @@
 
 using namespace std;
 
-vector<char> recurse(string const& key, map<string, vector<string>> & graph) {
+size_t recurse(string const& key, string const& end, map<string, vector<string>> & graph, map<string, size_t> & memoize) {
 
-  if (key == "out")
-    return {0};
+  if (memoize.count(key) == 1)
+    return memoize[key];
 
-  vector<char> signal;
+  if (key == end)
+    return 1;
+
+  size_t sum{0};
 
   for (string & k : graph[key])
-    for (char const c : recurse(k, graph))
-      signal.push_back((key == "fft" || key == "dac") ? c + 1 : c);
+    sum += recurse(k, end, graph, memoize);
 
-  return signal;
+  memoize[key] = sum;
+
+  return sum;
+
+}
+
+size_t n_paths(string const& beg, string const& end, map<string, vector<string>> & graph) {
+
+  map<string, size_t> memoize;
+
+  return recurse(beg, end, graph, memoize);
 
 }
 
@@ -45,14 +57,17 @@ int main() {
     
   }
 
-  vector<char> signal = recurse("svr", graph);
+  string hop1{"fft"}, hop2{"dac"};
 
-  size_t ctr{0};
+  if (n_paths(hop1, hop2, graph) == 0)
+    swap(hop1, hop2);
 
-  for (char const c : signal)
-    if (c == 2)
-      ++ctr;
+  size_t sum{1};
 
-  cout << ctr << endl;
+  sum *= n_paths("svr", hop1,  graph); 
+  sum *= n_paths(hop1 , hop2,  graph); 
+  sum *= n_paths(hop2 , "out", graph); 
+
+  cout << sum << endl;
 
 }
