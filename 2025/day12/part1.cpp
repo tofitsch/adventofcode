@@ -8,93 +8,54 @@
 
 using namespace std;
 
-using GridBase = vector<vector<bool>>;
+vector<size_t> read_presents(string const& in_file_name) {
 
-struct Grid : GridBase {
+  vector<size_t> presents;
 
-  using GridBase::GridBase;
+  ifstream in_file(in_file_name);
 
-  size_t n_x() const
-    {return this[0].size();}
+  string line;
 
-  size_t n_y() const
-    {return this->size();}
+  vector<string> g;
 
-  Grid rotate(size_t const n) const {
+  size_t p{0};
 
-    if (n == 0)
-      return * this;
+  while (getline(in_file, line)) {
 
-    Grid g(n_y(), vector<bool>(n_x()));
+    if (regex_search(line, regex("^\\d+x")))
+      break;
 
-    for (size_t x = 0; x < n_x(); ++x)
-      for (size_t y = 0; y < n_y(); ++y)
-        g[x][y] = (*this)[n_y() - 1 - y][x];
+    if (regex_search(line, regex("^\\d+:"))) {
 
-    return g.rotate(n - 1);
+      p = 0;
 
-  }
-
-};
-
-
-struct Present {
-
-  Present(vector<string> const& lines) {
-    
-    n_y = lines.size();
-    n_x = lines[0].size();
-
-    Grid g(n_y, vector<bool>(n_x));
-
-    for (size_t y = 0; y < n_y; ++y)
-      for (size_t x = 0; x < n_x; ++x)
-        g[y][x] = (lines[y][x] == '#');
-
-    orientations.insert(g.rotate(0));
-    orientations.insert(g.rotate(1));
-    orientations.insert(g.rotate(2));
-    orientations.insert(g.rotate(3));
-    //TODO
-    
-  }
-
-  void print() const { //TODO
-
-    cout << endl;
-    cout << endl;
-
-    for (Grid const& g : orientations) {
-
-      for (vector<bool> const& r : g) {
-
-        for (bool const c : r)
-          cout << (c ? '#' : '.');
-
-        cout << endl;
-
-      }
-
-      cout << endl;
+      continue;
 
     }
 
+    if (line.length() == 0) {
+
+      presents.push_back(p);
+
+      g = {};
+
+      continue;
+
+    }
+
+    for (char const c : line)
+      if (c == '#')
+        ++p;
+
   }
 
-  bool place(Grid & grid, size_t const x, size_t const y, size_t const z) const {
-    //TODO
-    return true;
-  }
+  return presents;
 
-  set<Grid> orientations;
-
-  size_t n_x, n_y, n_z; //z: orientation
-
-};
+}
 
 struct Tree {
 
-  Tree(string const& line, vector<Present> const& p) {
+  Tree(string const& line, vector<size_t> const& presents) {
 
     size_t const
       pos_x = line.find('x'),
@@ -103,16 +64,26 @@ struct Tree {
     n_x = stoul(line.substr(0, pos_x));
     n_y = stoul(line.substr(pos_x + 1, pos_c - pos_x));
 
-    stringstream line_stream(line.substr(pos_c + 1));
+    n_max = n_x * n_y;
+
+    stringstream line_stream(line.substr(pos_c + 2));
 
     string field;
 
     size_t ctr{0};
 
-    while (getline(line_stream, field)) {
+    n_min = 0;
+    n_presents = 0;
 
-      for (size_t i = 0; i < stoul(field); ++i)
-        presents.push_back(& p[ctr]);
+    while (getline(line_stream, field, ' ')) {
+
+      for (size_t i = 0; i < stoul(field); ++i) {
+
+        n_min += presents[ctr];
+
+        ++n_presents;
+
+      }
 
       ++ctr;
 
@@ -120,54 +91,30 @@ struct Tree {
 
   }
 
-  vector<Present const *> presents;
+  enum class Validity{yes, no, undetermined};
 
-  size_t n_x, n_y;
+  Validity validity() const {
 
-  bool solve() {
-    //TODO;
-    return true;
+    if (n_min > n_max)
+      return Validity::no;
+
+    if (n_presents * 9 <= n_max)
+      return Validity::yes;
+
+    return Validity::undetermined;
+
   }
+
+  size_t
+    n_x,
+    n_y,
+    n_max,
+    n_min,
+    n_presents;
 
 };
 
-vector<Present> const read_presents(string const& in_file_name) {
-
-  vector<Present> presents;
-
-  ifstream in_file(in_file_name);
-
-  string line;
-
-  vector<string> g;
-
-  while (getline(in_file, line)) {
-
-    if (regex_search(line, regex("^\\d+x")))
-      break;
-
-    if (regex_search(line, regex("^\\d+:")))
-      continue;
-
-    if (line.length() == 0) {
-
-      presents.emplace_back(g);
-
-      g = {};
-
-      continue;
-
-    }
-
-    g.push_back(line);
-
-  }
-
-  return presents;
-
-}
-
-vector<Tree> const read_trees(string const& in_file_name, vector<Present> const& presents) {
+vector<Tree> read_trees(string const& in_file_name, vector<size_t> const& presents) {
 
   vector<Tree> trees;
 
@@ -187,13 +134,23 @@ int main() {
 
   string line;
 
-  string const in_file_name{"example.txt"};
+  string const in_file_name{"input.txt"};
 
-  vector<Present> const presents = read_presents(in_file_name);
+  vector<size_t> const presents = read_presents(in_file_name);
 
   vector<Tree> const trees = read_trees(in_file_name, presents);
 
-  for (Present const& p : presents)
-    p.print();
+  size_t ctr_yes{0}, ctr_no{0}, ctr_undetermined{0};
+
+  for (Tree const& t : trees) {
+
+    Tree::Validity const v = t.validity();
+
+    if (v == Tree::Validity::yes)
+      ++ctr_yes;
+
+  }
+
+  cout << ctr_yes << endl; 
 
 }
