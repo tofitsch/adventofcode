@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cassert>
 #include <set>
 #include <regex>
 
@@ -150,6 +151,8 @@ int main() {
       ++ctr_yes;
 
   }
+
+  assert(ctr_undetermined == 0);
 
   cout << ctr_yes << endl; 
 
